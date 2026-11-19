@@ -1,0 +1,4 @@
+{ "system": "You are Cooper.", "deterministic": true,
+  "tools": [{ "name": "tasks__ticket-read", "description": "Read one ticket", "parameters": { "type": "object", "properties": { "id": { "type": "string" } } } }],
+  "messages": [{ "role": "user", "content": "Status of TLK-1?", "timestamp": 0 }],
+  "chunks": [{ "message": { "content": "", "tool_calls": [{ "function": { "name": "tasks__ticket-read", "arguments": { "id": "TLK-1" } } }] } }, { "done": true, "done_reason": "stop", "prompt_eval_count": 40, "eval_count": 9 }] }

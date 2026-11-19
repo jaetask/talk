@@ -1,0 +1,65 @@
+// Research helpers: which pages a write-up may cite, what is said aloud, and the report saved as a Talk file.
+// Pure functions, ported from Python Talk's server/web/research.py.
+export type Source = { url: string; title: string; text: string };
+
+export const domain = (url: string): string => {
+	try {
+		const host = new URL(url).hostname.toLowerCase();
+		return host.startsWith("www.") ? host.slice(4) : host;
+	} catch {
+		return "";
+	}
+};
+
+const norm = (t: string): string => t.replace(/[“”"'‘’]/g, "").toLowerCase().split(/\s+/).filter(Boolean).join(" ");
+
+/** Drop citations to sources that don't exist, and any sentence quoting words not found word for word in a source. */
+export function checked(text: string, sources: Source[]): string {
+	const n = sources.length;
+	text = text.replace(/\[(\d+)\]/g, (m, d: string) => (Number(d) >= 1 && Number(d) <= n ? m : ""));
+	const corpus = norm(sources.map((s) => s.text).join(" "));
+	return text
+		.trim()
+		.split(/(?<=[.!?])\s+/)
+		.filter((sentence) => [...sentence.matchAll(/[“"]([^”"]{12,})[”"]/g)].every((q) => corpus.includes(norm(q[1]))))
+		.join(" ")
+		.trim();
+}
+
+/** The spoken version: citation numbers removed, then a short "Sources: ..." line naming the sites. */
+export function forSpeech(text: string, sources: Source[]): string {
+	const cited = [...new Set([...text.matchAll(/\[(\d+)\]/g)].map((m) => Number(m[1])).filter((i) => i >= 1 && i <= sources.length))].sort((a, b) => a - b);
+	const use = cited.length ? cited : sources.map((_, i) => i + 1);
+	const body = text.replace(/\s*\[\d+\]/g, "").trim();
+	const sites: string[] = [];
+	for (const i of use) {
+		const d = domain(sources[i - 1].url);
+		if (d && !sites.includes(d)) sites.push(d);
+	}
+	if (!sites.length) return body;
+	return `${body} Sources: ${sites.length > 1 ? `${sites.slice(0, -1).join(", ")} and ${sites[sites.length - 1]}` : sites[0]}.`;
+}
+
+export const fileSlug = (topic: string): string =>
+	`research-${topic.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 48).replace(/-$/, "") || "notes"}`;
+
+export function reportMarkdown(topic: string, spoken: string, points: string[], sources: Source[], date: string): string {
+	const lines = [`# Research: ${topic}`, "", `${date} · @Jae`, "", "## Summary", "", spoken.trim(), ""];
+	const kept = points.map((p) => p.trim()).filter(Boolean);
+	if (kept.length) lines.push("## Key points", "", ...kept.map((p) => `- ${p}`), "");
+	lines.push("## Sources", "", ...sources.map((s, i) => `${i + 1}. ${s.title || domain(s.url)} (${domain(s.url)}): ${s.url}`));
+	return `${lines.join("\n")}\n`;
+}
+
+/** The JSON object in a model's reply, tolerating code fences or words around it. */
+export function jsonIn(text: string): Record<string, unknown> | undefined {
+	const start = text.indexOf("{");
+	const end = text.lastIndexOf("}");
+	if (start < 0 || end <= start) return undefined;
+	try {
+		const v = JSON.parse(text.slice(start, end + 1));
+		return v && typeof v === "object" && !Array.isArray(v) ? v : undefined;
+	} catch {
+		return undefined;
+	}
+}

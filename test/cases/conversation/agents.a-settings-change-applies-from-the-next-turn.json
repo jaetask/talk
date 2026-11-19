@@ -1,0 +1,7 @@
+{ "about": "An agent's settings live in the store. Changing Maddy's apps changes what she can use from her next turn, in the same chat.", "apps": ["money"],
+  "script": [{ "call": "money__list-items", "args": {} }, "I can't see Money.", { "call": "money__list-items", "args": {} }, "Two bills: Tesco Mobile and the gym."],
+  "turns": [
+    { "say": "What bills do we have?", "config": { "agent": "maddy" } },
+    { "saveAgent": { "id": "maddy", "change": { "apps": ["marketing", "tasks", "money"], "instructions": "You also keep an eye on the bills." } } },
+    { "say": "What bills do we have?" }
+  ] }

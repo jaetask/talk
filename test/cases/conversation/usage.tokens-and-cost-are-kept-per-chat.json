@@ -1,0 +1,3 @@
+{ "about": "Every model call's tokens and cost are stored with the chat.",
+  "script": [{ "call": "tasks__ticket-read", "args": { "id": "TLK-1" } }, "It's being worked on."],
+  "turns": [{ "say": "What's the status of TLK-1?", "show": ["usage"] }] }

@@ -1,0 +1,1 @@
+{ "about": "Any OpenAI-compatible speech server, with a key.", "provider": "openai", "options": { "baseUrl": "https://speech.example/", "model": "tts-1", "voice": "alloy", "apiKey": "sk-secret" } }

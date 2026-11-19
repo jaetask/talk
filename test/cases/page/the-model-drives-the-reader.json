@@ -1,0 +1,6 @@
+{ "about": "The model drives the reader with tools instead of retelling the text: it opens a file and reads a section by number, and the reading starts once its few words have been said. A question about the file is answered from the file's text, which is in its context.",
+  "script": [{ "call": "reader_open", "args": { "file": "lantern" } }, "Opening Lantern notes.", { "call": "reader_goto", "args": { "section": "3" } }, "Reading the safety section.", { "call": "reader_goto", "args": { "section": "pricing" } }, "There's no section on pricing."],
+  "steps": [
+    { "ws": [{ "type": "config", "agent": "cooper", "session_id": "reader-chat" }, { "type": "text", "text": "Open the Lantern notes" }, { "until": "article" },
+             { "type": "text", "text": "Read section three" }, { "until": "finished" }, { "type": "text", "text": "Read the pricing section" }, { "until": "done" }] }
+  ] }

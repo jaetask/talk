@@ -1,0 +1,1 @@
+{ "about": "Speech recognition returns nothing (a cough): no turn, back to listening.", "heard": [""], "replies": [], "steps": [{ "fixture": "stop" }, { "wait": true }] }

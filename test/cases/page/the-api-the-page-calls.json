@@ -1,0 +1,86 @@
+{
+ "about": "The endpoints the page calls, answered from the engine and the durable store, in Python Talk's shapes.",
+ "script": [
+  {
+   "call": "tasks__board-read",
+   "args": {}
+  },
+  "Two tickets."
+ ],
+ "steps": [
+  {
+   "http": "GET /api/agents",
+   "pick": "id"
+  },
+  {
+   "http": "GET /api/brain",
+   "pick": "harnesses"
+  },
+  {
+   "ws": [
+    {
+     "type": "config",
+     "agent": "cooper",
+     "session_id": "chat-1"
+    },
+    {
+     "type": "text",
+     "text": "What's on the board?"
+    },
+    {
+     "until": "done"
+    }
+   ]
+  },
+  {
+   "http": "GET /api/agents/cooper/sessions"
+  },
+  {
+   "http": "GET /api/sessions/chat-1/timeline",
+   "pick": "turns.reply"
+  },
+  {
+   "http": "GET /api/sessions/chat-1/timeline",
+   "pick": "session.agent_name"
+  },
+  {
+   "http": "POST /api/sessions/chat-1/rename",
+   "body": {
+    "title": "The board"
+   }
+  },
+  {
+   "http": "POST /api/sessions/chat-1/pin",
+   "body": {
+    "pinned": true
+   }
+  },
+  {
+   "http": "GET /api/pinned"
+  },
+  {
+   "http": "GET /api/sessions/chat-1/log.jsonl"
+  },
+  {
+   "http": "GET /api/tools/tasks__ticket-archive/schema",
+   "pick": "kind"
+  },
+  {
+   "http": "GET /api/articles",
+   "pick": "title"
+  },
+  {
+   "http": "POST /api/sessions/chat-1/clear"
+  },
+  {
+   "http": "GET /api/sessions/chat-1/timeline",
+   "pick": "turns.redacted"
+  },
+  {
+   "http": "GET /api/sessions/nope/timeline"
+  },
+  {
+   "http": "GET /api/arena"
+  }
+ ]
+}

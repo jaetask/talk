@@ -1,0 +1,8 @@
+{ "about": "The two web tools as the model sees them: results without duplicates, a page reduced to its readable text and wrapped as untrusted, and errors it can act on.",
+  "tools": [
+    { "name": "web_search", "args": { "query": "lantern agent pricing" } },
+    { "name": "web_search", "args": { "query": "nothing at all" } },
+    { "name": "web_read", "args": { "url": "{web}/pricing", "question": "what does the team plan cost" } },
+    { "name": "web_read", "args": { "url": "{web}/empty" } },
+    { "name": "web_read", "args": { "url": "{web}/missing" } }
+  ] }

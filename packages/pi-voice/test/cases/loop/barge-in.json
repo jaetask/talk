@@ -1,0 +1,3 @@
+{ "about": "Barge-in: the reply is still playing at the listener's end when the person says \"stop\". The reply is stopped at once and the new words are heard as the next turn.",
+  "heard": ["tell me everything", "stop"], "replies": [["Here is a very long answer that goes on. ", "And on and on, with a second sentence. ", "And a third one too."], ["Okay."]],
+  "steps": [{ "fixture": "question" }, { "wait": true }, { "fixture": "stop" }, { "wait": true }, { "silenceMs": 2000 }] }

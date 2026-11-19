@@ -1,0 +1,3 @@
+{ "about": "Maddy has Marketing and Tasks only. Money's tools are not hers, and naming one gets a plain refusal.", "apps": ["money"],
+  "script": [{ "call": "money__list-items", "args": {} }, "Money isn't something I can see. Cooper can.", { "call": "tasks__board-read", "args": {} }, "Two tickets."],
+  "turns": [{ "say": "What bills do we have?", "config": { "agent": "maddy" } }, { "say": "And the board?" }] }

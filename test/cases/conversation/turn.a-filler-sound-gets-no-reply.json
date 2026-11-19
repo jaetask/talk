@@ -1,0 +1,3 @@
+{ "about": "When Jae only makes a filler sound the agent can choose to say nothing: no words, no tool line, and the run ends there.",
+  "script": [{ "text": "I'm listening.", "calls": [{ "call": "talk__stay-quiet", "args": {} }] }],
+  "turns": [{ "say": "Um..." }] }

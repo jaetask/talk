@@ -1,0 +1,3 @@
+{ "about": "A force push to main is refused outright: Jae is never asked, and the agent is told no.", "agent": "force",
+  "script": [{ "call": "start_coding_session", "args": { "task": "Fix the export button" } }, "Claude Code fixed the button but couldn't run the tests."],
+  "steps": [{ "say": "Get Claude Code to fix the export button" }, { "say": "yes" }, { "wait": "answered" }] }

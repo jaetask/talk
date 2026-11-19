@@ -1,0 +1,3 @@
+{ "about": "With the write switch off, write tools are not offered, and a model that names one anyway is told changes are off.",
+  "script": [{ "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "Done" } }, "I can only look things up right now."],
+  "turns": [{ "say": "Comment done on TLK-1" }] }

@@ -1,0 +1,8 @@
+{ "about": "Delegation: Cooper hands a task to Maddy, who runs as a subagent with her own apps and signs her own change. Cooper gets her answer back.", "apps": ["money"],
+  "script": [
+    { "call": "agent_ask", "args": { "agent": "maddy", "task": "Comment on TLK-1 that the launch post is drafted." } },
+    { "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "The launch post is drafted." } },
+    "I've commented on Fix the reader.",
+    "Maddy has left the comment on Fix the reader."
+  ],
+  "turns": [{ "say": "Ask Maddy to note on TLK-1 that the launch post is drafted", "config": { "agent": "cooper", "writes": true } }] }

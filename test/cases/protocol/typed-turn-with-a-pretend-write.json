@@ -1,0 +1,7 @@
+{ "about": "What Python Talk's Pi Durable harness and the Dojo's cases send, and what comes back: tokens, tool lines, one call record per tool, done, and the pretend-write log.",
+  "script": [{ "call": "tasks__ticket-read", "args": { "id": "TLK-1" } }, { "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "Looked at it" } }, "I've left a comment on Fix the reader."],
+  "steps": [
+    { "send": { "type": "config", "agent": "cooper", "writes": true, "pretend_writes": true, "new_session": true } },
+    { "send": { "type": "text", "text": "Comment on TLK-1 that you looked at it" }, "until": "done" },
+    { "send": { "type": "pretend_log" }, "until": "pretend_log" }
+  ] }

@@ -1,0 +1,55 @@
+{
+  "name": "pi-voice",
+  "version": "0.1.0",
+  "description": "A voice loop in front of any Pi Durable conversation: speech to text, turn detection, text to speech with swappable voices, and barge-in.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./durable": "./src/durable.ts"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "pi",
+    "pi-durable",
+    "voice",
+    "tts",
+    "stt",
+    "vad",
+    "kokoro",
+    "barge-in"
+  ],
+  "peerDependencies": {
+    "@earendil-works/chord": ">=1.5.0",
+    "@earendil-works/pi-durable": ">=1.5.0"
+  },
+  "peerDependenciesMeta": {
+    "@earendil-works/chord": {
+      "optional": true
+    },
+    "@earendil-works/pi-durable": {
+      "optional": true
+    }
+  },
+  "scripts": {
+    "test": "bun test/run.ts",
+    "test:update": "bun test/run.ts --update",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@earendil-works/chord": "1.5.2",
+    "@earendil-works/pi-durable": "1.5.2",
+    "@jaetask/snap": "0.1.0",
+    "@types/bun": "1.3.13",
+    "typescript": "5.9.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaetask/pi-voice.git"
+  },
+  "author": "jaetask"
+}

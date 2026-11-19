@@ -1,0 +1,3 @@
+{ "about": "The model calls a dangerous tool before looking the item up, is refused, looks it up, and then answers in words instead of calling again. Talk sends it back once; the false claim is never spoken, and the gate asks Jae.",
+  "script": [{ "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } }, { "call": "tasks__board-read", "args": {} }, "I've archived it.", { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } }, "Archived."],
+  "turns": [{ "say": "Archive the sidebar ticket", "config": { "writes": true } }, { "say": "yes" }] }

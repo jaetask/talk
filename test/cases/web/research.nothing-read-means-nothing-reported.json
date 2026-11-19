@@ -1,0 +1,8 @@
+{ "about": "A researcher that answers without reading a page reports nothing: the tool returns an error the model must say plainly.",
+  "script": [
+    { "call": "web_research", "args": { "topic": "nothing at all" } },
+    { "call": "web_search", "args": { "query": "nothing at all" } },
+    "{\"spoken\": \"It is probably fine.\", \"points\": []}",
+    "I couldn't find anything on that."
+  ],
+  "turns": [{ "say": "Research nothing at all" }] }

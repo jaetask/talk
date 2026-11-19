@@ -1,0 +1,6 @@
+{ "about": "The reader over the websocket, as the page drives it: open a file, play, and each sentence is announced as it is heard (a table row is one sentence). The position moves with the reading.",
+  "steps": [
+    { "ws": [{ "type": "config", "agent": "cooper", "session_id": "file-chat" }, { "type": "article_open", "slug": "orca-deep-dive" }, { "until": "article" }, { "type": "article_play" }, { "until": "finished" },
+             { "type": "article_open", "slug": "lantern-notes" }, { "until": "article" }, { "type": "article_goto", "index": 2 }, { "until": "finished" }] },
+    { "http": "GET /api/articles", "pick": "position" }
+  ] }

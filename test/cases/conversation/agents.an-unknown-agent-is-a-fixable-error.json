@@ -1,0 +1,3 @@
+{ "about": "Asking an agent that doesn't exist gets an error that lists the ones that do.",
+  "script": [{ "call": "agent_ask", "args": { "agent": "bob", "task": "Say hello." } }, "There's no Bob. I can ask Maddy."],
+  "turns": [{ "say": "Ask Bob to say hello", "config": { "agent": "cooper" } }] }

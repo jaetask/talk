@@ -1,0 +1,29 @@
+{
+ "about": "Starting Claude Code asks Jae first. On yes the session starts and the turn ends; the tool call stays parked. An edit inside the scratch copy needs no question; running the tests does, and it arrives unasked. When the session ends, its result goes back to the model, which reports.",
+ "script": [
+  {
+   "call": "start_coding_session",
+   "args": {
+    "task": "Fix the export button"
+   }
+  },
+  "Claude Code fixed the export button and the tests pass. The pull request is open."
+ ],
+ "steps": [
+  {
+   "say": "Get Claude Code to fix the export button"
+  },
+  {
+   "say": "yes"
+  },
+  {
+   "wait": "asked"
+  },
+  {
+   "say": "yes, allow it"
+  },
+  {
+   "wait": "answered"
+  }
+ ]
+}

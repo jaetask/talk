@@ -1,0 +1,10 @@
+{ "about": "Research is delegated to a subagent with only the web tools. Its report is checked against the pages it read: a citation to a page that doesn't exist and a quote that isn't on any page are dropped. The report is saved as a file.",
+  "script": [
+    { "call": "web_research", "args": { "topic": "Lantern Agent's pricing", "save": true } },
+    { "call": "web_search", "args": { "query": "lantern agent pricing" } },
+    { "call": "web_read", "args": { "url": "{web}/pricing", "question": "plans and prices" } },
+    { "call": "web_read", "args": { "url": "{web}/review", "question": "what reviewers said" } },
+    "{\"spoken\": \"Lantern Agent has two plans [1]. The Team plan costs forty dollars a seat each month [1][7]. Reviewers called it \\\"the best agent ever made by anyone\\\" [2]. Reviewers found it good value [2].\", \"points\": [\"The Solo plan costs twelve dollars a month [1]\", \"Audit logs were slow to load [2]\"]}",
+    "Lantern has a Solo plan at twelve dollars and a Team plan at forty a seat. I've saved the report to your files."
+  ],
+  "turns": [{ "say": "Look into Lantern Agent's pricing and save it" }] }

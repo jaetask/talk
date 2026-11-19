@@ -1,0 +1,9 @@
+{ "about": "Only public http(s) pages are read. Local and private addresses, other schemes, and a redirect into a private network are all refused.",
+  "tools": [
+    { "name": "web_read", "args": { "url": "http://localhost:8081/mcp" } },
+    { "name": "web_read", "args": { "url": "http://127.0.0.1:3910/" } },
+    { "name": "web_read", "args": { "url": "http://192.168.1.1/admin" } },
+    { "name": "web_read", "args": { "url": "http://[::1]/" } },
+    { "name": "web_read", "args": { "url": "file:///etc/passwd" } },
+    { "name": "web_read", "args": { "url": "{web}/moved" } }
+  ] }

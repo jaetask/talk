@@ -1,0 +1,3 @@
+{ "about": "Archiving is dangerous. The call is parked, the server asks its own question, and it runs only on an explicit yes, signed with the agent's actor.",
+  "script": [{ "call": "tasks__board-read", "args": {} }, { "call": "tool_search", "args": { "query": "archive ticket" } }, { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } }, "Archived."],
+  "turns": [{ "say": "Archive the sidebar ticket", "config": { "writes": true } }, { "say": "Yes, go ahead" }] }

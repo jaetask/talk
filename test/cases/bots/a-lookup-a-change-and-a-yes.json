@@ -1,0 +1,23 @@
+{ "about": "The bots page against a scripted engine: the roster, a typed turn with a lookup (its step, its card, the reply streaming in), a dangerous change that waits on the card's button, a reload that must show the same rows, the Trajectory's turns, and a turn made into a test and then cleared.",
+  "script": [
+    { "call": "tasks__board-read", "args": {} }, "Two tickets: Fix the reader is in progress and Tidy the sidebar is to do.",
+    { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } }, "I've archived Tidy the sidebar."
+  ],
+  "steps": [
+    { "http": "GET /auth/me", "pick": "user.name" },
+    { "http": "GET /bots", "pick": "bots.name" },
+    { "http": "GET /bots/cooper", "pick": "bot" },
+    { "http": "GET /apps", "pick": "apps" },
+    { "say": "What's on the board?", "bot": "cooper" },
+    { "reload": "cooper" },
+    { "say": "Archive the sidebar ticket", "bot": "cooper" },
+    { "http": "GET /tasks", "pick": "tasks.title" },
+    { "reload": "cooper" },
+    { "decide": "allow", "bot": "cooper" },
+    { "reload": "cooper" },
+    { "http": "GET /bots/cooper/export" },
+    { "http": "GET /bots/cooper/trajectory", "pick": "turns.said" },
+    { "turn": "case", "bot": "cooper", "which": 0 },
+    { "turn": "redact", "bot": "cooper", "which": 0 },
+    { "reload": "cooper" }
+  ] }

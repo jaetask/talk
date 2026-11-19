@@ -1,0 +1,5 @@
+{ "about": "The transcript is in SQLite, so a restart keeps the chat: the second service answers in the same conversation.",
+  "runs": [
+    { "script": [{ "call": "tasks__ticket-read", "args": { "id": "TLK-1" } }, "It's being worked on."], "turns": [{ "say": "What's the status of TLK-1?" }] },
+    { "script": ["Still the reader fix."], "turns": [{ "say": "Which one was that again?" }] }
+  ] }

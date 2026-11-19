@@ -1,0 +1,3 @@
+{ "about": "When the model cannot answer (here the script runs out), the turn says so instead of staying silent.",
+  "script": [],
+  "turns": [{ "say": "Anything new?" }] }

@@ -1,0 +1,3 @@
+{ "about": "A brain can say a few words while it works (\"Let me check.\"): they are spoken at once, ahead of the answer, and are not part of the reply's text.",
+  "heard": ["what's on the board today"], "replies": [[{ "aside": "Let me check." }, "Two tickets. ", "One is in review."]],
+  "steps": [{ "fixture": "question" }, { "wait": true }] }

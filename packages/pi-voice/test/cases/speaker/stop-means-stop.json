@@ -1,0 +1,2 @@
+{ "about": "After stop (the person talked over it) nothing more is sent.", "gapMs": 250, "say": ["One.", "Two."], "stopAfter": "One.",
+  "sentences": { "One.": [[{ "tone": 300 }]], "Two.": [[{ "tone": 300 }]] } }

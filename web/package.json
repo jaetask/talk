@@ -1,0 +1,22 @@
+{
+  "name": "talk-next-web",
+  "private": true,
+  "type": "module",
+  "description": "The new Talk's page: grokbot-clone's web app (MIT, see LICENSE.grokbot-clone) on the Pi Durable engine. Built with bun, served by the engine on 3911.",
+  "scripts": {
+    "build": "bun build ./index.html --outdir dist --minify --define import.meta.env.DEV=false",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "lucide-react": "1.61.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-markdown": "10.1.0",
+    "remark-gfm": "4.0.1",
+    "zustand": "5.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7"
+  }
+}

@@ -1,0 +1,3 @@
+{ "about": "Agreeing in conversation is not approval. Anything but an explicit yes cancels the parked call: its run stops there, its result says it was asked and not done, and what Jae said is the next turn.",
+  "script": [{ "call": "tasks__board-read", "args": {} }, { "call": "tool_search", "args": { "query": "archive ticket" } }, { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } }, "Okay, I've left it alone."],
+  "turns": [{ "say": "Archive the sidebar ticket", "config": { "writes": true } }, { "say": "Hmm, actually leave it", "show": ["transcript"] }] }

@@ -1,0 +1,10 @@
+{ "results": [{ "app": "money", "tool": "list-items", "result": { "items": [{ "id": "i1", "name": "Tesco Mobile", "profile": "Personal" }, { "id": "i2", "name": "Rent", "profile": "Personal" }, { "id": "i3", "name": "Rent", "profile": "Company" }] } }],
+  "calls": [
+    { "app": "money", "label": "Money", "tool": "delete-item", "args": { "id": "i1" } },
+    { "app": "money", "label": "Money", "tool": "mark-paid", "args": { "name": "Tesco Mobile" } },
+    { "app": "money", "label": "Money", "tool": "delete-item", "args": { "name": "Rent" } },
+    { "app": "money", "label": "Money", "tool": "delete-item", "args": { "name": "Netflix" } },
+    { "app": "money", "label": "Money", "tool": "delete-item", "args": { "id": "i1", "profile": "Company" } },
+    { "app": "tasks", "label": "Tasks", "tool": "ticket-archive", "args": { "id": "TLK-1" } }
+  ],
+  "answers": ["yes", "Yeah go on", "ok do it", "sure", "no", "hmm maybe", "yesterday I said so", "what would that do?"] }

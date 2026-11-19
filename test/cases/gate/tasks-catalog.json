@@ -1,0 +1,5 @@
+{ "results": [{ "app": "tasks", "tool": "catalog-read", "result": "Here you go: {\"projects\":[{\"project\":\"Talk\",\"id\":\"p1\",\"features\":[{\"feature\":\"Voice\",\"id\":\"f1\"}]},{\"project\":\"Voice\",\"id\":\"p2\"}]}" }],
+  "calls": [
+    { "app": "tasks", "label": "Tasks", "tool": "feature-archive", "args": { "feature": "Voice", "project": "Talk" } },
+    { "app": "tasks", "label": "Tasks", "tool": "project-archive", "args": { "project": "Talk" } }
+  ] }

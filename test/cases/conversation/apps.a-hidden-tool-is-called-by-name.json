@@ -1,0 +1,21 @@
+{
+ "about": "A tool that isn't on the short list can still be called by name in one step: the skill's topic list tells the model it exists.",
+ "script": [
+  {
+   "call": "tasks__ticket-step-add",
+   "args": {
+    "id": "TLK-1",
+    "title": "Test it"
+   }
+  },
+  "Added the step."
+ ],
+ "turns": [
+  {
+   "say": "Add a step to TLK-1: test it",
+   "config": {
+    "writes": true
+   }
+  }
+ ]
+}

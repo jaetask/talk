@@ -1,0 +1,4 @@
+{ "markdown": "Intro before any heading.\n\n# Agent review\n\nNov 8, 2026 · @Jae\n\nA **bold** claim with a [link](https://example.com/a) and `code`.\n\n## 1. What it is\n\nIt is an agent.\n\n### Overview\n\nSmall.\n\n## 2. Tools\n\n| Tool | Needs a yes | What it does |\n|---|---|---|\n| read_file | No | Reads a file. |\n| delete_file | Yes | Deletes a file. |\n\n```\ncode is not read\n```\n\n### Overview\n\nMany.\n\n## 3. Sandboxing and safety\n\nTools run in a sandbox.",
+  "find": ["2", "six", "section three", "the third section", "tools", "overview", "safety", "what it is", "sandbox", "pricing"],
+  "files": ["Orca: deep dive", "OpenBot deep dive", "Lessons for Talk from Orca", "Lantern notes"],
+  "ask": ["the orca deep dive", "orca", "the lessons one", "openbot", "lantern", "hermes"] }

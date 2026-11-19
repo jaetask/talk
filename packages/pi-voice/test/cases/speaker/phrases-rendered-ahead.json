@@ -1,0 +1,2 @@
+{ "about": "A phrase rendered ahead of time is answered from memory: the provider is asked for it once (ahead), and never again.", "phrases": ["Let me check."], "gapMs": 100, "say": ["Let me check.", "Two tickets.", "Let me check."],
+  "sentences": { "Let me check.": [[{ "tone": 200 }]], "Two tickets.": [[{ "tone": 300 }]] } }
