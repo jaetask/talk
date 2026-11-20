@@ -143,12 +143,17 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		const queued = () => s.playUntil - performance.now();
 		const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 		let at = { index, sentence };
+		let lastCue = 0; // when the last sentence's cue fires; a section or end shows after it
+		const afterCues = async () => {
+			while (performance.now() < lastCue + 1 && !stopped) await sleep(10);
+		};
 		let stop: () => Promise<void> = async () => {};
 		const done = (async () => {
 			s.playUntil = 0;
 			await chats.setReading(sid, { index, sentence, playing: true });
 			for (let i = Math.max(0, index); i < file.sections.length && !stopped; i++) {
 				while (queued() > 300 && !stopped) await sleep(50); // a new section shows once the last one has been heard
+				await afterCues();
 				if (stopped) break;
 				at = { index: i, sentence: 0 };
 				await chats.setReading(sid, { index: i, sentence: 0 });
@@ -160,11 +165,13 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 					if (stopped) break;
 					const starts = Math.max(s.playUntil, performance.now());
 					heard.push({ at: starts, index: i, sentence: j });
+					lastCue = Math.max(lastCue, starts + 50);
 					cues.push(setTimeout(() => send(ws, { type: "article_sentence", slug: file.slug, index: i, sentence: j, text: line.shown ?? spoken(line.say, pronunciations()) }), Math.max(0, starts - performance.now() + 50)));
 					await speaker.say(line.say);
 				}
 			}
 			while (queued() > 0 && !stopped) await sleep(50);
+			await afterCues();
 			if (!stopped) {
 				stopped = true; // read to the end: a later stop has nothing to do
 				await chats.setReading(sid, { playing: false });
