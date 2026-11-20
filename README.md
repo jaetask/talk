@@ -67,3 +67,7 @@ The page began as [grokbot-clone](https://github.com/nickvasilescu/grokbot-clone
 ## Licence
 
 MIT.
+
+## Changes
+
+Push a branch, never main. A pull request to main opens by itself and merges when the `ci` check passes.
