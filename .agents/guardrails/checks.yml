@@ -1,0 +1,16 @@
+# Guardrails. on runs a check; off skips it. Re-run the guardrails skill to check again.
+commands:
+  typecheck: "bun run check"
+  test: "bun run test"
+checks:
+  gitignore: on
+  no-secrets: on
+  lockfile: on
+  tests-before-merge: on
+  strict-types: on
+  yaml: on
+  agents-md: on
+  ci: on
+  no-push-main: on
+  auto-pr: on
+dismissed: []

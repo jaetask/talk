@@ -1,3 +1,7 @@
 node_modules/
 data/
 web/dist/
+dist/
+.env
+.env.*
+.DS_Store
