@@ -103,7 +103,7 @@ const oneLine = (s: unknown, n = 160) => {
   const t = String(s ?? "")
     .replace(/\s+/g, " ")
     .trim();
-  return t.length > n ? t.slice(0, n - 1) + "…" : t;
+  return t.length > n ? `${t.slice(0, n - 1)}…` : t;
 };
 
 export interface Bar {
@@ -257,7 +257,7 @@ export function rows(session: Session, turns: Turn[], agents: Timeline["agents"]
             tag: "CLAUDE CODE",
             turn: t.idx,
             t,
-            text: "Session started: " + t.user_text.slice(12).trim().split("\n")[0],
+            text: `Session started: ${t.user_text.slice(12).trim().split("\n")[0]}`,
             more: "The task Talk gave Claude Code (over ACP), in a scratch worktree. Not something Jae said.",
           }
         : {
@@ -279,7 +279,7 @@ export function rows(session: Session, turns: Turn[], agents: Timeline["agents"]
       turn: t.idx,
       t,
       route,
-      text: `${apps} · ${t.route_how || "—"}${t.model ? " · " + t.model : ""}${t.harness ? " on " + t.harness : ""}${usageLine(t) ? " · " + usageLine(t) : ""}`,
+      text: `${apps} · ${t.route_how || "—"}${t.model ? ` · ${t.model}` : ""}${t.harness ? ` on ${t.harness}` : ""}${usageLine(t) ? ` · ${usageLine(t)}` : ""}`,
       more: `Apps offered to the model: ${apps}\nHow the route was chosen: ${t.route_how || "—"}\nModel: ${t.model || "—"}\nHarness: ${t.harness || "—"}\nUsed: ${usageLine(t) || "not counted"}\nTimings: ${JSON.stringify(t.timings || {})}`,
     });
     for (const c of (t.tool_calls || [])
@@ -302,8 +302,8 @@ export function rows(session: Session, turns: Turn[], agents: Timeline["agents"]
         bad: failed(c),
         kind: c.kind,
         hid: !!c.hidden,
-        text: `${c.hidden ? "[hidden from the model after a retry] " : ""}${toolOf(c.name)} ${oneLine(args, 90)} → ${c.outcome || ""}${c.result ? ": " + oneLine(c.result, 120) : ""}`,
-        more: `${c.kind ? c.kind + " · " : ""}${JSON.stringify(c.args || {}, null, 1)}\n\n→ ${c.outcome} · took ${secs(c.duration_s)} · started ${secs(c.start_s)} into the turn\n\n${c.result || "(no result saved)"}`,
+        text: `${c.hidden ? "[hidden from the model after a retry] " : ""}${toolOf(c.name)} ${oneLine(args, 90)} → ${c.outcome || ""}${c.result ? `: ${oneLine(c.result, 120)}` : ""}`,
+        more: `${c.kind ? `${c.kind} · ` : ""}${JSON.stringify(c.args || {}, null, 1)}\n\n→ ${c.outcome} · took ${secs(c.duration_s)} · started ${secs(c.start_s)} into the turn\n\n${c.result || "(no result saved)"}`,
       });
     }
     if (t.reply || t.error || t.interrupted) {
@@ -319,8 +319,7 @@ export function rows(session: Session, turns: Turn[], agents: Timeline["agents"]
         text:
           (t.reply || "").trim() ||
           (t.error ? `error: ${t.error}` : "(interrupted before replying)"),
-        more:
-          (t.interrupted ? "Interrupted by Jae. " : "") + `Turn took ${secs(t.timings?.total)}.`,
+        more: `${t.interrupted ? "Interrupted by Jae. " : ""}Turn took ${secs(t.timings?.total)}.`,
       });
     }
   }
