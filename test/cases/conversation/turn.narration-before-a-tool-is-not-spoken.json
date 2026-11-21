@@ -1,3 +1,11 @@
-{ "about": "What the model says on the way to a tool call is narration, so it is left out of the reply.",
-  "script": [{ "text": "I'll look that up for you.", "calls": [{ "call": "tasks__board-read", "args": {} }] }, "Two tickets: one in progress and one to do."],
-  "turns": [{ "say": "What's on the board?" }] }
+{
+  "about": "What the model says on the way to a tool call is narration, so it is left out of the reply.",
+  "script": [
+    {
+      "text": "I'll look that up for you.",
+      "calls": [{ "call": "tasks__board-read", "args": {} }]
+    },
+    "Two tickets: one in progress and one to do."
+  ],
+  "turns": [{ "say": "What's on the board?" }]
+}

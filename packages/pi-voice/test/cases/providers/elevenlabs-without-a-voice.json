@@ -1,1 +1,5 @@
-{ "about": "ElevenLabs needs a voice id from the account.", "provider": "elevenlabs", "options": { "apiKey": "el-secret" } }
+{
+  "about": "ElevenLabs needs a voice id from the account.",
+  "provider": "elevenlabs",
+  "options": { "apiKey": "el-secret" }
+}

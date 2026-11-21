@@ -1,1 +1,4 @@
-{ "about": "One utterance: it starts a moment after the speech does and ends 700 ms after the last word.", "fixture": "question" }
+{
+  "about": "One utterance: it starts a moment after the speech does and ends 700 ms after the last word.",
+  "fixture": "question"
+}

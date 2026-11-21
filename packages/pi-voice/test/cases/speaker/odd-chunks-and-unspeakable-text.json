@@ -1,2 +1,9 @@
-{ "about": "A chunk may end mid-sample; nothing is lost or shifted. Text with nothing to say (a bare list marker) is skipped.", "oddBytes": true,
-  "gapMs": 100, "say": ["-", "One."], "sentences": { "One.": [[{ "silence": 60 }, { "tone": 150 }], [{ "tone": 150 }, { "silence": 100 }]] } }
+{
+  "about": "A chunk may end mid-sample; nothing is lost or shifted. Text with nothing to say (a bare list marker) is skipped.",
+  "oddBytes": true,
+  "gapMs": 100,
+  "say": ["-", "One."],
+  "sentences": {
+    "One.": [[{ "silence": 60 }, { "tone": 150 }], [{ "tone": 150 }, { "silence": 100 }]]
+  }
+}

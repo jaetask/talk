@@ -1,1 +1,9 @@
-{ "limit": 300, "hold": [{ "text": "One is in review. Bye, Jae." }, { "keep": true }, { "text": "Bye, Jae." }, { "end": true }] }
+{
+  "limit": 300,
+  "hold": [
+    { "text": "One is in review. Bye, Jae." },
+    { "keep": true },
+    { "text": "Bye, Jae." },
+    { "end": true }
+  ]
+}

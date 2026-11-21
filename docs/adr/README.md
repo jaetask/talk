@@ -32,3 +32,4 @@ Decisions about the code live here, since comments are not kept in the source.
 - [29. Tests run without a model, a GPU or the network](0029-tests-need-no-model-gpu-or-network.md)
 - [30. Avatar shapes are drawn from formulas, not traced from artwork](0030-avatars-are-drawn-from-formulas.md)
 - [31. Skills, personalities and agent settings are read fresh each turn](0031-skills-and-agent-settings-are-read-fresh.md)
+- [32. Talk runs on Node, with TypeScript run by tsx](0032-talk-runs-on-node.md)

@@ -1,6 +1,8 @@
 commands:
-  typecheck: "bun run check"
-  test: "bun run test"
+  typecheck: "npm run typecheck"
+  lint: "npm run lint"
+  format: "npm run format:check"
+  test: "npm run test"
 checks:
   gitignore: on
   no-secrets: on

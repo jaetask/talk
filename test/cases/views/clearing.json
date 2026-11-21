@@ -1,28 +1,25 @@
 {
- "about": "Clearing one turn hides it and keeps its place. Clear chat hides everything so far, and the model starts from nothing.",
- "script": [
-  {
-   "call": "tasks__ticket-read",
-   "args": {
-    "id": "TLK-1"
-   }
-  },
-  "It's being worked on.",
-  "Morning, Jae."
- ],
- "turns": [
-  {
-   "say": "What's the status of TLK-1?",
-   "config": {
-    "agent": "cooper"
-   }
-  },
-  {
-   "say": "Morning Cooper"
-  }
- ],
- "show": [
-  "redact-first",
-  "clear"
- ]
+  "about": "Clearing one turn hides it and keeps its place. Clear chat hides everything so far, and the model starts from nothing.",
+  "script": [
+    {
+      "call": "tasks__ticket-read",
+      "args": {
+        "id": "TLK-1"
+      }
+    },
+    "It's being worked on.",
+    "Morning, Jae."
+  ],
+  "turns": [
+    {
+      "say": "What's the status of TLK-1?",
+      "config": {
+        "agent": "cooper"
+      }
+    },
+    {
+      "say": "Morning Cooper"
+    }
+  ],
+  "show": ["redact-first", "clear"]
 }

@@ -1,1 +1,5 @@
-{ "about": "Without a key nothing is sent, and the error says which variable to set.", "provider": "xai", "options": {} }
+{
+  "about": "Without a key nothing is sent, and the error says which variable to set.",
+  "provider": "xai",
+  "options": {}
+}

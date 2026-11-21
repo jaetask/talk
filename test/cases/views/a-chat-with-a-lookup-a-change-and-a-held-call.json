@@ -1,56 +1,50 @@
 {
- "about": "Three turns: a lookup, an ordinary change (in test mode) and a dangerous one that waits for a yes. Then everything a screen is given: the timeline, the messages with their stored cards, the export, a draft test.",
- "script": [
-  {
-   "call": "tasks__board-read",
-   "args": {}
-  },
-  "Two tickets: Fix the reader is in progress and Tidy the sidebar is to do.",
-  {
-   "call": "tasks__ticket-comment-add",
-   "args": {
-    "id": "TLK-1",
-    "body": "Looked at it"
-   }
-  },
-  "I've left a comment on Fix the reader.",
-  {
-   "call": "tasks__board-read",
-   "args": {}
-  },
-  {
-   "call": "tasks__ticket-archive",
-   "args": {
-    "id": "TLK-2"
-   }
-  },
-  "I've archived Tidy the sidebar."
- ],
- "turns": [
-  {
-   "say": "What's on the board?",
-   "config": {
-    "agent": "cooper",
-    "writes": true,
-    "pretend": true
-   }
-  },
-  {
-   "say": "Comment on TLK-1 that you looked at it"
-  },
-  {
-   "say": "Archive the sidebar ticket"
-  },
-  {
-   "say": "yes"
-  }
- ],
- "tests": true,
- "show": [
-  "timeline",
-  "messages",
-  "export",
-  "case",
-  "list"
- ]
+  "about": "Three turns: a lookup, an ordinary change (in test mode) and a dangerous one that waits for a yes. Then everything a screen is given: the timeline, the messages with their stored cards, the export, a draft test.",
+  "script": [
+    {
+      "call": "tasks__board-read",
+      "args": {}
+    },
+    "Two tickets: Fix the reader is in progress and Tidy the sidebar is to do.",
+    {
+      "call": "tasks__ticket-comment-add",
+      "args": {
+        "id": "TLK-1",
+        "body": "Looked at it"
+      }
+    },
+    "I've left a comment on Fix the reader.",
+    {
+      "call": "tasks__board-read",
+      "args": {}
+    },
+    {
+      "call": "tasks__ticket-archive",
+      "args": {
+        "id": "TLK-2"
+      }
+    },
+    "I've archived Tidy the sidebar."
+  ],
+  "turns": [
+    {
+      "say": "What's on the board?",
+      "config": {
+        "agent": "cooper",
+        "writes": true,
+        "pretend": true
+      }
+    },
+    {
+      "say": "Comment on TLK-1 that you looked at it"
+    },
+    {
+      "say": "Archive the sidebar ticket"
+    },
+    {
+      "say": "yes"
+    }
+  ],
+  "tests": true,
+  "show": ["timeline", "messages", "export", "case", "list"]
 }

@@ -1,3 +1,8 @@
-{ "about": "An ordinary change runs without a question. Talk adds the author (the agent's own actor in Tasks) and a retry key; the model never sets them.",
-  "script": [{ "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "Done", "by": "jae" } }, "I've added the comment."],
-  "turns": [{ "say": "Comment done on TLK-1", "config": { "writes": true } }] }
+{
+  "about": "An ordinary change runs without a question. Talk adds the author (the agent's own actor in Tasks) and a retry key; the model never sets them.",
+  "script": [
+    { "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "Done", "by": "jae" } },
+    "I've added the comment."
+  ],
+  "turns": [{ "say": "Comment done on TLK-1", "config": { "writes": true } }]
+}

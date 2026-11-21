@@ -1,2 +1,5 @@
-{ "about": "When SearXNG isn't running the model is told so, and told to say so.", "searchDown": true,
-  "tools": [{ "name": "web_search", "args": { "query": "weather in lisbon" } }] }
+{
+  "about": "When SearXNG isn't running the model is told so, and told to say so.",
+  "searchDown": true,
+  "tools": [{ "name": "web_search", "args": { "query": "weather in lisbon" } }]
+}

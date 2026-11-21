@@ -1,2 +1,7 @@
-{ "about": "Pronunciations are applied to what is sent to the voice.", "pronunciations": "TLK=T L K", "gapMs": 100, "say": ["TLK is done."],
-  "sentences": { "T L K is done.": [[{ "tone": 200 }]] } }
+{
+  "about": "Pronunciations are applied to what is sent to the voice.",
+  "pronunciations": "TLK=T L K",
+  "gapMs": 100,
+  "say": ["TLK is done."],
+  "sentences": { "T L K is done.": [[{ "tone": 200 }]] }
+}

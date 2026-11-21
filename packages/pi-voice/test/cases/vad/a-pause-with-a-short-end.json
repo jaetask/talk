@@ -1,1 +1,5 @@
-{ "about": "The same audio with a 300 ms end-of-turn setting: now the pause splits it in two.", "fixture": "pause-in-the-middle", "detector": { "endMs": 300 } }
+{
+  "about": "The same audio with a 300 ms end-of-turn setting: now the pause splits it in two.",
+  "fixture": "pause-in-the-middle",
+  "detector": { "endMs": 300 }
+}

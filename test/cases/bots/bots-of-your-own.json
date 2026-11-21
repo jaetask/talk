@@ -1,8 +1,28 @@
-{ "about": "Making, changing and removing a bot (an agent), a new conversation and going back to an earlier one, a turn spoken on a call landing in the same transcript, and the small endpoints the details panel reads.",
+{
+  "about": "Making, changing and removing a bot (an agent), a new conversation and going back to an earlier one, a turn spoken on a call landing in the same transcript, and the small endpoints the details panel reads.",
   "script": ["Hello! What shall we do?", "It's Thursday.", "Again it is."],
   "steps": [
-    { "http": "POST /bots", "body": { "name": "Scout", "avatarShape": "star", "avatarColor": "green", "mode": "personal" }, "pick": "bot" },
-    { "http": "PATCH /bots/scout", "body": { "description": "finds things out", "instructions": "Be brief.", "voice": "bf_emma", "voiceSpeed": 1.1, "avatarColor": "blue" }, "pick": "bot" },
+    {
+      "http": "POST /bots",
+      "body": {
+        "name": "Scout",
+        "avatarShape": "star",
+        "avatarColor": "green",
+        "mode": "personal"
+      },
+      "pick": "bot"
+    },
+    {
+      "http": "PATCH /bots/scout",
+      "body": {
+        "description": "finds things out",
+        "instructions": "Be brief.",
+        "voice": "bf_emma",
+        "voiceSpeed": 1.1,
+        "avatarColor": "blue"
+      },
+      "pick": "bot"
+    },
     { "say": "Hi Scout", "bot": "scout" },
     { "http": "POST /bots/scout/read" },
     { "http": "GET /bots/scout/timeline", "pick": "session.agent_color" },
@@ -23,4 +43,5 @@
     { "http": "DELETE /bots/maddy" },
     { "http": "GET /bots", "pick": "bots.id" },
     { "http": "GET /rooms/x/members" }
-  ] }
+  ]
+}

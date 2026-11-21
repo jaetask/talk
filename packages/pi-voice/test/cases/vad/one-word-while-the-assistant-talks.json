@@ -1,1 +1,5 @@
-{ "about": "While the assistant is talking the bar is higher (a stricter threshold, a loudness gate) but the start window is shorter, so a firm \"stop\" still gets through quickly.", "fixture": "stop", "feed": { "threshold": 0.7, "startFrames": 8, "minRms": 0.045 } }
+{
+  "about": "While the assistant is talking the bar is higher (a stricter threshold, a loudness gate) but the start window is shorter, so a firm \"stop\" still gets through quickly.",
+  "fixture": "stop",
+  "feed": { "threshold": 0.7, "startFrames": 8, "minRms": 0.045 }
+}

@@ -1,3 +1,9 @@
-{ "about": "A dangerous call must point at an item a lookup returned. Without one it is refused, with a result the model can act on.",
-  "script": [{ "call": "tool_search", "args": { "query": "archive ticket" } }, { "call": "tasks__ticket-archive", "args": { "id": "TLK-9" } }, "I can't find that ticket."],
-  "turns": [{ "say": "Archive TLK-9", "config": { "writes": true } }] }
+{
+  "about": "A dangerous call must point at an item a lookup returned. Without one it is refused, with a result the model can act on.",
+  "script": [
+    { "call": "tool_search", "args": { "query": "archive ticket" } },
+    { "call": "tasks__ticket-archive", "args": { "id": "TLK-9" } },
+    "I can't find that ticket."
+  ],
+  "turns": [{ "say": "Archive TLK-9", "config": { "writes": true } }]
+}

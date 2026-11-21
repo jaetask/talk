@@ -1,1 +1,17 @@
-{ "app": "money", "tool": "list-accounts", "structured": { "accounts": [{ "name": "Current", "number": "1234 5678 9012 3456", "sortCode": "12-34-56", "opened": "2024-01-15", "balance": 1646.5, "icon": "bank", "notes": "" }] } }
+{
+  "app": "money",
+  "tool": "list-accounts",
+  "structured": {
+    "accounts": [
+      {
+        "name": "Current",
+        "number": "1234 5678 9012 3456",
+        "sortCode": "12-34-56",
+        "opened": "2024-01-15",
+        "balance": 1646.5,
+        "icon": "bank",
+        "notes": ""
+      }
+    ]
+  }
+}

@@ -1,1 +1,5 @@
-{ "about": "ElevenLabs: the streaming endpoint for one of the account's voices, raw PCM at 24 kHz.", "provider": "elevenlabs", "options": { "apiKey": "el-secret", "voice": "JBFqnCBsd6RMkjVDRZzb" } }
+{
+  "about": "ElevenLabs: the streaming endpoint for one of the account's voices, raw PCM at 24 kHz.",
+  "provider": "elevenlabs",
+  "options": { "apiKey": "el-secret", "voice": "JBFqnCBsd6RMkjVDRZzb" }
+}

@@ -1,5 +1,36 @@
-{ "app": "tasks", "tool": "board-read",
-  "catalog": [{ "id": "p1", "kind": "project", "name": "Talk", "ticketPrefix": "TLK" }, { "id": "p2", "kind": "project", "name": "Money", "ticketPrefix": "MNY" }, { "id": "a1", "kind": "actor", "name": "Cooper" }, { "id": "f1", "kind": "feature", "name": "Voice", "projectId": "p1" }],
-  "structured": { "total": 2, "tickets": [
-    { "id": "TLK-1", "title": "Fix the reader", "status": "doing", "priority": "high", "actorId": "a1", "featureId": "f1", "projectId": "p1", "placement": "board", "createdAt": "2026-11-01", "version": 4 },
-    { "id": "MNY-7", "title": "Bills view", "status": "todo", "priority": "none", "projectId": "p2", "placement": "board", "labels": ["ui"] }] } }
+{
+  "app": "tasks",
+  "tool": "board-read",
+  "catalog": [
+    { "id": "p1", "kind": "project", "name": "Talk", "ticketPrefix": "TLK" },
+    { "id": "p2", "kind": "project", "name": "Money", "ticketPrefix": "MNY" },
+    { "id": "a1", "kind": "actor", "name": "Cooper" },
+    { "id": "f1", "kind": "feature", "name": "Voice", "projectId": "p1" }
+  ],
+  "structured": {
+    "total": 2,
+    "tickets": [
+      {
+        "id": "TLK-1",
+        "title": "Fix the reader",
+        "status": "doing",
+        "priority": "high",
+        "actorId": "a1",
+        "featureId": "f1",
+        "projectId": "p1",
+        "placement": "board",
+        "createdAt": "2026-11-01",
+        "version": 4
+      },
+      {
+        "id": "MNY-7",
+        "title": "Bills view",
+        "status": "todo",
+        "priority": "none",
+        "projectId": "p2",
+        "placement": "board",
+        "labels": ["ui"]
+      }
+    ]
+  }
+}

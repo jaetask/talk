@@ -1,6 +1,14 @@
-{ "about": "A dangerous call is parked, the service stops, and it starts again on the same file. The question is still open, and a yes runs the call once.",
+{
+  "about": "A dangerous call is parked, the service stops, and it starts again on the same file. The question is still open, and a yes runs the call once.",
   "runs": [
-    { "script": [{ "call": "tasks__board-read", "args": {} }, { "call": "tool_search", "args": { "query": "archive ticket" } }, { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } }],
-      "turns": [{ "say": "Archive the sidebar ticket", "config": { "writes": true } }] },
+    {
+      "script": [
+        { "call": "tasks__board-read", "args": {} },
+        { "call": "tool_search", "args": { "query": "archive ticket" } },
+        { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } }
+      ],
+      "turns": [{ "say": "Archive the sidebar ticket", "config": { "writes": true } }]
+    },
     { "script": ["Archived."], "turns": [{ "say": "yes" }] }
-  ] }
+  ]
+}

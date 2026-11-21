@@ -1,1 +1,6 @@
-{ "about": "Kokoro, the local default: OpenAI's speech endpoint on the speech server already on this machine, raw PCM, no key.", "provider": "kokoro", "options": {}, "speak": { "voice": "af_bella", "speed": 0.94 } }
+{
+  "about": "Kokoro, the local default: OpenAI's speech endpoint on the speech server already on this machine, raw PCM, no key.",
+  "provider": "kokoro",
+  "options": {},
+  "speak": { "voice": "af_bella", "speed": 0.94 }
+}

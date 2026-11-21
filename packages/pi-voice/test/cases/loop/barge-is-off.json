@@ -1,3 +1,10 @@
-{ "about": "With the interrupt level set to 1, talking over the reply never stops it: the words are not even heard as a turn while it plays.", "options": { "bargeRms": 1 },
-  "heard": ["tell me everything", "stop"], "replies": [["Here is a very long answer that goes on. ", "And on and on, with a second sentence."], ["Okay."]],
-  "steps": [{ "fixture": "question" }, { "wait": true }, { "fixture": "stop" }, { "wait": true }] }
+{
+  "about": "With the interrupt level set to 1, talking over the reply never stops it: the words are not even heard as a turn while it plays.",
+  "options": { "bargeRms": 1 },
+  "heard": ["tell me everything", "stop"],
+  "replies": [
+    ["Here is a very long answer that goes on. ", "And on and on, with a second sentence."],
+    ["Okay."]
+  ],
+  "steps": [{ "fixture": "question" }, { "wait": true }, { "fixture": "stop" }, { "wait": true }]
+}

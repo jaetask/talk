@@ -1,9 +1,19 @@
-{ "about": "A delegate cannot ask Jae for a yes, so a dangerous change comes back refused instead of being made.",
+{
+  "about": "A delegate cannot ask Jae for a yes, so a dangerous change comes back refused instead of being made.",
   "script": [
-    { "call": "agent_ask", "args": { "agent": "maddy", "task": "Archive the Tidy the sidebar ticket." } },
+    {
+      "call": "agent_ask",
+      "args": { "agent": "maddy", "task": "Archive the Tidy the sidebar ticket." }
+    },
     { "call": "tasks__board-read", "args": {} },
     { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } },
     "I couldn't archive it: that needs Jae's yes.",
     "Maddy couldn't archive it, because that needs your yes. Shall I do it?"
   ],
-  "turns": [{ "say": "Get Maddy to archive the sidebar ticket", "config": { "agent": "cooper", "writes": true } }] }
+  "turns": [
+    {
+      "say": "Get Maddy to archive the sidebar ticket",
+      "config": { "agent": "cooper", "writes": true }
+    }
+  ]
+}
