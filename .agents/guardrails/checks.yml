@@ -5,6 +5,9 @@ commands:
   test: "npm run test"
 checks:
   gitignore: on
+  pre-commit: on
+  lint: on
+  format: on
   no-secrets: on
   lockfile: on
   tests-before-merge: on

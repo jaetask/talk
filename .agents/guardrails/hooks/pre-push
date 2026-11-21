@@ -7,3 +7,4 @@ while read -r _local_ref _local_sha remote_ref _remote_sha; do
   fi
 done
 set -e
+npm run test

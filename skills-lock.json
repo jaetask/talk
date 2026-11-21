@@ -8,12 +8,47 @@
       "skillPath": "skills/delete-comment/SKILL.md",
       "computedHash": "0788874c01106e5ebf407843cbc5881438d3af75a15f45827c10d0afdba18ce3"
     },
+    "guardrails": {
+      "source": "jaetask/skills",
+      "commit": "bdab5ae8bc4ccd0ae1131617a332e52c3908585a",
+      "sourceType": "github",
+      "skillPath": "skills/guardrails/SKILL.md",
+      "computedHash": "cf9fcde1adbdd22688ea40ff07db206691e6c3e6b635c86c3638654028165bae"
+    },
+    "pave": {
+      "source": "jaetask/skills",
+      "commit": "bdab5ae8bc4ccd0ae1131617a332e52c3908585a",
+      "sourceType": "github",
+      "skillPath": "skills/pave/SKILL.md",
+      "computedHash": "9b3a4a88da0a1f5eba940e1c9b81271cc324ca90d6f7a6c32c336aa4ba70cd80"
+    },
     "remove-the-human": {
       "source": "jaetask/skills",
       "commit": "bdab5ae8bc4ccd0ae1131617a332e52c3908585a",
       "sourceType": "github",
       "skillPath": "skills/remove-the-human/SKILL.md",
       "computedHash": "d19cbd1e6c7de6e98255ecfd74a1c6363ac69727a35c49d793b541fa42aa7a6c"
+    },
+    "trail": {
+      "source": "jaetask/skills",
+      "commit": "bdab5ae8bc4ccd0ae1131617a332e52c3908585a",
+      "sourceType": "github",
+      "skillPath": "skills/trail/SKILL.md",
+      "computedHash": "fe35170895c8e17b15055395a01f14f006f75d781e03f64e42d6b6726be32a45"
+    },
+    "ux-flow": {
+      "source": "jaetask/toolkit",
+      "commit": "0015e89758a211a9af331cd0d22be480154e79fe",
+      "sourceType": "github",
+      "skillPath": "skills/ux-flow/SKILL.md",
+      "computedHash": "5ba4e68ba5ceec18f28d6a8be20bb35f8c04030e4e62f02e642c8d4143dff7d4"
+    },
+    "visualize": {
+      "source": "jaetask/skills",
+      "commit": "bdab5ae8bc4ccd0ae1131617a332e52c3908585a",
+      "sourceType": "github",
+      "skillPath": "skills/visualize/SKILL.md",
+      "computedHash": "58a2cb62d521ae6930cd622d6714e62947d733deefc281b128981854afa720d8"
     }
   }
 }

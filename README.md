@@ -17,7 +17,7 @@ Node 22.19 or later.
 
 ```sh
 npm install
-npm run build:page                 # writes public/
+npm run build:page                 # writes public/ (esbuild and Tailwind)
 cp apps.example.json apps.json     # the MCP servers your agents may use; optional
 npm start                          # http://127.0.0.1:3930
 ```
@@ -63,9 +63,9 @@ page/                the page (React on @jaetask/toolkit), built into public/
 
 ## Where it came from
 
-Talk began as a private Python service; this is its rewrite on pi. Comments that mention "Python Talk" refer to that predecessor, and some code still knows the shapes of the apps it grew up with (a ticket board, for one).
+Talk began as a private Python service; this is its rewrite on pi. Some code still knows the shapes of the apps it grew up with (a ticket board, for one).
 
-The page began as [grokbot-clone](https://github.com/nickvasilescu/grokbot-clone)'s web app (MIT, `web/LICENSE.grokbot-clone`). Its artwork is not used here: the avatars are drawn from formulas in `web/src/avatar/shapes.ts` and the icons are Lucide.
+The page's logic began as [grokbot-clone](https://github.com/nickvasilescu/grokbot-clone)'s web app (MIT, `page/LICENSE.grokbot-clone`); its screens are built from @jaetask/toolkit. The avatars are drawn from formulas in `page/avatar/shapes.ts` and the icons are Tabler.
 
 ## Licence
 
