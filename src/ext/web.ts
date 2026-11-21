@@ -1,13 +1,11 @@
-import { mkdirSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
 import { defineExtension, defineTool, section, type Extension } from "@earendil-works/pi-durable";
 import { readSkill } from "../apps/skills.ts";
 import { initialChat, TalkChat, type ChatState } from "../chat.ts";
 import { runChild } from "./subagent.ts";
 import { runWebTool, type WebOptions } from "../web/read.ts";
-import { checked, domain, fileSlug, forSpeech, jsonIn, reportMarkdown, type Source } from "../web/research.ts";
+import { checked, domain, forSpeech, jsonIn, type Source } from "../web/research.ts";
 
-export type WebExtensionOptions = WebOptions & { filesDir: string; researchSeconds?: number; today?: () => string };
+export type WebExtensionOptions = WebOptions & { researchSeconds?: number };
 
 const RESEARCHER =
 	"You research one topic on the web for Jae and report back. Plan two to four different searches with web_search, then web_read the three or four " +
@@ -94,9 +92,9 @@ export function webExtension(opts: WebExtensionOptions, researcher: Extension): 
 				name: "web_research",
 				description:
 					"Look into a topic properly: a researcher searches the web, reads the best three or four pages and reports back with checked sources. It takes up to a " +
-					"minute or so, so use it when Jae asks to research, look into or dig into something, not for a quick fact. Set save to keep the report as one of " +
-					'Jae\'s files, which can be read aloud. Example: {"topic": "how Lantern Agent prices its team plan", "save": true}',
-				parameters: { type: "object", properties: { topic: { type: "string", description: "What to find out, in a few words" }, save: { type: "boolean", description: "Keep the report as a file" } }, required: ["topic"] },
+					"minute or so, so use it when Jae asks to research, look into or dig into something, not for a quick fact. " +
+					'Example: {"topic": "how Lantern Agent prices its team plan"}',
+				parameters: { type: "object", properties: { topic: { type: "string", description: "What to find out, in a few words" } }, required: ["topic"] },
 				replay: "safe",
 				execute: async (args: any, api, context) => {
 					const topic = String(args.topic ?? "").trim().slice(0, 100);
@@ -116,18 +114,10 @@ export function webExtension(opts: WebExtensionOptions, researcher: Extension): 
 					const spoken = checked(String(report?.spoken ?? child.text), sources);
 					const points = (Array.isArray(report?.points) ? report.points : []).map((p) => checked(String(p), sources)).filter(Boolean);
 					if (!spoken) return done({ error: "The researcher's answer couldn't be checked against the pages it read, so nothing is reported. Say that plainly." }, true);
-					let saved: string | undefined;
-					if (args.save) {
-						const slug = fileSlug(topic);
-						mkdirSync(opts.filesDir, { recursive: true });
-						writeFileSync(join(opts.filesDir, `${slug}.md`), reportMarkdown(topic, spoken, points, sources, (opts.today ?? (() => new Date().toISOString().slice(0, 10)))()));
-						saved = slug;
-					}
 					return done({
 						say: forSpeech(spoken, sources),
 						key_points: points,
 						sources: sources.map((s, i) => `[${i + 1}] ${s.title || domain(s.url)} (${domain(s.url)})`),
-						...(saved ? { saved_as_file: saved } : {}),
 						instruction: "Tell Jae what was found in a few spoken sentences, naming the sites. Don't add anything the research didn't find.",
 					});
 				},

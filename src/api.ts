@@ -4,14 +4,12 @@ import { type Agent, HEART } from "./agents.ts";
 import { personalities } from "./apps/skills.ts";
 import { MODEL, REPO, writesEnabled } from "./config.ts";
 import type { Engine } from "./engine.ts";
-import { loadArticles } from "./reader/articles.ts";
 import { AGENT_COLORS, type Chats } from "./store.ts";
 import { DEFAULT_GAP_MS, DEFAULT_SPEED } from "./voice.ts";
 
 export type ApiOptions = {
 	engine: Engine;
 	chats: Chats;
-	filesDir: string;
 	uiDist: string;
 	casesDir: string;
 	voices?: () => Promise<{ id: string; label: string }[]>;
@@ -134,14 +132,6 @@ export function createApi(o: ApiOptions) {
 		if (seg[1] === "tools" && seg[3] === "schema") {
 			const { tool } = engine.options.registry.resolve(seg[2]);
 			return json({ name: seg[2], kind: tool?.kind ?? "unknown", inputSchema: tool?.inputSchema ?? {} });
-		}
-		if (path === "/api/articles") {
-			const positions = await chats.setting<Record<string, number>>("articles", {});
-			return json(loadArticles(o.filesDir).map((a) => ({ slug: a.slug, title: a.title, position: positions[a.slug] ?? 0, sections: a.sections.map(({ order, title, level, id }) => ({ order, title, level, id })) })));
-		}
-		if (seg[1] === "articles" && seg[2]) {
-			const a = loadArticles(o.filesDir).find((x) => x.slug === seg[2]);
-			return a ? json(a) : json({ error: "no such article" }, 404);
 		}
 		if (path === "/api/voices")
 			return json({

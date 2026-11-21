@@ -20,7 +20,6 @@ Decisions about the code live here, since comments are not kept in the source.
 - [16. A delegate is a child conversation that cannot delegate or ask for a yes](0016-a-delegate-is-a-child-conversation.md)
 - [17. A coding session runs in a scratch worktree, and its risky steps come back as questions](0017-coding-sessions-run-in-a-scratch-worktree.md)
 - [18. Web pages are read from public addresses only and handed over as untrusted data](0018-web-pages-are-read-as-untrusted-data.md)
-- [19. The model drives the file reader with tools, and reading follows what is heard](0019-the-model-drives-the-reader-with-tools.md)
 - [20. Audio is 16-bit little-endian mono PCM: 16 kHz up, the provider's rate down](0020-audio-is-pcm16-mono.md)
 - [21. The barge-in level sits a margin above the echo measured at the microphone](0021-barge-in-sits-above-the-measured-echo.md)
 - [22. Turn detection uses an energy VAD behind a small interface](0022-turn-detection-uses-an-energy-vad.md)

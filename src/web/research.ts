@@ -36,17 +36,6 @@ export function forSpeech(text: string, sources: Source[]): string {
 	return `${body} Sources: ${sites.length > 1 ? `${sites.slice(0, -1).join(", ")} and ${sites[sites.length - 1]}` : sites[0]}.`;
 }
 
-export const fileSlug = (topic: string): string =>
-	`research-${topic.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "").slice(0, 48).replace(/-$/, "") || "notes"}`;
-
-export function reportMarkdown(topic: string, spoken: string, points: string[], sources: Source[], date: string): string {
-	const lines = [`# Research: ${topic}`, "", `${date} · @Jae`, "", "## Summary", "", spoken.trim(), ""];
-	const kept = points.map((p) => p.trim()).filter(Boolean);
-	if (kept.length) lines.push("## Key points", "", ...kept.map((p) => `- ${p}`), "");
-	lines.push("## Sources", "", ...sources.map((s, i) => `${i + 1}. ${s.title || domain(s.url)} (${domain(s.url)}): ${s.url}`));
-	return `${lines.join("\n")}\n`;
-}
-
 export function jsonIn(text: string): Record<string, unknown> | undefined {
 	const start = text.indexOf("{");
 	const end = text.lastIndexOf("}");

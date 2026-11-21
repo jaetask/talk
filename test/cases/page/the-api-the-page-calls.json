@@ -66,10 +66,6 @@
    "pick": "kind"
   },
   {
-   "http": "GET /api/articles",
-   "pick": "title"
-  },
-  {
    "http": "POST /api/sessions/chat-1/clear"
   },
   {

@@ -233,17 +233,6 @@ The 4 rows the stream built are the rows a reload fetches.
 ]
 ```
 
-## GET /bots/scout/files (files.name)
-
-200
-
-```json
-[
-  "lantern-notes.md",
-  "orca-deep-dive.md"
-]
-```
-
 ## GET /voice/options (voices.id)
 
 200

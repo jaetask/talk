@@ -261,7 +261,6 @@ export class Engine {
 		const { app, tool } = this.options.registry.resolve(name);
 		const tasks = this.options.registry.apps.get("tasks");
 		const plain = Object.entries(args ?? {}).map(([k, v]) => `${k}=${v && typeof v === "object" ? JSON.stringify(v).slice(0, 40) : v}`).join(" ");
-		if (name.startsWith("reader_")) return `🔧 Reader · ${name.slice(7)} ${plain}`.trimEnd();
 		if (name.startsWith("web_")) return `🔧 Web · ${name.slice(4)} ${plain}`.trimEnd();
 		if (["start_coding_session", "coding_status", "stop_coding_session"].includes(name)) return `🔧 Claude Code · ${name.replace(/_/g, " ")}`;
 		const bits = Object.entries(args ?? {}).filter(([k]) => k !== "by" && k !== "requestId").map(([k, v]) => {
