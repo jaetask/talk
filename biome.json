@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!docs", "!.claude", "!web", "!public", "!**/*.expect.md", "!**/SKILL.md"]
+    "includes": ["**", "!docs", "!.claude", "!public", "!**/*.expect.md", "!**/SKILL.md"]
   },
   "formatter": {
     "indentStyle": "space",
@@ -23,5 +23,25 @@
         "noNonNullAssertion": "off"
       }
     }
-  }
+  },
+  "css": {
+    "parser": {
+      "tailwindDirectives": true
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["page/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          },
+          "style": {
+            "noDescendingSpecificity": "off"
+          }
+        }
+      }
+    }
+  ]
 }

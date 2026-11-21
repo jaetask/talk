@@ -6,7 +6,7 @@ The page began as another project's web app under the MIT licence. That project'
 
 ## Decision
 
-`web/src/avatar/shapes.ts` draws each avatar from a few formulas: a silhouette in a 48-unit box with two eyes cut out of the fill. Nothing is traced from anyone's artwork.
+`page/avatar/shapes.ts` draws each avatar from a few formulas: a silhouette in a 48-unit box with two eyes cut out of the fill. Nothing is traced from anyone's artwork.
 
 ## Consequences
 
