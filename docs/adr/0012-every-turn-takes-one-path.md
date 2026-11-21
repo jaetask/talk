@@ -10,7 +10,7 @@ A turn can be typed on the page, spoken on a call, started by a test, or come fr
 - The engine writes one turn record into the transcript: the turn as the person saw it. Screens are drawn from these records and the entries between them, so a chat reopened later shows exactly what happened.
 - `src/views.ts` is pure functions over committed entries. The chat, the Trajectory, an export and a test case are the same facts.
 - On the bots page (`src/bots.ts`) rows are derived from the committed transcript. A reload shows what a live turn showed, and a turn started anywhere arrives on the same event stream.
-- A voice call talks to the same chat the page shows, so what was said lands in the transcript like a typed turn (`web/src/voice/call.ts`).
+- A voice call talks to the same chat the page shows, so what was said lands in the transcript like a typed turn (`page/voice/call.ts`).
 - Websocket messages other than audio are handled in the order they arrived. A config must be in place before the text that follows it (`src/server.ts`).
 
 ## Consequences

@@ -6,7 +6,7 @@ Browsers block audio that does not start from a user gesture. Audio worklets and
 
 ## Decision
 
-In `web/src/voice/audio.ts`, `web/src/voice/call.ts` and `web/src/voice/dictation.ts`:
+In `page/voice/audio.ts`, `page/voice/call.ts` and `page/voice/dictation.ts`:
 
 - The AudioContext is created and resumed synchronously inside the click handler, so autoplay rules allow it. Starting a call or dictation must come from a user gesture.
 - An audio worklet only runs while it is connected to the destination. The capture worklet is routed through a gain node set to zero.
