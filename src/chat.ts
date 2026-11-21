@@ -26,8 +26,6 @@ export type ChatState = {
 	pretendLog: PretendWrite[];
 	endCall: boolean;
 	working: { callId: string; started: string; status: string } | null;
-	article: { slug: string; index: number; sentence: number; playing: boolean } | null;
-	readerAction: { kind: "open" | "read"; slug: string; index: number; sentence: number; play: boolean } | null;
 	runSubmission: number | null;
 	[key: string]: Json;
 };
@@ -53,8 +51,6 @@ export const initialChat = (): ChatState => ({
 	pretendLog: [],
 	endCall: false,
 	working: null,
-	article: null,
-	readerAction: null,
 	runSubmission: null,
 });
 

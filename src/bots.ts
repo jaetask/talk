@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { extname, join, resolve } from "node:path";
 import type { SttProvider, TtsProvider } from "../packages/pi-voice/src/index.ts";
@@ -74,7 +74,6 @@ const plain = (label: string): string => label.replace(/^🔧\s*/, "");
 export type BotsOptions = {
 	engine: Engine;
 	chats: Chats;
-	filesDir: string;
 	config: (agent: string) => ChatConfig;
 	tts: (provider?: string) => TtsProvider;
 	stt: () => SttProvider;
@@ -293,12 +292,6 @@ export function createBots(o: BotsOptions) {
 			slug: a.name, name: a.label, description: a.online ? `${a.tools} lookups and ${a.writeTools} changes, over its MCP server` : `Offline${a.error ? `: ${a.error.slice(0, 80)}` : ""}`,
 			categories: [], managedAuth: false, noAuth: true, connected: a.online,
 		}));
-	const inside = (path: string): string | undefined => {
-		if (!existsSync(o.filesDir)) return undefined;
-		const root = realpathSync(o.filesDir);
-		const wanted = resolve(root, `./${path}`);
-		return (wanted === root || wanted.startsWith(`${root}/`)) && existsSync(wanted) ? wanted : undefined;
-	};
 	const slug = (name: string): string => name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").replace(/^[^a-z]+/, "").slice(0, 32) || "bot";
 
 	async function handle(req: Request, server?: { timeout(req: Request, seconds: number): void }): Promise<Response | undefined> {
@@ -334,11 +327,6 @@ export function createBots(o: BotsOptions) {
 		if (seg[0] === "tasks") return json({ tasks: await tasksOf() });
 		if (seg[0] === "policies") return json({ policies: [] });
 		if (seg[0] === "rooms") return json({ error: "Group chats aren't part of Talk yet." }, 501);
-		if (seg[0] === "files" && seg[1] === "raw") {
-			const file = inside(url.searchParams.get("path") ?? "");
-			if (!file || !statSync(file).isFile()) return json({ error: "No such file." }, 404);
-			return new Response(readFileSync(file), { headers: { "content-type": extname(file) === ".md" ? "text/markdown; charset=utf-8" : "application/octet-stream", "content-disposition": `attachment; filename="${file.split("/").pop()}"` } });
-		}
 
 		if (seg[0] === "approvals" && seg[1] && method === "POST") {
 			const [botId] = seg[1].split("~");
@@ -552,17 +540,6 @@ export function createBots(o: BotsOptions) {
 				});
 				const said = ((await chats.turns(x.sid))?.turns ?? []).reduce((n, t) => n + t.user_text.length + t.reply.length, 0);
 				return json({ memories: [], skills, routines: [], tasks: await tasksOf(id), memory: { lastConsolidatedAt: null, historyChars: said, compactAtChars: NUM_CTX * 3, lastCompaction: null } });
-			}
-			case "files": {
-				if (seg[3] === "download") return json({ url: `${base}/files/raw?path=${encodeURIComponent(String((await body()).path ?? ""))}` });
-				const path = url.searchParams.get("path") ?? "";
-				const dir = inside(path);
-				if (!dir || !statSync(dir).isDirectory()) return json({ status: "ok", path, files: [] });
-				const files = readdirSync(dir).filter((n) => !n.startsWith(".")).map((n) => {
-					const st = statSync(join(dir, n));
-					return { name: n, size: st.size, modifiedAt: st.mtimeMs, isDir: st.isDirectory() };
-				}).sort((a, b) => Number(b.isDir) - Number(a.isDir) || a.name.localeCompare(b.name));
-				return json({ status: "ok", path, files });
 			}
 			case "skills":
 			case "screen":

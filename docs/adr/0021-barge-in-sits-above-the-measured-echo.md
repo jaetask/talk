@@ -14,7 +14,7 @@ In `packages/pi-voice/src/audio.ts` and `packages/pi-voice/src/loop.ts`:
 - The loop keeps about two seconds of microphone level measured while the assistant talks, and only while the person is not talking. The gate sits a margin above that echo and never above the person's own setting. A setting of 1 or more never barges.
 - The gate applies while the assistant talks even in the middle of an utterance, so the assistant's own echo cannot hold the detector open.
 - If the person started talking just before the assistant did, the loop barges once their speech stays above the gate.
-- Other audio playing at the listener's end, such as a file being read aloud, is reported to the loop with its length, so talking over it counts as barging in.
+- Other audio playing at the listener's end is reported to the loop with its length, so talking over it counts as barging in.
 
 ## Consequences
 

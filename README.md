@@ -50,7 +50,7 @@ src/server.ts        the page, its HTTP API and the websocket
 src/engine.ts        a chat is a Pi Durable conversation; a turn follows its run
 src/bots.ts          the page's API: agents as bots, rows from the transcript, one event stream
 src/ext/             extensions: one per app (MCP), the gate, agents and delegation, the web and research,
-                     Claude Code over ACP, the file reader
+                     Claude Code over ACP
 src/apps/            how app tools are classified, shown to the model, compacted and drawn as cards
 src/views.ts         what the screens are given: turns, cards, export, a draft test from a turn
 src/model/ollama.ts  Ollama's own chat API as a pi-ai API

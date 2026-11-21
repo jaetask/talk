@@ -13,7 +13,6 @@ export const APPS_ROOT = (process.env.APPS_ROOT ?? "~/develop").replace(/^~/, ho
 export const APPS_FILE = process.env.TALK_APPS_FILE ?? join(REPO, "apps.json");
 export const SKILLS_DIR = process.env.TALK_SKILLS_DIR ?? join(REPO, "skills");
 export const PERSONAS_DIR = process.env.TALK_PERSONAS_DIR ?? join(REPO, "personalities");
-export const FILES_DIR = process.env.TALK_FILES_DIR ?? join(REPO, "data", "files");
 export const WEB_DIST = join(NEXT, "web", "dist");
 export const UI_DIST = process.env.TALK_UI_DIST ?? WEB_DIST;
 export const PRONUNCIATIONS = process.env.TALK_PRONUNCIATIONS ?? join(REPO, "pronunciations.txt");

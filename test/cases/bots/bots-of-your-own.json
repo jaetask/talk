@@ -16,7 +16,6 @@
     { "reopen": "scout" },
     { "reload": "scout" },
     { "http": "GET /bots/scout/settings", "pick": "skills.name" },
-    { "http": "GET /bots/scout/files", "pick": "files.name" },
     { "http": "GET /voice/options", "pick": "voices.id" },
     { "http": "POST /voice/session", "body": { "botId": "scout" }, "pick": "voice" },
     { "http": "POST /bots/scout/primary" },

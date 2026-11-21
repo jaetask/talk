@@ -134,17 +134,6 @@ No audio was sent.
 "danger"
 ```
 
-## GET /api/articles (title)
-
-200
-
-```json
-[
-  "Lantern notes",
-  "Orca: deep dive"
-]
-```
-
 ## POST /api/sessions/chat-1/clear
 
 200

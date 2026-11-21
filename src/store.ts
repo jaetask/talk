@@ -127,29 +127,6 @@ export class Chats {
 		if (!conv) return undefined;
 		return this.engine.harness.commit(async (tx) => change((await tx.doc(TalkChat, conv.id)) as ChatState), ctx);
 	}
-	async openArticle(sid: string, slug: string, index?: number): Promise<number> {
-		const at = index ?? (await this.setting<Record<string, number>>("articles", {}))[slug] ?? 0;
-		await this.chatDoc(sid, (doc) => { doc.article = { slug, index: at, sentence: 0, playing: false }; });
-		return at;
-	}
-	closeArticle(sid: string) {
-		return this.chatDoc(sid, (doc) => { doc.article = null; doc.readerAction = null; });
-	}
-	async setReading(sid: string, at: { index?: number; sentence?: number; playing?: boolean }): Promise<void> {
-		const slug = await this.chatDoc(sid, (doc) => {
-			if (!doc.article) return undefined;
-			Object.assign(doc.article, at);
-			return doc.article.slug;
-		});
-		if (slug && at.index !== undefined) await this.saveSetting("articles", { ...(await this.setting<Record<string, number>>("articles", {})), [slug]: at.index });
-	}
-	takeReaderAction(sid: string) {
-		return this.chatDoc(sid, (doc) => {
-			const action = doc.readerAction;
-			doc.readerAction = null;
-			return action ? { ...action } : null;
-		});
-	}
 
 	async redactTurn(turnId: number): Promise<boolean> {
 		for (const sid of Object.keys((await this.index()).chats)) {

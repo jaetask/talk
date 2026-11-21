@@ -18,9 +18,6 @@ import { Parked } from "../src/ext/gate.ts";
 import { researcherExtension, webExtension } from "../src/ext/web.ts";
 import { serve } from "../src/server.ts";
 import { Chats } from "../src/store.ts";
-import { readerExtension } from "../src/ext/reader.ts";
-import { findSection, matchFile, splitSections, spokenSentences } from "../src/reader/articles.ts";
-import { splitSentences } from "../packages/pi-voice/src/index.ts";
 import { checkUrl, runWebTool } from "../src/web/read.ts";
 import { fakeMoney, fakeTasks, fakeWeb, scripted, turn } from "./support.ts";
 
@@ -121,7 +118,7 @@ async function web(input: string, name: string): Promise<string> {
 	const fill = <T,>(v: T): T => JSON.parse(JSON.stringify(v).replaceAll("{web}", site.base));
 	const tidy = (s: string) => mask(s).replaceAll(site.base, "http://web.test");
 	const options = {
-		searxng: c.searchDown ? "http://127.0.0.1:9" : site.base, cacheDir: join(dir, "web"), filesDir: join(dir, "files"), researchSeconds: 20, today: () => "2026-11-19",
+		searxng: c.searchDown ? "http://127.0.0.1:9" : site.base, cacheDir: join(dir, "web"), researchSeconds: 20,
 		resolve: async (url: string) => (new URL(url).port === port && new URL(url).hostname === "127.0.0.1" ? url : checkUrl(url)),
 	};
 	const out = [`# ${name}`, "", c.about ?? "", ""];
@@ -143,7 +140,6 @@ async function web(input: string, name: string): Promise<string> {
 			const page = await conv.entries({ order: "ascending" } as never, 100, undefined, ctx);
 			const result = page.items.map((e: any) => e.model?.[0]).filter((m: any) => m?.role === "toolResult" && m.toolName === "web_research").pop();
 			if (result) out.push("## What the research tool gave the model", "", code(JSON.parse(tidy(result.content[0].text))), "");
-			for (const f of existsSync(options.filesDir) ? readdirSync(options.filesDir) : []) out.push(`## Saved file ${f}`, "", "```markdown", tidy(readFileSync(join(options.filesDir, f), "utf8")).trim(), "```", "");
 		} finally {
 			await engine.close();
 		}
@@ -243,16 +239,15 @@ async function page(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const tasks = fakeTasks();
 	const dir = mkdtempSync(join(tmpdir(), "talk-next-page-"));
-	const files = new URL("./fixtures/files", import.meta.url).pathname;
 	const out = [`# ${name}`, "", c.about ?? "", ""];
 	const tone = (ms: number) => new Uint8Array(new Int16Array(Array.from({ length: Math.round(ms * 24) }, (_, i) => Math.round(6000 * Math.sin(i / 8)))).buffer);
 	const tts = () => ({ name: "fake", sampleRate: 24000, async *synthesize(text: string) { yield tone(Math.min(400, 60 + text.length * 4)); } });
 	const quiet = (v: unknown) => mask(JSON.stringify(v, null, 2))
 		.replace(/"(at|createdAt|updatedAt|started_at|last_at|pinned_at|startedAt|completedAt|occurredAt)": "\d{4}-[^"]+"/g, '"$1": "<when>"')
 		.replace(/"timings": \{[^}]*\}/g, '"timings": "<timings>"').replace(/"(startedMs|start_s|duration_s|ms)": [\d.]+/g, '"$1": "<n>"').replaceAll(dir, "<tmp>");
-	const researcher = researcherExtension({ searxng: "http://127.0.0.1:9", cacheDir: join(dir, "web"), filesDir: files });
-	const { engine } = await scripted(c.script ?? [], [{ name: "tasks", label: "Tasks", url: tasks.url }], "memory", { extra: [readerExtension({ filesDir: files })], childOnly: [researcher] });
-	const server = serve(engine, 0, { filesDir: files, uiDist: join(dir, "no-ui"), casesDir: join(dir, "cases"), tts });
+	const researcher = researcherExtension({ searxng: "http://127.0.0.1:9", cacheDir: join(dir, "web") });
+	const { engine } = await scripted(c.script ?? [], [{ name: "tasks", label: "Tasks", url: tasks.url }], "memory", { childOnly: [researcher] });
+	const server = serve(engine, 0, { uiDist: join(dir, "no-ui"), casesDir: join(dir, "cases"), tts });
 	const base = `http://127.0.0.1:${server.port}`;
 	try {
 		for (const step of c.steps ?? []) {
@@ -276,15 +271,13 @@ async function page(input: string, name: string): Promise<string> {
 					if (typeof e.data !== "string") { audio += (e.data as ArrayBuffer).byteLength; return; }
 					last = JSON.parse(e.data);
 					if (last.type === "token") { if (got.at(-1)?.startsWith("says: ")) got[got.length - 1] += last.text; else got.push(`says: ${last.text}`); }
-					else if (last.type === "article_sentence") got.push(`  reads [${last.index}.${last.sentence}] ${last.text}`);
-					else if (last.type === "article") got.push(`article: ${last.slug} at section ${last.index}${last.playing ? ", reading" : ", not reading"}${last.finished ? " (finished)" : ""}`);
 					else if (last.type === "done") got.push(`done (${last.stop})`);
-					else if (!["call", "agent", "state"].includes(last.type)) got.push(`${last.type}: ${mask(JSON.stringify(last.text ?? last.slug ?? ""))}`);
+					else if (!["call", "agent", "state"].includes(last.type)) got.push(`${last.type}: ${mask(JSON.stringify(last.text ?? ""))}`);
 					wake();
 				};
 				for (const m of step.ws as any[]) {
 					if (m.until) {
-						const hit = () => (m.until === "finished" ? last?.type === "article" && last.finished : m.until === "paused" ? last?.type === "article" && !last.playing : last?.type === m.until);
+						const hit = () => last?.type === m.until;
 						const deadline = Date.now() + 20_000;
 						while (!hit()) {
 							if (Date.now() > deadline) throw new Error(`nothing arrived for "${m.until}"`);
@@ -304,17 +297,6 @@ async function page(input: string, name: string): Promise<string> {
 		tasks.stop();
 		rmSync(dir, { recursive: true, force: true });
 	}
-	return out.join("\n");
-}
-
-function reader(input: string, name: string): string {
-	const c = JSON.parse(input);
-	const sections = splitSections(c.markdown);
-	const article = { slug: "file", title: sections.find((s) => s.level === 1)?.title ?? "File", sections };
-	const out = [`# ${name}`, "", "## Sections", "", table(["order", "level", "title", "under", "id"], sections.map((s) => [String(s.order), String(s.level), s.title, s.parent ?? "", s.id])), ""];
-	out.push("## What is read aloud", "", ...sections.flatMap((s) => spokenSentences(s, splitSentences).map((line) => `- [${s.order}] ${line.say}${line.shown ? `  (highlights: ${line.shown})` : ""}`)), "");
-	if (c.find) out.push("## Finding a section", "", table(["asked for", "found"], (c.find as string[]).map((q) => { const f = findSection(q, article); return [q, f.ambiguous ? `ambiguous: ${f.ambiguous.map((k) => sections[k].title).join(" / ")}` : f.index === undefined ? "nothing" : sections[f.index].title]; })), "");
-	if (c.files) out.push("## Finding a file", "", table(["asked for", "found"], (c.ask as string[]).map((q) => { const f = matchFile(q, (c.files as string[]).map((t) => ({ slug: t.toLowerCase().replace(/[^a-z0-9]+/g, "-"), title: t, sections: [] }))); return [q, f.ambiguous ? `ambiguous: ${f.ambiguous.join(" / ")}` : (f.slug ?? "nothing")]; })), "");
 	return out.join("\n");
 }
 
@@ -406,13 +388,12 @@ async function bots(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const tasks = fakeTasks();
 	const dir = mkdtempSync(join(tmpdir(), "talk-next-bots-"));
-	const files = new URL("./fixtures/files", import.meta.url).pathname;
 	const out = [`# ${name}`, "", c.about ?? "", ""];
 	const tone = (ms: number) => new Uint8Array(new Int16Array(Array.from({ length: Math.round(ms * 24) }, (_, i) => Math.round(6000 * Math.sin(i / 8)))).buffer);
 	const tts = () => ({ name: "fake", sampleRate: 24000, async *synthesize(text: string) { yield tone(Math.min(400, 60 + text.length * 4)); } });
 	const stt = () => ({ name: "fake", async transcribe(pcm: Uint8Array, rate: number) { return `(heard ${pcm.byteLength / 2 / rate} s of audio)`; } });
-	const { engine } = await scripted(c.script ?? [], [{ name: "tasks", label: "Tasks", url: tasks.url }], "memory", { extra: [readerExtension({ filesDir: files })] });
-	const server = serve(engine, 0, { filesDir: files, uiDist: join(dir, "no-ui"), casesDir: join(dir, "cases"), tts, stt, botConfig: (agent) => ({ agent, writes: true, pretend: true }) });
+	const { engine } = await scripted(c.script ?? [], [{ name: "tasks", label: "Tasks", url: tasks.url }], "memory");
+	const server = serve(engine, 0, { uiDist: join(dir, "no-ui"), casesDir: join(dir, "cases"), tts, stt, botConfig: (agent) => ({ agent, writes: true, pretend: true }) });
 	const base = `http://127.0.0.1:${server.port}/api/v2`;
 	const quiet = (v: unknown) => mask(JSON.stringify(v, null, 2)).replace(/"(updatedSeq|createdAt|lastActivityAt|since|startedAt|updatedAt|modifiedAt|serverTime|size)": \d+/g, '"$1": "<n>"').replace(/"(start|seconds)": [\d.]+/g, '"$1": "<n>"').replace(/"at": "\d{4}-[^"]+"/g, '"at": "<when>"');
 	const events: any[] = [];
@@ -542,7 +523,7 @@ async function bots(input: string, name: string): Promise<string> {
 
 const only = process.argv.find((a) => a.startsWith("--only="))?.slice(7);
 const groups: [string, (input: string, name: string) => string | Promise<string>][] = [
-	["conversation", conversation], ["protocol", protocol], ["durable", durable], ["web", web], ["coding", coding], ["views", views], ["page", page], ["bots", bots], ["reader", reader], ["classify", classify], ["gate", gate], ["ollama", ollama], ["compact", compact], ["skills", skills],
+	["conversation", conversation], ["protocol", protocol], ["durable", durable], ["web", web], ["coding", coding], ["views", views], ["page", page], ["bots", bots], ["classify", classify], ["gate", gate], ["ollama", ollama], ["compact", compact], ["skills", skills],
 ];
 const failed = await snap(groups.filter(([g]) => !only || g === only).map(([g, render]) => ({ dir: `${here}${g}`, render })));
 process.exit(failed === 0 ? 0 : 1);
