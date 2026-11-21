@@ -1,11 +1,8 @@
-// PCM helpers. Audio is 16-bit little-endian mono throughout: 16 kHz from the microphone, a provider's own rate
-// (24 kHz for Kokoro) to the speaker.
 
-const LOUD = 330; // about 1% of full scale
+const LOUD = 330;
 
 export const samplesOf = (pcm: Uint8Array): Int16Array => new Int16Array(pcm.buffer, pcm.byteOffset, pcm.byteLength >> 1);
 
-/** PCM16 as floats in -1..1. */
 export function toFloat(pcm: Uint8Array): Float32Array {
 	const s = samplesOf(pcm.byteOffset % 2 ? pcm.slice() : pcm);
 	const out = new Float32Array(s.length);
@@ -19,14 +16,12 @@ export function rms(frame: Float32Array): number {
 	return frame.length ? Math.sqrt(sum / frame.length) : 0;
 }
 
-/** Index of the first sample louder than the threshold (0 when there is none). */
 export function firstLoudSample(pcm: Uint8Array, threshold = LOUD): number {
 	const s = samplesOf(pcm.byteOffset % 2 ? pcm.slice() : pcm);
 	for (let i = 0; i < s.length; i++) if (Math.abs(s[i]) > threshold) return i;
 	return 0;
 }
 
-/** Index of the last sample louder than the threshold, or -1 when the chunk is silent. */
 export function lastLoudSample(pcm: Uint8Array, threshold = LOUD): number {
 	const s = samplesOf(pcm.byteOffset % 2 ? pcm.slice() : pcm);
 	for (let i = s.length - 1; i >= 0; i--) if (Math.abs(s[i]) > threshold) return i;
@@ -43,7 +38,6 @@ export function concat(...parts: Uint8Array[]): Uint8Array {
 	return out;
 }
 
-/** A WAV file around PCM16 mono. */
 export function wavBytes(pcm: Uint8Array, rate = 16000): Uint8Array {
 	const out = new Uint8Array(44 + pcm.byteLength);
 	const v = new DataView(out.buffer);
@@ -64,7 +58,6 @@ export function wavBytes(pcm: Uint8Array, rate = 16000): Uint8Array {
 	return out;
 }
 
-/** The PCM16 mono data and sample rate of a plain WAV file. */
 export function readWav(file: Uint8Array): { pcm: Uint8Array; rate: number } {
 	const v = new DataView(file.buffer, file.byteOffset, file.byteLength);
 	let at = 12;
@@ -79,18 +72,12 @@ export function readWav(file: Uint8Array): { pcm: Uint8Array; rate: number } {
 	throw new Error("not a WAV file with a data chunk");
 }
 
-export const BARGE_THRESHOLD = 0.7; // stricter while the assistant is talking, to resist its own voice in the microphone
-export const BARGE_MS = 256; // a one-word "stop" is about 250 ms of strong speech
-export const BARGE_RMS = 0.045; // about -30 dBFS: close-microphone speech, not speaker leakage
-export const ECHO_FRAMES = 62; // about two seconds of microphone level while the assistant talks
+export const BARGE_THRESHOLD = 0.7;
+export const BARGE_MS = 256;
+export const BARGE_RMS = 0.045;
+export const ECHO_FRAMES = 62;
 const ECHO_MIN = 0.01;
 
-/**
- * How loud the person must be to cut the assistant off while it is talking. A fixed level fails on speakers: echo
- * cancellation also turns the person's voice down while the assistant talks. So sit a margin above the echo actually
- * reaching the microphone over the last two seconds, never above the person's own setting. A setting of 1 or more
- * never barges.
- */
 export function bargeGate(echoLevels: number[], setting: number): number {
 	if (setting >= 1) return Number.POSITIVE_INFINITY;
 	if (echoLevels.length < 30) return setting;

@@ -1,6 +1,3 @@
-// The danger gate, as a Pi Durable beforeTool hook. A change is refused while the write switch is off. A dangerous
-// change (delete, archive, money, send or publish) must point at one item a lookup returned, and then the call is
-// parked: the server asks Jae its own question, and the call runs only on an explicit yes.
 import { awaitWithContext, type Context } from "@earendil-works/chord/context";
 import { defineExtension, GenerationTask, hook, LiveDoc, ToolTask, type Extension, type Harness } from "@earendil-works/pi-durable";
 import { fullName, toolOf, type JsonObject } from "../apps/classify.ts";
@@ -10,12 +7,9 @@ import { initialChat, TalkChat } from "../chat.ts";
 
 export type Decision = { yes: boolean; said: string };
 
-/** How a note from Talk itself to the model begins. It is placed as a user message; screens leave it out. */
-/** How a call Jae declined reads in the transcript. */
 export const DECLINED = "Not done, nothing was changed.";
 export const NOTE = "(Talk)";
 
-/** Calls parked in this process, by conversation and call id. A restart finds the decision in the chat document. */
 export class Parked {
 	private waiters = new Map<string, (d: Decision) => void>();
 	wait(key: string): Promise<Decision> {
@@ -29,10 +23,6 @@ export class Parked {
 	}
 }
 
-/**
- * Ask Jae a yes-or-no question on behalf of a running tool call, and park until he answers. The question is the
- * server's own words. A decision recorded before a restart is found in the chat document, so nothing is asked twice.
- */
 export async function askJae(
 	parked: Parked,
 	api: { conversationId: any; commit: (change: (tx: any) => any, context: Context) => Promise<any>; snapshot: (...args: any[]) => Promise<any> },
@@ -76,16 +66,12 @@ export function gateExtension(registry: Registry, parked: Parked, harness: () =>
 								callId: call.id, name: call.name, args, question: question(app.label, tool.name, item), item: item.name, askedAt: Date.now(),
 							};
 						}, context);
-						// Stopping the answer or closing the service ends the wait without deciding; the call stays undecided.
 						decision = await awaitWithContext(wait, context);
 					}
 					if (decision.yes) return undefined;
 					return { block: `${DECLINED} Jae was asked first ("${question(app.label, tool.name, item)}") and did not say yes, so ${toolOf(call.name).replace(/-/g, " ")} was not run.` };
 				},
 			}),
-			// A dangerous call was refused because its item hadn't been looked up, and the model is about to answer
-			// without calling it again: often with "shall I?" in words, sometimes with a claim that it is done. One
-			// note, once per run, sends it back to the tool, where the gate asks Jae properly.
 			hook(GenerationTask, {
 				onYield: async (_answer, api, context: Context) => {
 					const first = (await api.snapshot(LiveDoc, api.conversationId, context))?.run?.first;
@@ -109,8 +95,6 @@ export function gateExtension(registry: Registry, parked: Parked, harness: () =>
 					};
 				},
 			}),
-			// A call Jae didn't say yes to: its run is stopped while it waits (the engine does that), and here its result
-			// is written as what happened, so the model reads "asked, not done" and then Jae's own words as the next turn.
 			hook(ToolTask, {
 				afterTool: async (call, result, api, context: Context) => {
 					if (!result.diagnostics?.some((d) => d.code === "aborted" || d.code === "abandoned")) return undefined;
@@ -122,8 +106,6 @@ export function gateExtension(registry: Registry, parked: Parked, harness: () =>
 					return { ...result, output: [{ type: "text" as const, text }], isError: true };
 				},
 			}),
-			// A tool name the chat doesn't have: misspelled, another agent's app, a change while changes are off, or
-			// made up. The error says which, so the model's next step can be the right one.
 			hook(ToolTask, {
 				afterTool: async (call, result, api, context: Context) => {
 					if (!result.diagnostics?.some((d) => d.code === "tool_unavailable")) return undefined;

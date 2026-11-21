@@ -1,9 +1,3 @@
-// Expect tests for the new Talk, run with @jaetask/snap: each case is an input file, and the approved output sits
-// beside it as name.expect.md. Nothing here needs Ollama, the real apps or a GPU: the model is scripted and the
-// apps are fakes in this process.
-//
-//   bun test/run.ts            compare with the approved expect files
-//   bun test/run.ts --update   approve new output (read the diff first)
 import "./env.ts";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -34,7 +28,6 @@ const here = new URL("./cases/", import.meta.url).pathname;
 const mask = (s: string) => s.replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, "<uuid>");
 const code = (v: unknown) => "```json\n" + mask(JSON.stringify(v, null, 2)) + "\n```";
 
-/** A conversation on the engine: a scripted model, a fake Tasks, and what the person would see and the app would get. */
 async function conversation(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const tasks = fakeTasks();
@@ -60,7 +53,6 @@ async function conversation(input: string, name: string): Promise<string> {
 				out.push("- what the model had in front of it:", ...seen.map((l: string) => `  - ${l}`));
 			}
 			if (t.show?.includes("transcript")) {
-				// every message the model would be sent now, tool calls and their results included
 				const seen = (await (await engine.conversationOf(t.sid ?? "chat"))!.context(ctx)).entries.flatMap((e: any) => (e.model ?? []).map((m: any) =>
 					m.role === "toolResult" ? `result of ${m.toolName}: ${m.content.map((c: any) => c.text ?? "").join("").replace(/\s+/g, " ").slice(0, 400)}`
 					: `${m.role}: ${typeof m.content === "string" ? m.content : m.content.map((c: any) => (c.type === "toolCall" ? `[calls ${c.name}]` : (c.text ?? ""))).join("")}`));
@@ -81,7 +73,6 @@ async function conversation(input: string, name: string): Promise<string> {
 	return out.join("\n");
 }
 
-/** The websocket, as Python Talk's harness and the Dojo use it: Talk's own protocol in, Talk's own events out. */
 async function protocol(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const tasks = fakeTasks();
@@ -122,7 +113,6 @@ async function protocol(input: string, name: string): Promise<string> {
 	return out.join("\n");
 }
 
-/** The web tools and research against a small fake web. The fake site is on loopback, so the test allows that one host and nothing else. */
 async function web(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const site = fakeWeb();
@@ -164,7 +154,6 @@ async function web(input: string, name: string): Promise<string> {
 	return out.join("\n");
 }
 
-/** A coding session over ACP against a stand-in agent: what Jae hears turn by turn, and what arrives unasked while the session runs. */
 async function coding(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const dir = mkdtempSync(join(tmpdir(), "talk-next-coding-"));
@@ -214,11 +203,6 @@ async function coding(input: string, name: string): Promise<string> {
 	return out.join("\n");
 }
 
-/**
- * View data: a scripted chat, then what the screens are given. Times are masked. The last section draws that data with
- * the page's own pure view code (ui/src/trajectory/model.ts and ui/src/cards/model.ts), so a card or a Trajectory row
- * that the page could not draw fails here, without a browser.
- */
 async function views(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const tasks = fakeTasks();
@@ -255,7 +239,6 @@ async function views(input: string, name: string): Promise<string> {
 	return out.join("\n");
 }
 
-/** The page's side: the HTTP API, the toolkit's chat protocol (AgentKit) and the reader over the websocket, against a scripted engine. */
 async function page(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const tasks = fakeTasks();
@@ -324,7 +307,6 @@ async function page(input: string, name: string): Promise<string> {
 	return out.join("\n");
 }
 
-/** Files as the reader sees them: sections, what is said for each, and finding a section or a file. */
 function reader(input: string, name: string): string {
 	const c = JSON.parse(input);
 	const sections = splitSections(c.markdown);
@@ -336,7 +318,6 @@ function reader(input: string, name: string): string {
 	return out.join("\n");
 }
 
-/** The same chat across a restart: the engine is closed and opened again on the same SQLite file between turns. */
 async function durable(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const file = join(tmpdir(), `talk-next-test-${crypto.randomUUID()}.sqlite`);
@@ -421,11 +402,6 @@ function skills(input: string, name: string): string {
 	return [`# ${name}`, "", code({ description: skill.description, tools: skill.tools, topics: skill.topics, builders: skill.builders }), "", "## Body with changes switched off", "", "```", readOnlySkill(skill.body, tools), "```", ""].join("\n");
 }
 
-/**
- * The bots page's API (next/web): a scripted engine behind the real server, driven over HTTP the way the page drives
- * it, with the event stream read the way the page reads it. Each step shows what the stream sent; `reload` checks
- * that the rows the stream built are the rows a reload would fetch.
- */
 async function bots(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
 	const tasks = fakeTasks();
@@ -439,7 +415,6 @@ async function bots(input: string, name: string): Promise<string> {
 	const server = serve(engine, 0, { filesDir: files, uiDist: join(dir, "no-ui"), casesDir: join(dir, "cases"), tts, stt, botConfig: (agent) => ({ agent, writes: true, pretend: true }) });
 	const base = `http://127.0.0.1:${server.port}/api/v2`;
 	const quiet = (v: unknown) => mask(JSON.stringify(v, null, 2)).replace(/"(updatedSeq|createdAt|lastActivityAt|since|startedAt|updatedAt|modifiedAt|serverTime|size)": \d+/g, '"$1": "<n>"').replace(/"(start|seconds)": [\d.]+/g, '"$1": "<n>"').replace(/"at": "\d{4}-[^"]+"/g, '"at": "<when>"');
-	// The stream, read as the page reads it, and the page's own bookkeeping of rows (store.ts upsertRows).
 	const events: any[] = [];
 	const page = new Map<string, Map<number, any>>();
 	let wake = () => {};
@@ -490,7 +465,6 @@ async function bots(input: string, name: string): Promise<string> {
 			const e = seen[i];
 			if (e.type === "rows") {
 				for (const r of e.rows) {
-					// a reply streams in as many updates of one row: show where it ended up
 					const later = seen.slice(i + 1).some((x) => x.type === "rows" && !x.replace && x.rows.some((y: any) => y.seq === r.seq && y.body.streaming));
 					if (r.body.streaming && later) continue;
 					lines.push(`rows${e.replace ? ` (replacing ${e.replace[0]} on)` : ""}: ${rowLine(r)}`);
@@ -527,7 +501,6 @@ async function bots(input: string, name: string): Promise<string> {
 				await until((e) => e.type === "tasks" && e.botId === step.bot, from);
 				out.push(`## The card's button: ${step.decide}`, "", `${res.status}`, "", "The stream:", "", ...told(from).map((l) => `- ${l}`), "");
 			} else if (step.voice) {
-				// a turn spoken on a call: the same chat, over the websocket the call uses
 				const sess = (await call("POST", "/voice/session", { botId: step.bot })).body;
 				const ws = new WebSocket(`ws://127.0.0.1:${server.port}/ws`);
 				await new Promise((resolve, reject) => { ws.onopen = resolve; ws.onerror = reject; });
@@ -537,14 +510,12 @@ async function bots(input: string, name: string): Promise<string> {
 				ws.close();
 				out.push(`## ${step.bot} is told on its call's socket: ${step.voice}`, "", "The stream:", "", ...told(from).map((l) => `- ${l}`), "");
 			} else if (step.turn) {
-				// a turn's own actions, as the Trajectory tab calls them
 				const turns = (await call("GET", `/bots/${step.bot}/trajectory`)).body.turns as any[];
 				const res = await call("POST", `/bots/${step.bot}/turns/${turns[step.which].id}/${step.turn}`, {});
 				await new Promise((resolve) => setTimeout(resolve, 50));
 				const saved = res.body.saved ? JSON.parse(readFileSync(join(dir, "cases", `${res.body.name}.json`), "utf8")) : undefined;
 				out.push(`## Turn ${step.which + 1}: ${step.turn}`, "", `${res.status}`, "", "```json", quiet(saved ? { saved: res.body.saved, case: { ...saved, config: { ...saved.config, fixtures: Object.keys(saved.config?.fixtures ?? {}) } } } : res.body), "```", "", ...(events.length > from ? ["The stream:", "", ...told(from).map((l) => `- ${l}`), ""] : []));
 			} else if (step.reopen) {
-				// an earlier conversation, put back on screen
 				const list = (await call("GET", `/bots/${step.reopen}/conversations`)).body.conversations as any[];
 				const earlier = list.find((x) => !x.current);
 				const res = await call("POST", `/bots/${step.reopen}/conversations/${encodeURIComponent(earlier.id)}`);

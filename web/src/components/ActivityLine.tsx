@@ -4,7 +4,6 @@ import { BotAvatarFor } from '../avatar/BotAvatar';
 import { activityPhrase } from '../lib/phrases';
 import { elapsed } from '../lib/time';
 
-/** The single live "activity line": avatar mark + shimmering phrase + elapsed time. */
 export function ActivityLine({ bot, live, rows }: { bot: Bot; live: LiveState; rows: Row[] }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => {

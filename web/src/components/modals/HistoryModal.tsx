@@ -6,7 +6,6 @@ import { Modal } from './Modal';
 
 interface Conversation { id: string; first: string; at: number; turns: number; current: boolean }
 
-/** A bot's earlier conversations. Starting a new one never loses the old: each is a durable chat that can be put back on screen. */
 export function HistoryModal() {
   const bot = useSelectedBot();
   const setModal = useStore((s) => s.setModal);

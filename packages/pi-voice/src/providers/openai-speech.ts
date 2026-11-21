@@ -1,5 +1,3 @@
-// Any server with OpenAI's speech endpoint (POST /v1/audio/speech) that can return raw PCM: Kokoro behind
-// Kokoro-FastAPI or VoiceStudio, LocalAI, OpenAI itself. Kokoro on this machine is the default voice.
 
 import type { SpeakOptions, TtsProvider } from "../tts.ts";
 
@@ -40,7 +38,6 @@ export function openaiSpeech(options: OpenAiSpeechOptions): TtsProvider {
 	};
 }
 
-/** Kokoro, local and free: by default the speech server already running on this machine. */
 export function kokoro(options: Partial<OpenAiSpeechOptions> = {}): TtsProvider {
 	return openaiSpeech({ baseUrl: "http://127.0.0.1:3900", model: "mlx-audio", voice: "af_heart", name: "kokoro", ...options });
 }

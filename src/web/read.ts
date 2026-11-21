@@ -1,7 +1,3 @@
-// Reading the web safely: a search through Talk's own SearXNG, and one page fetched, reduced to its readable text and
-// trimmed to what the question needs. Only http(s) pages at public addresses are read, redirects are checked hop by
-// hop, pages are capped, nothing is executed, and page text is always handed over as untrusted data.
-// Ported from Python Talk's server/web/search.py and server/web/read.py.
 import { createHash } from "node:crypto";
 import { lookup } from "node:dns/promises";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -22,7 +18,6 @@ export class SearchUnavailable extends Error {}
 export type WebOptions = {
 	searxng: string;
 	cacheDir: string;
-	/** Checks an address before it is fetched; returns it, or throws UnsafeUrl. Tests inject one that allows their fake site. */
 	resolve?: (url: string) => Promise<string>;
 	fetch?: typeof fetch;
 };
@@ -30,15 +25,14 @@ export type WebOptions = {
 export type SearchResult = { title: string; url: string; snippet: string; engine: string };
 export type Page = { url: string; title: string; blocks: string[]; at: number };
 
-/** Is this IP address on the public internet (not loopback, private, link-local, multicast, or reserved)? */
 export function isPublicAddress(ip: string): boolean {
 	const mapped = ip.toLowerCase().match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
 	if (mapped) return isPublicAddress(mapped[1]);
 	if (isIP(ip) === 4) {
 		const [a, b] = ip.split(".").map(Number);
 		if (a === 0 || a === 10 || a === 127 || a >= 224) return false;
-		if (a === 100 && b >= 64 && b <= 127) return false; // carrier-grade NAT
-		if (a === 169 && b === 254) return false; // link-local, cloud metadata
+		if (a === 100 && b >= 64 && b <= 127) return false;
+		if (a === 169 && b === 254) return false;
 		if (a === 172 && b >= 16 && b <= 31) return false;
 		if (a === 192 && (b === 168 || b === 0)) return false;
 		if (a === 198 && (b === 18 || b === 19)) return false;
@@ -46,12 +40,11 @@ export function isPublicAddress(ip: string): boolean {
 	}
 	const v6 = ip.toLowerCase();
 	if (v6 === "::" || v6 === "::1") return false;
-	if (/^f[cd]/.test(v6) || /^fe[89ab]/.test(v6) || v6.startsWith("ff")) return false; // unique local, link-local, multicast
+	if (/^f[cd]/.test(v6) || /^fe[89ab]/.test(v6) || v6.startsWith("ff")) return false;
 	if (v6.startsWith("2001:db8") || v6.startsWith("64:ff9b")) return false;
 	return true;
 }
 
-/** Throws UnsafeUrl unless the address is http(s) and every address its host resolves to is public. */
 export async function checkUrl(url: string): Promise<string> {
 	let parts: URL;
 	try {
@@ -113,7 +106,6 @@ const decode = (s: string): string =>
 		return ENTITIES[e.toLowerCase()] ?? m;
 	});
 
-/** (title, readable paragraphs) from HTML: scripts, menus, headers and footers are dropped, and tiny fragments too. */
 export function extract(html: string): { title: string; blocks: string[] } {
 	const raw: string[] = [];
 	let cur = "";
@@ -134,14 +126,13 @@ export function extract(html: string): { title: string; blocks: string[] } {
 	for (let m = tag.exec(html); m; m = tag.exec(html)) {
 		text(html.slice(last, m.index));
 		last = tag.lastIndex;
-		if (!m[2]) continue; // a comment
+		if (!m[2]) continue;
 		const name = m[2].toLowerCase();
 		const closing = m[1] === "/";
 		if (SKIP.has(name)) {
 			if (!closing && m[3] !== "/") {
 				skip++;
 				if (name === "script" || name === "style") {
-					// raw text: skip to the closing tag whatever is inside
 					const end = html.toLowerCase().indexOf(`</${name}`, last);
 					last = tag.lastIndex = end < 0 ? html.length : end;
 				}
@@ -154,7 +145,7 @@ export function extract(html: string): { title: string; blocks: string[] } {
 	const blocks: string[] = [];
 	const seen = new Set<string>();
 	for (const b of raw) {
-		if (b.length < 25 && !/[.?!:]$/.test(b)) continue; // menu items, buttons, stray labels
+		if (b.length < 25 && !/[.?!:]$/.test(b)) continue;
 		if (seen.has(b)) continue;
 		seen.add(b);
 		blocks.push(b);
@@ -164,7 +155,6 @@ export function extract(html: string): { title: string; blocks: string[] } {
 
 const STOP = new Set(["the", "and", "for", "what", "how", "does", "about", "with", "this"]);
 
-/** The start of the page, then the paragraphs that best match the question, in page order, within the limit. */
 export function trim(blocks: string[], question = "", limit = READ_LIMIT): string {
 	const all = blocks.join("\n");
 	if (all.length <= limit) return all;
@@ -205,7 +195,6 @@ export function trim(blocks: string[], question = "", limit = READ_LIMIT): strin
 
 const cachePath = (dir: string, url: string): string => join(dir, `${createHash("sha1").update(url).digest("hex").slice(0, 20)}.json`);
 
-/** A page's title and readable paragraphs, from the day's cache or the web. */
 export async function fetchPage(url: string, opts: WebOptions): Promise<Page> {
 	const resolve = opts.resolve ?? checkUrl;
 	url = await resolve(url);
@@ -214,7 +203,6 @@ export async function fetchPage(url: string, opts: WebOptions): Promise<Page> {
 		const cached = JSON.parse(readFileSync(file, "utf8")) as Page;
 		if (Date.now() - cached.at < CACHE_MS) return cached;
 	} catch {
-		// not cached
 	}
 	let current = url;
 	let res: Response | undefined;
@@ -246,12 +234,10 @@ export async function fetchPage(url: string, opts: WebOptions): Promise<Page> {
 		mkdirSync(opts.cacheDir, { recursive: true });
 		writeFileSync(file, JSON.stringify(page));
 	} catch {
-		// the cache is a convenience
 	}
 	return page;
 }
 
-/** web_search or web_read as the model sees it: JSON, with errors as {"error": ...} the model can act on. */
 export async function runWebTool(name: "web_search" | "web_read", args: { query?: string; n?: number; url?: string; question?: string }, opts: WebOptions): Promise<{ text: string; isError: boolean; page?: Page }> {
 	const err = (error: string) => ({ text: JSON.stringify({ error }), isError: true });
 	try {

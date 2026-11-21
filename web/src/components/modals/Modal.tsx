@@ -1,7 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
-/** 50% black scrim + centered dialog. Escape and scrim click close. Focus is trapped loosely (restored on close). */
 export function Modal({ onClose, children, className, label, top }: { onClose: () => void; children: ReactNode; className?: string; label: string; top?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

@@ -1,5 +1,3 @@
-// ElevenLabs text to speech (POST /v1/text-to-speech/{voice}/stream), as raw PCM. Paid; the key comes from the
-// environment (ELEVENLABS_API_KEY) unless given. A voice is one of your account's voice ids.
 
 import { failure, streamBody } from "./openai-speech.ts";
 import type { SpeakOptions, TtsProvider } from "../tts.ts";

@@ -1,7 +1,3 @@
-// Handing work to another agent. The delegate runs as a Pi Durable subagent: a child conversation owned by the tool
-// call, with that agent's own role, apps, model and signature. Stopping the call stops the delegate, and a restart
-// finds the same child. A delegate cannot delegate further, and cannot ask Jae for a yes: a dangerous change comes
-// back refused, for the agent Jae is talking to to make itself.
 import { defineExtension, defineTool, section, type AgentChange, type Extension } from "@earendil-works/pi-durable";
 import type { Agent, Agents } from "../agents.ts";
 import { initialChat, TalkChat, type ChatState } from "../chat.ts";
@@ -12,7 +8,6 @@ export const AGENTS_EXTENSION = "talk-agents";
 
 export type AgentsExtensionOptions = {
 	agents: Agents;
-	/** What a conversation of this chat state runs with (the engine's own rule, so a delegate is configured like any chat). */
 	agentChange: (chat: Pick<ChatState, "apps" | "writes">, model: string | undefined, without: string[]) => AgentChange;
 	chatOfAgent: (agent: Agent) => Partial<ChatState>;
 	seconds?: number;
@@ -69,7 +64,6 @@ export function agentsExtension(opts: AgentsExtensionOptions): Extension {
 						task: String(args.task),
 						timeoutMs: (opts.seconds ?? 120) * 1000,
 					});
-					// Changes the delegate made in test mode are read back from the chat Jae is in.
 					const made = ((await api.snapshot(TalkChat, child.conversation, context))?.pretendLog ?? []) as ChatState["pretendLog"];
 					if (made.length)
 						await api.commit(async (tx) => {

@@ -18,11 +18,9 @@ export function Composer({ bot, running }: { bot: Bot; running: boolean }) {
   const ref = useRef<HTMLTextAreaElement>(null);
   const setModal = useStore((s) => s.setModal);
 
-  // Per-bot drafts.
   useEffect(() => { setText(drafts.get(bot.id) ?? ''); setError(null); ref.current?.focus(); }, [bot.id]);
   useEffect(() => { drafts.set(bot.id, text); }, [bot.id, text]);
 
-  // Auto-grow.
   useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -31,7 +29,6 @@ export function Composer({ bot, running }: { bot: Bot; running: boolean }) {
     el.style.overflowY = el.scrollHeight > MAX_H ? 'auto' : 'hidden';
   }, [text]);
 
-  // ⌘I focuses the prompt.
   useEffect(() => {
     const k = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'i') { e.preventDefault(); ref.current?.focus(); } };
     window.addEventListener('keydown', k);
@@ -57,7 +54,6 @@ export function Composer({ bot, running }: { bot: Bot; running: boolean }) {
   const stop = () => api.interrupt(bot.id).catch((e) => setError(e.message));
   const fresh = () => api.fresh(bot.id).catch((e) => setError(e.message));
 
-  // Dictation: insert the transcript at the cursor.
   const insertText = (t: string) => {
     const el = ref.current;
     setText((cur) => {

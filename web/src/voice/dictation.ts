@@ -1,6 +1,3 @@
-// Composer dictation: hold the mic to talk (or tap to start, tap again to stop). The microphone is captured as
-// 16 kHz PCM16 (the same capture a voice call uses), transcribed by Talk's own speech-to-text, and the text is handed
-// back to the composer.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { voiceApi } from './api';
 import { MicCapture, createAudioContext, micErrorMessage, openMic } from './audio';
@@ -44,7 +41,7 @@ export function useDictation(onText: (text: string) => void, onError: (msg: stri
     if (rec.current || starting.current) return;
     starting.current = true;
     const downAt = Date.now();
-    const ctx = createAudioContext(); // inside the click, so the browser lets it run
+    const ctx = createAudioContext();
     try {
       const stream = await openMic();
       const chunks: Int16Array[] = [];
@@ -61,11 +58,10 @@ export function useDictation(onText: (text: string) => void, onError: (msg: stri
     }
   }, [finish]);
 
-  // Pointer handlers: press-and-hold records until release; a quick tap toggles recording on, tap again stops.
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     if (e.button !== 0) return;
     e.preventDefault();
-    try { (e.currentTarget as Element).setPointerCapture(e.pointerId); } catch { /* ignore */ }
+    try { (e.currentTarget as Element).setPointerCapture(e.pointerId); } catch {  }
     if (rec.current && toggleMode.current) { finish(); return; }
     void begin();
   }, [begin, finish]);
@@ -73,12 +69,11 @@ export function useDictation(onText: (text: string) => void, onError: (msg: stri
   const onPointerUp = useCallback(() => {
     const r = rec.current;
     if (!r) {
-      // Still waiting on the permission prompt: treat as a tap.
       if (starting.current) toggleMode.current = true;
       return;
     }
     if (toggleMode.current) return;
-    if (Date.now() - r.downAt < HOLD_MS) toggleMode.current = true; // tap: keep recording
+    if (Date.now() - r.downAt < HOLD_MS) toggleMode.current = true;
     else finish();
   }, [finish]);
 
@@ -89,7 +84,6 @@ export function useDictation(onText: (text: string) => void, onError: (msg: stri
     else { toggleMode.current = true; void begin(); }
   }, [begin, finish]);
 
-  // Esc cancels; unmount stops.
   useEffect(() => {
     if (state !== 'recording') return;
     const k = (e: KeyboardEvent) => { if (e.key === 'Escape') finish(true); };

@@ -1,7 +1,3 @@
-// Tool result cards: what a tool call showed, drawn in the chat as a small card under the reply. The card is built
-// once, when the call finishes, and stored with the call, so a chat reopened days later draws exactly the same card.
-// Views: tickets, change (what one change did), sources (what a Knowledge source said), table (anything else).
-// Nothing here talks to the network. Ported from Python Talk's server/tools/cards.py; the stored shape is the same.
 import { appOf, toolOf, type Json, type JsonObject } from "./classify.ts";
 
 export const CARD_VERSION = 1;
@@ -18,20 +14,17 @@ export type Card = {
 	data: JsonObject;
 };
 
-/** A tool result as data. Notes may come before the result itself, so the last line that parses wins. */
 export function parseCardResult(text: string | undefined): Json | undefined {
 	if (!text) return undefined;
 	const t = String(text).trim();
 	try {
 		return JSON.parse(t);
 	} catch {
-		// try line by line
 	}
 	for (const line of t.split("\n").reverse()) {
 		try {
 			return JSON.parse(line);
 		} catch {
-			// next
 		}
 	}
 	return undefined;
@@ -44,7 +37,6 @@ const ticketRow = (t: JsonObject): JsonObject => Object.fromEntries(TICKET_KEYS.
 const isTicket = (o: unknown): o is JsonObject => isObj(o) && typeof o.id === "string" && "title" in o;
 const recordList = (v: Json): v is JsonObject[] => Array.isArray(v) && v.length > 0 && v.every(isObj);
 
-/** (what the records are called, the records): {"features": [...]} is ("features", [...]). */
 function namedRows(data: Json): [string | undefined, JsonObject[] | undefined] {
 	if (recordList(data)) return [undefined, data];
 	if (isObj(data)) {
@@ -114,7 +106,6 @@ const quoteRow = (item: JsonObject, q: JsonObject): JsonObject => ({
 	at: clock(q.atSeconds) || (Number.isInteger(q.page) ? `p. ${q.page}` : ""), link: q.link ?? "",
 });
 
-/** Knowledge results as source rows: search hits, one insight or playbook with its quotes, or a list of them. */
 export function sourcesRows(data: Json): JsonObject[] | undefined {
 	if (!isObj(data)) return undefined;
 	if (Array.isArray(data.hits)) {
@@ -132,10 +123,6 @@ export function sourcesRows(data: Json): JsonObject[] | undefined {
 	return undefined;
 }
 
-/**
- * The card for one finished call, or nothing when it shouldn't have one: a refused, failed or held call, one of
- * Talk's own tools, a context lookup, or a result with nothing to draw.
- */
 export function buildCard(call: { name: string; args: JsonObject; kind: string; outcome: string; result: string; full?: string; appLabel?: string; at: string }): Card | undefined {
 	const app = appOf(call.name);
 	const tool = app ? toolOf(call.name) : "";
@@ -170,5 +157,4 @@ export function buildCard(call: { name: string; args: JsonObject; kind: string; 
 	return table ? { ...card, view: "table", data: table } : undefined;
 }
 
-/** Two cards with this key are the same lookup: drawn once a turn. */
 export const cardKey = (card: Pick<Card, "name" | "args">): string => JSON.stringify([card.name, Object.fromEntries(Object.entries(card.args).sort(([a], [b]) => a.localeCompare(b)))]);

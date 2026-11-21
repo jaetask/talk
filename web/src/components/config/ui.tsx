@@ -19,7 +19,6 @@ export function Field({ label, hint, children, htmlFor }: { label: string; hint?
   );
 }
 
-/** A small segmented control with optional per-option hints. */
 export function Segmented<T extends string>({ value, options, onChange, label }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; label: string }) {
   return (
     <div className="cfg-seg" role="radiogroup" aria-label={label}>
@@ -32,7 +31,6 @@ export function Segmented<T extends string>({ value, options, onChange, label }:
   );
 }
 
-/** Button that asks "Sure?" in place before running a destructive action. */
 export function ConfirmButton({ children, confirmLabel = 'Delete', onConfirm, className = 'cfg-btn cfg-btn--ghost-danger', disabled, title }: { children: ReactNode; confirmLabel?: string; onConfirm: () => Promise<unknown> | void; className?: string; disabled?: boolean; title?: string }) {
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -61,7 +59,6 @@ export function shortDate(ts: number): string {
   return d.toLocaleDateString('en-US', opts);
 }
 
-/** "Next today 8:00 AM", shown in the routine's own time zone so it matches its schedule text. */
 export function nextRunLabel(ts: number | null, timeZone?: string): string {
   if (!ts) return '';
   let tz = timeZone || undefined;

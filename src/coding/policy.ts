@@ -1,19 +1,13 @@
-// Coding sessions over ACP: which of the agent's steps run without asking, which Jae is asked about, and which are
-// refused outright; plus how a session's updates are shown and summed up. Pure functions. Never approve on the
-// agent's own wording. Ported from Python Talk's server/coding/policy.py.
 import { existsSync, realpathSync } from "node:fs";
 import { basename, dirname, isAbsolute, join, sep } from "node:path";
 import type { PermissionRequest, Update } from "./acp.ts";
 
 const AUTO_KINDS = new Set(["read", "search", "think", "edit", "move", "delete", "switch_mode"]);
 const TASKS_TOOL = /^mcp__tasks__(?<tool>[\w-]+)$/;
-// Looking things up and commenting are part of working a ticket; changing it is Jae's call.
 const TASKS_AUTO = /^(get|list|search|read)[\w-]*$|^(ticket|board|catalog)-(read|find)$|^ticket-comment-(add|reply-to|react)$/;
-// Commands refused outright, whatever else is in the chain: no confirmation could make these right here.
 const REFUSE_CMD =
 	/\bsudo\b|\brm\s+-[a-z]*r[a-z]*f?\s+(\/|~|\$HOME)(\s|$)|\b(curl|wget)\b[^|]*\|\s*(ba|z)?sh\b|\bgit\s+push\b[^|;&]*(\s--force\b|\s-f\b|\s(origin\s+)?(main|master)\b)|\bgh\s+pr\s+merge\b|\bgit\s+reset\s+--hard\b|\bchmod\s+777\b|\bgit\s+(checkout|switch)\s+(main|master)\b.*\bgit\s+push\b/i;
 
-/** The real path of `p`, following links as far as the path exists (a file about to be created has a real folder). */
 const real = (p: string): string => {
 	let rest = "";
 	for (let at = p; ; ) {
@@ -42,7 +36,6 @@ function paths(request: PermissionRequest): string[] {
 	return out;
 }
 
-/** A shell line split into its commands (on &&, ||, ;, | and newlines), keeping quoted text together. */
 export function splitCommands(cmd: string): string[] {
 	const parts: string[] = [];
 	let cur = "";
@@ -68,7 +61,6 @@ export function splitCommands(cmd: string): string[] {
 	return parts.map((p) => p.split(/\s+/).filter(Boolean).join(" ")).filter(Boolean);
 }
 
-/** What a command is, in a few words: "git commit", "gh pr create", "python unit_test.py". */
 export function commandName(command: string): string {
 	const words = command.split(" ").filter((w) => !w.split("/")[0].includes("=") || w.startsWith("-") || w.startsWith("/"));
 	if (!words.length) return command.slice(0, 30);
@@ -109,7 +101,6 @@ export function decide(request: PermissionRequest, worktree: string): Permission
 	return { action: "ask", option: allowOnce, reject, why: `${kind} needs Jae`, question: `Claude Code wants to ${cmd ? spokenCommands(cmd) : title.toLowerCase()}. Allow it once?` };
 }
 
-/** A short chat line for an update worth showing (plans, tool calls); nothing for streaming noise. */
 export function describe(update: Update): string | undefined {
 	if (update.sessionUpdate === "plan") {
 		const steps = (update.entries ?? []).map((e: { content?: string }) => e.content ?? "").filter(Boolean);
@@ -121,14 +112,12 @@ export function describe(update: Update): string | undefined {
 
 export const textOf = (update: Update): string => (update.content && typeof update.content === "object" ? (update.content.text ?? "") : "");
 
-/** The spoken wrap-up: the agent's last two sentences, or what stopped it. */
 export function summary(reply: string, stop: string): string {
 	const sentences = reply.replace(/\(Stopped: [^)]*\)\.?/g, "").split(/\s+/).filter(Boolean).join(" ").split(/(?<=[.!?])\s+/);
 	const last = sentences.slice(-2).filter(Boolean).join(" ").slice(0, 400);
 	return (stop === "end_turn" ? `Claude Code is done. ${last}` : `Claude Code stopped (${stop.replace(/_/g, " ")}). ${last}`).trim();
 }
 
-/** The local repo for a Tasks project: <appsRoot>/<project name> when that is a git repo, else the default. */
 export function repoFor(project: string | undefined, appsRoot: string, fallback: string): string {
 	if (project) {
 		const cand = join(appsRoot, project.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, "-"));
@@ -139,7 +128,6 @@ export function repoFor(project: string | undefined, appsRoot: string, fallback:
 
 const SAFE_RUN = "Don't start, stop or restart any servers or running services (other agents run this app's live server); run tests in this worktree only.";
 
-/** What Claude Code is asked to do. A ticket gets its title and body, and the Tasks protocol in brief. */
 export function taskPrompt(task: string, ticket?: { id: string; title?: string; body?: string }): string {
 	const tail = `Make the change, run the relevant tests, commit, push the branch and open a pull request. Don't merge it. Finish with a two-sentence summary of what you did.\n\n${SAFE_RUN}`;
 	if (ticket)

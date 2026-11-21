@@ -1,6 +1,3 @@
-// A Pi Durable conversation as the voice loop's brain: what the person said is submitted to the conversation, and
-// the answer is handed over as it streams. Stopping the reply aborts the conversation's run. What the model says on
-// the way to a tool call is left out of what is spoken.
 
 import { BACKGROUND_CONTEXT, type Context } from "@earendil-works/chord/context";
 import { AssistantEntry, LiveDoc, type Conversation, type Harness } from "@earendil-works/pi-durable";
@@ -29,7 +26,6 @@ export function durableBrain(harness: Harness, conversation: Conversation, conte
 				if (!generation) return;
 				const message = generation.message as { content?: { type: string; text?: string }[] } | undefined;
 				if (generation.attempt !== attempt || !textOf(message?.content).startsWith(streamed)) {
-					// A new model step. If the last one ended in a tool call, what it said was narration.
 					attempt = generation.attempt;
 					streamed = "";
 				}
@@ -46,7 +42,6 @@ export function durableBrain(harness: Harness, conversation: Conversation, conte
 			const settled = submission.wait(context).then(async (s) => {
 				await watch.stop();
 				if (s.status === "done" && s.type === "input") {
-					// The last streamed partial may trail the committed answer: say the rest.
 					const answer = await conversation.commit((tx) => tx.entry(AssistantEntry, s.answer), context);
 					const full = textOf((answer?.model?.[0] as { content?: { type: string; text?: string }[] } | undefined)?.content);
 					if (full.startsWith(streamed) && full.length > streamed.length) push(hold.text(full.slice(streamed.length)));

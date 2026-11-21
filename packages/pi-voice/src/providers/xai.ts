@@ -1,5 +1,3 @@
-// xAI text to speech (POST /v1/tts): the Grok voices, such as eve, ara and rex. Paid; the key comes from the
-// environment (XAI_API_KEY) unless given.
 
 import { failure, streamBody } from "./openai-speech.ts";
 import type { SpeakOptions, TtsProvider } from "../tts.ts";

@@ -20,7 +20,6 @@ a { color: inherit; }
 :focus-visible { outline: 2px solid var(--color-border-focus); outline-offset: 1px; }
 .boot { height: 100%; background: var(--color-bg-chrome); }
 
-/* ---------- shared controls ---------- */
 .icon-btn {
   display: inline-flex; align-items: center; justify-content: center;
   width: 36px; height: 36px; border-radius: var(--radius-full);

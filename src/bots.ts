@@ -1,8 +1,3 @@
-// The bots page's API (next/web): Talk's agents drawn as bots, each with one conversation on screen. A bot is an
-// agent; its conversation is a durable chat; a row is something that chat's transcript holds (what was said, a tool
-// call, the card a call showed, a question waiting on Jae). Rows are derived from the committed transcript, so a
-// reload shows exactly what a live turn showed, and a turn started anywhere (typed here, spoken on a call, a long
-// job reporting back) arrives on the same event stream.
 import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { extname, join, resolve } from "node:path";
@@ -19,7 +14,6 @@ import type { Chats } from "./store.ts";
 import type { TurnView } from "./views.ts";
 import { DEFAULT_SPEED, pronunciations } from "./voice.ts";
 
-// ── the page's shapes (next/web/shared/types.ts) ──
 
 export type Bot = {
 	id: string; name: string; label: string; description: string; instructions: string; avatarShape: string; avatarColor: string;
@@ -48,7 +42,6 @@ const VOICES = [
 	["af_heart", "Heart"], ["af_bella", "Bella"], ["af_nicole", "Nicole"], ["af_sarah", "Sarah"], ["am_adam", "Adam"], ["am_michael", "Michael"],
 	["bf_emma", "Emma"], ["bm_george", "George"],
 ];
-/** The Kokoro voices on this machine (the model's own voice files), as Python Talk lists them; a short list when there are none to read. */
 function voices(): { id: string; name: string }[] {
 	try {
 		const snapshots = join(homedir(), ".cache/huggingface/hub/models--mlx-community--Kokoro-82M-bf16/snapshots");
@@ -56,17 +49,14 @@ function voices(): { id: string; name: string }[] {
 		for (const snap of readdirSync(snapshots)) for (const f of readdirSync(join(snapshots, snap, "voices"))) if (/^[ab][fm]_\w+\.safetensors$/.test(f)) found.add(f.replace(".safetensors", ""));
 		if (found.size) return [...found].sort().map((id) => ({ id, name: `${id.slice(3, 4).toUpperCase()}${id.slice(4)} (${id.startsWith("a") ? "US" : "UK"}, ${id[1] === "f" ? "f" : "m"})` }));
 	} catch {
-		// no voice files to read here
 	}
 	return VOICES.map(([id, name]) => ({ id, name }));
 }
 const SPEEDS = [0.8, 0.9, 0.94, 1, 1.1, 1.2, 1.3];
 
-// One turn's rows sit in a block of a thousand: the turn's place in the chat sets the block, the kind of row its
-// place inside it. A live turn and the committed turn it becomes number their rows the same way.
 const BLOCK = 1000;
 const SAID = 0;
-const CALL = 10; // then two per call: the call, and the card it showed
+const CALL = 10;
 const ERROR = 980;
 const ASK = 990;
 const REPLY = 999;
@@ -80,15 +70,11 @@ export type BotsOptions = {
 	engine: Engine;
 	chats: Chats;
 	filesDir: string;
-	/** A chat's settings for a turn started from the page (writes on or off, test mode). */
 	config: (agent: string) => ChatConfig;
 	tts: (provider?: string) => TtsProvider;
 	stt: () => SttProvider;
-	/** Where "Make test" saves a case (expect/cases). */
 	casesDir?: string;
-	/** The voices to offer; by default the Kokoro voices on this machine. */
 	voices?: () => { id: string; name: string }[];
-	/** Under which path the page calls this API. */
 	base?: string;
 };
 
@@ -97,7 +83,6 @@ export function createBots(o: BotsOptions) {
 	const registry = engine.options.registry;
 	const base = o.base ?? "/api/v2";
 
-	// ── the event stream ──
 	const clients = new Set<ReadableStreamDefaultController<Uint8Array>>();
 	const encoder = new TextEncoder();
 	const emit = (event: unknown): void => {
@@ -112,11 +97,9 @@ export function createBots(o: BotsOptions) {
 	};
 	const ping = setInterval(() => emit({ type: "ping" }), 20_000);
 
-	// A row's revision: later always wins on the page, whether the row came from a live turn or a reload.
 	let rev = 0;
 	const nextRev = (): number => (rev = Math.max(rev + 1, Date.now()));
 
-	// ── bots ──
 	let cache: Extras | undefined;
 	const extras = async (): Promise<Extras> => {
 		const agents = await engine.agents.list();
@@ -160,13 +143,11 @@ export function createBots(o: BotsOptions) {
 		const b = await bot(id);
 		if (b) emit({ type: "bot", bot: b });
 	};
-	/** The bot whose conversation on screen is this chat, if any. */
 	const botOfChat = async (sid: string): Promise<{ id: string; extra: Extra } | undefined> => {
 		const found = Object.entries(await extras()).find(([, x]) => x.sid === sid);
 		return found ? { id: found[0], extra: found[1] } : undefined;
 	};
 
-	// ── rows from the committed transcript ──
 	const callStatus = (outcome: string): "done" | "error" | "denied" | "awaiting-approval" =>
 		outcome === "error" ? "error" : outcome === "refused" || outcome === "denied" ? "denied" : outcome === "waiting" ? "awaiting-approval" : "done";
 	const turnRows = (botId: string, generation: number, t: TurnView, index: number, next: TurnView | undefined, chat: ChatState): Row[] => {
@@ -175,7 +156,7 @@ export function createBots(o: BotsOptions) {
 		const at = Date.parse(t.at) || Date.now();
 		const row = (seq: number, kind: Row["kind"], body: RowBody, offset = 0): Row => ({ botId, generation, seq: block + seq, updatedSeq: nextRev(), kind, body, createdAt: at + offset });
 		const rows: Row[] = [];
-		if (t.user_text && t.source !== "button") // a press of the card's button is shown by the card
+		if (t.user_text && t.source !== "button")
 			rows.push(row(SAID, "message", { type: "message", role: "user", text: t.user_text, ...(t.source === "voice" ? { from: { kind: "voice" as const, id: botId, name: "voice" } } : {}) }));
 		const drawn = new Set<string>();
 		for (const c of t.tool_calls) {
@@ -184,14 +165,12 @@ export function createBots(o: BotsOptions) {
 			rows.push(row(k, "tool-call", { type: "tool-call", callId: `t${t.id}-c${c.seq}`, name: c.name, label: plain(engine.describe(c.name, c.args)), status, args: c.args, ...(["ok", "confirmed"].includes(c.outcome) ? {} : { summary: c.outcome }) }, c.seq));
 			if (!c.card) continue;
 			const key = JSON.stringify([c.card.name, c.card.args]);
-			if (drawn.has(key)) continue; // the same lookup twice draws once
+			if (drawn.has(key)) continue;
 			drawn.add(key);
 			rows.push(row(k + 1, "card", { type: "card", card: "tool", data: c.card }, c.seq));
 		}
 		if (t.error) rows.push(row(ERROR, "notice", { type: "notice", text: t.error, tone: "error" }, 900));
 		if (t.stop === "asked") {
-			// Something is waiting on Jae's yes. Pending while it is the newest turn and the chat still holds the call;
-			// after that, what he said next is the answer.
 			const pending = !next && chat.pending ? chat.pending : null;
 			const status = pending ? "pending" : next ? (YES.test(next.user_text) ? "allowed" : "denied") : "expired";
 			const app = pending ? registry.resolve(pending.name).app : undefined;
@@ -210,8 +189,7 @@ export function createBots(o: BotsOptions) {
 		return { rows, turns: got.turns.length };
 	};
 
-	// ── live turns ──
-	type LiveTurn = { botId: string; generation: number; index: number; at: number; /** Jae started it (it isn't a long job reporting back). */ asked: boolean; calls: Map<string, { k: number; name: string; args: JsonObject; label: string }>; text: string };
+	type LiveTurn = { botId: string; generation: number; index: number; at: number;  asked: boolean; calls: Map<string, { k: number; name: string; args: JsonObject; label: string }>; text: string };
 	const turns = new Map<string, LiveTurn>();
 	const live = new Map<string, LiveState>();
 	const idle = (botId: string): LiveState => ({ botId, isRunning: false, activity: null, awaiting: null, startedAt: null });
@@ -242,26 +220,24 @@ export function createBots(o: BotsOptions) {
 	const emitRows = (t: LiveTurn, rows: Row[], replace?: [number, number]): void =>
 		emit({ type: "rows", botId: t.botId, generation: t.generation, rows, ...(replace ? { replace } : {}) });
 
-	/** Every chat's turns arrive here in order; the ones on a bot's screen become rows. */
 	const queues = new Map<string, Promise<void>>();
 	const stop = engine.observe((sid, e) => {
 		const run = (queues.get(sid) ?? Promise.resolve()).then(() => onTurn(sid, e)).catch((err) => console.error("talk-next: bots page:", String(err?.message ?? err).slice(0, 200)));
 		queues.set(sid, run);
-		return e.type === "start" ? run : undefined; // a turn waits only for its first rows to be placed
+		return e.type === "start" ? run : undefined;
 	});
 	async function onTurn(sid: string, e: TurnNotice): Promise<void> {
 		if (e.type === "start") return void (await begin(sid, { text: e.said, source: e.source }));
-		const t = turns.get(sid) ?? (e.type === "done" || e.type === "failed" ? undefined : await begin(sid)); // a long job reporting back starts no turn
+		const t = turns.get(sid) ?? (e.type === "done" || e.type === "failed" ? undefined : await begin(sid));
 		if (e.type === "done" || e.type === "failed") {
 			turns.delete(sid);
 			const b = await botOfChat(sid);
 			if (!b) return;
 			const from = t?.index ?? Math.max(0, ((await chats.turns(sid))?.turns.length ?? 1) - 1);
-			// The turn before is drawn again too: a card waiting on Jae shows what he answered once this turn exists.
 			const redraw = Math.max(0, from - 1);
 			const { rows, turns: count } = await committed(b.id, b.extra, redraw);
 			if (count > from) emit({ type: "rows", botId: b.id, generation: b.extra.generation, rows, replace: [blockOf(redraw), Number.MAX_SAFE_INTEGER] });
-			else if (t && e.type === "done" && e.done.reply) emitRows(t, [liveRow(t, REPLY, "message", { type: "message", role: "assistant", text: e.done.reply })]); // an answer that isn't a turn of its own (a job's status)
+			else if (t && e.type === "done" && e.done.reply) emitRows(t, [liveRow(t, REPLY, "message", { type: "message", role: "assistant", text: e.done.reply })]);
 			if (e.type === "failed") emit({ type: "rows", botId: b.id, generation: b.extra.generation, rows: [{ botId: b.id, generation: b.extra.generation, seq: blockOf(from) + ERROR, updatedSeq: nextRev(), kind: "notice", body: { type: "notice", text: e.error.slice(0, 300), tone: "error" }, createdAt: Date.now() }] });
 			const chat = await engine.chatState(sid);
 			const waiting = e.type === "done" && (e.done.stop === "asked" || Boolean(chat?.pending));
@@ -294,11 +270,9 @@ export function createBots(o: BotsOptions) {
 			setLive({ ...prev, activity: { kind: "thinking", since: Date.now() } });
 		}
 	}
-	/** Is this bot's chat the one a page has open? Kept simple: the page marks a bot read when it shows it. */
 	const open = new Set<string>();
 	const document = (botId: string): boolean => clients.size > 0 && open.has(botId);
 
-	// ── what the details panel shows ──
 	const tasksOf = async (only?: string) => {
 		const out: { id: string; botId: string; title: string; state: "working" | "needs_input" | "done"; note: string; updatedAt: number }[] = [];
 		for (const [id, x] of Object.entries(await extras())) {
@@ -331,7 +305,7 @@ export function createBots(o: BotsOptions) {
 		const missing = () => json({ error: "No such bot." }, 404);
 
 		if (seg[0] === "events") {
-			server?.timeout(req, 0); // the stream stays open
+			server?.timeout(req, 0);
 			let mine: ReadableStreamDefaultController<Uint8Array> | undefined;
 			const stream = new ReadableStream<Uint8Array>({
 				start(c) {
@@ -396,7 +370,6 @@ export function createBots(o: BotsOptions) {
 				return new Response(Buffer.concat(chunks), { headers: { "content-type": "application/octet-stream", "x-sample-rate": String(tts.sampleRate) } });
 			}
 			if (seg[1] === "stt" && method === "POST") {
-				// Dictation: the page sends what the microphone heard as 16 kHz PCM16.
 				const pcm = new Uint8Array(await req.arrayBuffer());
 				if (pcm.byteLength < 3200) return json({ text: "" });
 				try {
@@ -424,7 +397,6 @@ export function createBots(o: BotsOptions) {
 				return json({ bot: await bot(id) });
 			}
 			const all = await bots();
-			// After a restart nothing is running, but a call may still be waiting on Jae: say so.
 			const xs = await extras();
 			for (const b of all) {
 				if (live.has(b.id)) continue;
@@ -463,9 +435,8 @@ export function createBots(o: BotsOptions) {
 			case "messages": {
 				const text = String((await body()).text ?? "").trim();
 				if (!text) return json({ error: "Nothing to send." }, 400);
-				if (turns.get(x.sid)?.asked) await engine.abort(x.sid); // what Jae says now takes over from the answer in progress (a long job carries on)
+				if (turns.get(x.sid)?.asked) await engine.abort(x.sid);
 				const row = new Promise<Row>((resolveRow) => {
-					// If the chat is busy with something that won't be interrupted, don't keep the page waiting on it.
 					setTimeout(() => resolveRow({ botId: id, generation: x.generation, seq: 0, updatedSeq: 0, kind: "message", body: { type: "message", role: "user", text }, createdAt: Date.now() }), 10_000);
 					const off = engine.observe((sid, e) => {
 						if (sid !== x.sid || e.type !== "start") return;
@@ -498,7 +469,6 @@ export function createBots(o: BotsOptions) {
 				return json({ ok: true });
 			}
 			case "conversations": {
-				// Every conversation this bot has had; opening one puts it back on screen (nothing is lost by starting anew).
 				if (seg[3] && method === "POST") {
 					const sid = seg[3];
 					if ((await chats.row(sid))?.agent !== id) return json({ error: "No such conversation." }, 404);
@@ -525,7 +495,6 @@ export function createBots(o: BotsOptions) {
 				return new Response(lines, { headers: { "content-type": "application/x-ndjson", "content-disposition": `attachment; filename="talk-${id}.jsonl"` } });
 			}
 			case "turns": {
-				// One turn's own actions, from the Trajectory: clear it from view, or make a Dojo case of it.
 				const turnId = Number(seg[3]);
 				if (method !== "POST" || !Number.isFinite(turnId)) break;
 				if (!(await chats.turns(x.sid))?.turns.some((t) => t.id === turnId)) return json({ error: "No such turn in this conversation." }, 404);
@@ -550,7 +519,6 @@ export function createBots(o: BotsOptions) {
 				break;
 			}
 			case "trajectory": {
-				// Each turn as the stages the engine went through: hearing, each model step, each tool call, speaking.
 				const got = await chats.turns(x.sid);
 				const shown = (got?.turns ?? []).filter((t) => !t.redacted).map((t) => {
 					const stages = [
@@ -600,12 +568,10 @@ export function createBots(o: BotsOptions) {
 				try {
 					c.close();
 				} catch {
-					// already closed
 				}
 			}
 			clients.clear();
 		},
-		/** For tests: the rows a bot's conversation holds now, and what the stream has sent. */
 		rows: async (id: string) => (await committed(id, (await extras())[id])).rows,
 		subscribe(listener: (event: any) => void): () => void {
 			const c = { enqueue: (chunk: Uint8Array) => listener(JSON.parse(new TextDecoder().decode(chunk).replace(/^data: /, ""))), close() {} } as unknown as ReadableStreamDefaultController<Uint8Array>;

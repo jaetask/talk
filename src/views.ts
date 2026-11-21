@@ -1,6 +1,3 @@
-// View data: a chat's transcript as the screens draw it. Pure functions over committed entries, so the chat, the
-// Trajectory, an export and a test case are all the same facts, and a chat reopened later shows what happened then.
-// The shapes are the ones Python Talk's page already draws (its timeline and its tool cards).
 import type { EntryRecord } from "@earendil-works/pi-durable";
 import type { Card } from "./apps/cards.ts";
 import type { JsonObject } from "./apps/classify.ts";
@@ -17,7 +14,6 @@ export type TurnView = {
 	id: number; idx: number; at: string; source: string; user_text: string; reply: string; model: string | null; harness: string; route_how: string;
 	timings: { [k: string]: number }; spans: Span[]; interrupted: boolean; error: string | null; tool_calls: ToolCallView[]; agent_id: string | null;
 	redacted: boolean; redacted_at: string | null; tokens_in: number; tokens_out: number; tokens_cached: number; cost: number | null; cost_basis: string | null;
-	/** How the turn ended: answered, asked (waiting on Jae), working (a long job took over), failed or aborted. */
 	stop: string;
 };
 
@@ -27,13 +23,11 @@ const textOf = (content: readonly { type: string; text?: string }[] | undefined)
 	(content ?? []).filter((c) => c.type === "text").map((c) => c.text ?? "").join("");
 const secs = (ms: number): number => Math.round(ms) / 1000;
 
-/** Is a model on this machine (so a call costs nothing), going by its id? */
 const local = (model: string | null): boolean => !!model && !/:(remote|chatgpt)$/.test(model);
 
-/** The turns of a chat, oldest first: each turn record with the model steps and tool calls that led to it. */
 export function turnsOf(entries: readonly EntryRecord[], redactions?: Redactions): TurnView[] {
 	const turns: TurnView[] = [];
-	let steps: any[] = []; // assistant and tool-result messages since the last turn record
+	let steps: any[] = [];
 	const names = new Map<string, { name: string; args: JsonObject }>();
 	for (const entry of entries) {
 		const message = (entry as { model?: readonly any[] }).model?.[0];
@@ -86,7 +80,6 @@ export function turnsOf(entries: readonly EntryRecord[], redactions?: Redactions
 	return turns;
 }
 
-/** A chat's running total, as the page's usage line reads it. */
 export function usageOf(turns: readonly TurnView[]) {
 	const counted = turns.filter((t) => t.tokens_in || t.tokens_out);
 	const unpriced = counted.filter((t) => t.cost === null).length;
@@ -102,7 +95,6 @@ export function usageOf(turns: readonly TurnView[]) {
 
 export type AgentLook = { name: string; color: string };
 
-/** Everything the Trajectory draws for one chat. */
 export function timelineOf(
 	chat: { sid: string; agent: string; persona: string; voice: string },
 	entries: readonly EntryRecord[],
@@ -128,7 +120,6 @@ export type ChatMessage = {
 };
 export const CARD_KIND = "talk.tool-card";
 
-/** The chat as messages: what was said, each tool call's stored card, and the reply. A cleared turn keeps its place. */
 export function messagesOf(turns: readonly TurnView[]): ChatMessage[] {
 	const out: ChatMessage[] = [];
 	for (const t of turns) {
@@ -138,7 +129,7 @@ export function messagesOf(turns: readonly TurnView[]): ChatMessage[] {
 		for (const c of t.tool_calls) {
 			if (!c.card) continue;
 			const key = JSON.stringify([c.card.name, c.card.args]);
-			if (drawn.has(key)) continue; // the same lookup twice draws once
+			if (drawn.has(key)) continue;
 			drawn.add(key);
 			out.push({ id: `t${t.id}-c${c.seq}`, role: "assistant", createdAt: t.at, status: "complete", parts: [{ type: "widget", widget: { id: `t${t.id}-c${c.seq}`, kind: CARD_KIND, title: `${c.card.app_label} · ${c.card.tool}`, data: c.card } }] });
 		}
@@ -147,18 +138,12 @@ export function messagesOf(turns: readonly TurnView[]): ChatMessage[] {
 	return out;
 }
 
-/** The whole chat as JSON lines: the session first, then one turn per line, tool calls included. */
 export function exportLines(timeline: ReturnType<typeof timelineOf>): string {
 	return `${[JSON.stringify({ session: timeline.session }), ...timeline.turns.map((t) => JSON.stringify(t))].join("\n")}\n`;
 }
 
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
-/**
- * A draft Dojo case from a turn ("Make test"): the conversation up to it, the reads it made as fixtures so the case
- * doesn't drift with live data, and checks from what happened. golden: the same tools and writes again, no ids
- * spoken. regression: the turn went wrong, so only the safety checks, for a person to add what must not recur.
- */
 export function caseOf(turns: readonly TurnView[], turnId: number, kind: "golden" | "regression", agents: { [id: string]: AgentLook }, note = "") {
 	const upTo = turns.findIndex((t) => t.id === turnId);
 	if (upTo < 0) return undefined;

@@ -1,12 +1,8 @@
-// Talk's Agent Client Protocol client: drive one coding agent (Claude Code first) over ACP v1. The agent is a child
-// process speaking newline-delimited JSON-RPC 2.0 on stdin and stdout. Talk advertises no file or terminal
-// capabilities: the agent uses its own tools and reports them, and every risky step comes back as a permission
-// request. Ported from Python Talk's server/coding/acp.py.
 import { spawnSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { basename, join, resolve } from "node:path";
 
-export const CLAUDE_ADAPTER = ["npx", "-y", "@agentclientprotocol/claude-agent-acp@0.106.0"]; // pinned, as in Python Talk
+export const CLAUDE_ADAPTER = ["npx", "-y", "@agentclientprotocol/claude-agent-acp@0.106.0"];
 const PROTOCOL_VERSION = 1;
 const SECRET = /("(?:value|token|authorization|apiKey|api_key|password)"\s*:\s*)"[^"]*"/gi;
 export const redact = (text: string): string => text.replace(SECRET, '$1"[redacted]"');
@@ -16,7 +12,6 @@ export class AcpError extends Error {}
 export type Update = Record<string, any>;
 export type PermissionRequest = { toolCall?: Record<string, any>; options?: { optionId: string; kind: string }[] };
 
-/** A fresh worktree of `repo` on a new scratch branch talk/<label>-<id>, under `root`. Never Jae's working copy. */
 export function makeWorktree(repo: string, root: string, base = "origin/main", label = "acp"): string {
 	repo = resolve(repo);
 	const id = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
@@ -28,7 +23,6 @@ export function makeWorktree(repo: string, root: string, base = "origin/main", l
 	return path;
 }
 
-/** The agent's environment: Jae's own, minus another Claude session's variables (they would hijack it). */
 export function cleanEnv(): Record<string, string> {
 	return Object.fromEntries(
 		Object.entries(process.env).filter(([k, v]) => v !== undefined && !(k.startsWith("CLAUDE_CODE_") || k.startsWith("CLAUDE_AGENT_") || ["CLAUDECODE", "ANTHROPIC_BASE_URL", "CLAUDE_PID"].includes(k))),
@@ -72,7 +66,6 @@ export class AcpSession {
 		return s;
 	}
 
-	/** Run one prompt turn. Returns the stop reason, or "timeout" or "budget" when Talk had to cancel it. */
 	async prompt(text: string, handlers: { onUpdate?: (u: Update) => void | Promise<void>; onPermission?: (r: PermissionRequest) => Promise<string> }, budget: Budget = { seconds: 900, toolCalls: 80 }): Promise<string> {
 		this.onUpdate = handlers.onUpdate;
 		this.onPermission = handlers.onPermission;
@@ -124,7 +117,6 @@ export class AcpSession {
 			(this.proc.stdin as { write(s: string): void; flush?(): void }).write(`${JSON.stringify(msg)}\n`);
 			(this.proc.stdin as { flush?(): void }).flush?.();
 		} catch {
-			// the agent has gone; the reader settles what was pending
 		}
 	}
 
@@ -171,7 +163,6 @@ export class AcpSession {
 			try {
 				await this.onUpdate?.(update);
 			} catch {
-				// a display problem must not stop the session
 			}
 		} else if (msg.method === "session/request_permission" && "id" in msg) {
 			void (async () => {

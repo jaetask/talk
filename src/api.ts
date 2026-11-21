@@ -1,6 +1,3 @@
-// The page's HTTP API: the endpoints Talk's page (ui/) already calls, answered from the engine and the durable
-// store. Shapes are Python Talk's, so the same page works against either Talk. What the new Talk doesn't have
-// (the Model Arena, alerts, ChatGPT sign-in) answers with an empty, well-formed result rather than an error page.
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { extname, join, normalize } from "node:path";
 import { type Agent, HEART } from "./agents.ts";
@@ -15,9 +12,7 @@ export type ApiOptions = {
 	engine: Engine;
 	chats: Chats;
 	filesDir: string;
-	/** The built page (ui/dist). */
 	uiDist: string;
-	/** Where "Make test" saves a case. */
 	casesDir: string;
 	voices?: () => Promise<{ id: string; label: string }[]>;
 };
@@ -124,7 +119,7 @@ export function createApi(o: ApiOptions) {
 				const draft = await chats.draftCase(id, url.searchParams.get("kind") === "regression" ? "regression" : "golden", url.searchParams.get("note") ?? "");
 				return draft ? json(draft) : json({ error: "no such turn" }, 404);
 			}
-			if (seg[3] === "llm") return json([]); // the exact model requests are in the durable transcript, not yet shown here
+			if (seg[3] === "llm") return json([]);
 		}
 		if (path === "/api/cases" && req.method === "POST") {
 			const b = await body();
@@ -164,7 +159,6 @@ export function createApi(o: ApiOptions) {
 	};
 }
 
-/** The built page. Any path that isn't a file is the page itself (it routes in the browser). */
 function serveStatic(dist: string, path: string): Response {
 	if (!existsSync(join(dist, "index.html")))
 		return new Response("Talk's page isn't built yet: run `pnpm --dir ui install && pnpm --dir ui build` in the Talk repo. The websocket is at /ws and the chat protocol at /agentkit.", { status: 503 });

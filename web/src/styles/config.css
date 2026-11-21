@@ -1,9 +1,7 @@
-/* ---------- bot settings, app settings, tasks, library (all colors via tokens) ---------- */
 
 @keyframes cfg-spin { to { transform: rotate(360deg); } }
 .cfg-spinner { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--color-border-secondary); border-top-color: var(--color-text-secondary); animation: cfg-spin 0.8s linear infinite; }
 
-/* buttons */
 .cfg-btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px; flex-shrink: 0;
   height: 30px; padding: 0 12px; border-radius: var(--radius-full); white-space: nowrap;
@@ -25,7 +23,6 @@
 .cfg-icon-btn:hover:not(:disabled) { background: var(--color-bg-hover); color: var(--color-text-primary); }
 .cfg-icon-btn.cfg-btn--danger { width: auto; height: 28px; padding: 0 10px; font-size: 12px; color: #FFFFFF; }
 
-/* fields */
 .cfg-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .cfg-field__label { font-size: 13px; font-weight: 500; line-height: 18px; color: var(--color-text-primary); }
 .cfg-field__hint { font-size: 12px; line-height: 16px; letter-spacing: 0.12px; color: var(--color-text-tertiary); }
@@ -46,7 +43,6 @@
 .cfg-chip--muted { background: var(--color-bg-tertiary); color: var(--color-text-tertiary); }
 .cfg-code { font-family: var(--font-mono-stack); font-size: 11px; color: var(--color-text-tertiary); }
 
-/* ---------- bot settings dialog ---------- */
 .bot-settings { width: 760px; height: min(680px, calc(100vh - 48px)); max-width: calc(100vw - 32px); }
 .bot-settings__title { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .bot-settings__body { display: flex; flex: 1 1 0; min-height: 0; }
@@ -78,7 +74,6 @@
   display: flex; align-items: center; justify-content: flex-end; gap: 8px;
   margin: -6px -24px 0; padding: 10px 24px; background: var(--color-bg-elevated); border-top: 0.5px solid transparent; transition: border-color 160ms;
 }
-/* Only pin to the bottom of the scroll area while there is something to save. */
 .cfg-savebar.is-dirty { position: sticky; bottom: 0; z-index: 2; border-top-color: var(--color-border-tertiary); }
 .cfg-savebar__note { flex: 1 1 0; font-size: 12px; line-height: 16px; color: var(--color-text-tertiary); }
 .cfg-savebar__note.is-error { color: var(--color-danger-text); }
@@ -110,7 +105,6 @@
 .cfg-meter__track { height: 6px; border-radius: var(--radius-full); background: var(--color-bg-tertiary); overflow: hidden; }
 .cfg-meter__track span { display: block; height: 100%; border-radius: inherit; background: var(--bot-action, var(--color-primary)); }
 
-/* ---------- details panel: header gear, library, tasks ---------- */
 .details__gear { margin-right: auto; }
 .lib-crumbs { display: flex; align-items: center; gap: 2px; min-width: 0; overflow: hidden; white-space: nowrap; }
 .lib-crumbs .link-btn { padding: 2px 4px; margin: -2px 0; }
@@ -146,7 +140,6 @@
 .task-chip.is-needs_input { background: var(--color-warn-bg); color: var(--color-warn-text); }
 .task-chip.is-working { background: var(--color-success-bg); color: var(--color-success-text); }
 
-/* ---------- Tasks view (main column) ---------- */
 .tasks-view { display: flex; flex-direction: column; }
 .tasks-view__header { display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 60px; padding: 12px 20px; flex-shrink: 0; border-bottom: 0.5px solid var(--color-border-tertiary); }
 .tasks-view__title { font-size: 17px; font-weight: 600; line-height: 24px; color: var(--color-text-primary); }
@@ -156,7 +149,6 @@
 .tasks-empty__title { margin-top: 6px; font-size: 15px; font-weight: 500; line-height: 22px; }
 .tasks-empty__sub { max-width: 340px; font-size: 13px; line-height: 19px; color: var(--color-text-tertiary); }
 
-/* sidebar Tasks island */
 .sidebar-island {
   display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 10px; margin-bottom: 10px; border-radius: 12px;
   font-size: 14px; font-weight: 500; line-height: 20px; color: var(--color-text-primary); transition: background-color 120ms;
@@ -168,7 +160,6 @@
 .sidebar.is-collapsed .sidebar-island { justify-content: center; padding: 0; }
 .sidebar.is-collapsed .sidebar-island__label, .sidebar.is-collapsed .sidebar-island__count { display: none; }
 
-/* ---------- App settings page ---------- */
 .app-settings { position: fixed; inset: 0; z-index: 90; display: flex; background: var(--color-bg-chrome); animation: fade 140ms ease-out; }
 .app-settings__nav { display: flex; flex-direction: column; gap: 2px; width: 260px; flex-shrink: 0; padding: 16px 12px; background: var(--color-bg-sidebar); border-right: 0.5px solid var(--color-border-tertiary); }
 .app-settings__back { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; height: 30px; padding: 0 10px; margin-bottom: 18px; border-radius: var(--radius-full); font-size: 13px; color: var(--color-text-secondary); }
@@ -212,6 +203,5 @@
   .app-settings__nav { width: 180px; }
 }
 
-/* knob contrasts with the "on" track (matters for black bots in dark mode) */
 .toggle.is-on .toggle__knob { background: var(--bot-on-action, #FFFFFF); }
 .cfg-skill-body { margin: 4px 0 10px 34px; padding: 10px 12px; border-radius: 10px; background: var(--color-bg-subtle); font-size: 12px; line-height: 18px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 320px; overflow: auto; }

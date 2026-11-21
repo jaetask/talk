@@ -1,5 +1,3 @@
-// Test doubles: a fake app that speaks MCP over HTTP in this process, and an engine on a scripted model. Nothing
-// here touches Ollama, the real apps or the network beyond loopback.
 import { createModels } from "@earendil-works/pi-ai";
 import { fauxAssistantMessage, fauxProvider, fauxText, fauxToolCall } from "@earendil-works/pi-ai/providers/faux";
 import type { Extension } from "@earendil-works/pi-durable";
@@ -9,7 +7,6 @@ import { Engine, type ChatConfig, type TurnDone, type TurnEvent } from "../src/e
 
 export type FakeTool = { name: string; description: string; inputSchema: object; annotations?: object; result: (args: any) => unknown };
 
-/** A tiny MCP server (initialize, tools/list, tools/call). `calls` records what reached the app. */
 export function fakeApp(tools: FakeTool[]) {
 	const calls: { name: string; args: any; purpose: string | null }[] = [];
 	const server = Bun.serve({
@@ -26,7 +23,7 @@ export function fakeApp(tools: FakeTool[]) {
 				const tool = tools.find((t) => t.name === body.params?.name);
 				calls.push({ name: body.params?.name, args: body.params?.arguments, purpose: req.headers.get("x-talk-call") });
 				if (!tool) return ok({ content: [{ type: "text", text: `no tool ${body.params?.name}` }], isError: true });
-				if (body.params?.arguments?.body === "BREAK") return new Response("the app fell over", { status: 500 }); // a call that breaks mid-way
+				if (body.params?.arguments?.body === "BREAK") return new Response("the app fell over", { status: 500 });
 				const result = tool.result(body.params?.arguments ?? {});
 				return ok({ content: [{ type: "text", text: JSON.stringify(result) }], structuredContent: result });
 			}
@@ -39,7 +36,6 @@ export function fakeApp(tools: FakeTool[]) {
 const READ = { readOnlyHint: true };
 const ticket = (id: string, title: string, status = "todo") => ({ id, title, status, placement: "board", projectId: "p-talk", actorId: "a-cooper", version: 3 });
 
-/** A small Tasks: a catalog, a board, one ticket, and three changes (ordinary, ordinary with signing, dangerous). */
 export function fakeTasks() {
 	return fakeApp([
 		{ name: "catalog-read", description: "List projects, features and actors. Example: {}", inputSchema: { type: "object", properties: {} }, annotations: READ,
@@ -63,7 +59,6 @@ export function fakeTasks() {
 	]);
 }
 
-/** A small Money: bills to look up, and a deletion (dangerous). */
 export function fakeMoney() {
 	return fakeApp([
 		{ name: "list-items", description: "List bills and income. Example: {}", inputSchema: { type: "object", properties: {} }, annotations: READ,
@@ -75,7 +70,6 @@ export function fakeMoney() {
 
 export type Step = string | { call: string; args?: object } | { calls: { call: string; args?: object }[]; text?: string };
 
-/** An engine whose model answers from a script: a string is a spoken answer, `{call}` is a tool call. */
 export async function scripted(script: Step[], apps: { name: string; label: string; url: string }[] = [], storage = "memory", more: { extra?: Extension[]; childOnly?: Extension[]; registry?: Registry; parked?: Parked } = {}) {
 	const faux = fauxProvider({ provider: "faux", models: [{ id: "scripted" }] });
 	faux.setResponses(
@@ -93,7 +87,6 @@ export async function scripted(script: Step[], apps: { name: string; label: stri
 	return { engine, faux, registry };
 }
 
-/** One turn, with its events as plain lines a person can read in an expect file. */
 export async function turn(engine: Engine, sid: string, said: string, config: ChatConfig = {}): Promise<{ done: TurnDone; lines: string[] }> {
 	const lines: string[] = [];
 	const done = await engine.turn(sid, said, (e: TurnEvent) => {
@@ -105,7 +98,6 @@ export async function turn(engine: Engine, sid: string, said: string, config: Ch
 	return { done, lines };
 }
 
-/** A small web: a search engine in SearXNG's shape and a few pages, all on loopback. */
 export function fakeWeb() {
 	const pages: Record<string, string> = {
 		"/pricing": "<html><head><title>Lantern Agent pricing</title><script>var x = '<p>not text</p>';</script></head><body><nav><a href='/'>Home</a></nav>" +

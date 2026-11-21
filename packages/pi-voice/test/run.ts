@@ -1,9 +1,3 @@
-// Expect tests for pi-voice, run with @jaetask/snap: an input file per case, the approved output beside it as
-// name.expect.md. Nothing here needs a GPU, a speech server or a key: audio comes from recorded fixtures, and the
-// speech services are stand-ins in this process.
-//
-//   bun test/run.ts            compare with the approved expect files
-//   bun test/run.ts --update   approve new output (read the diff first)
 import { readFileSync } from "node:fs";
 import { snap, table } from "@jaetask/snap";
 import {
@@ -15,16 +9,14 @@ const here = new URL("./", import.meta.url).pathname;
 const code = (v: unknown) => "```json\n" + JSON.stringify(v, null, 2) + "\n```";
 const fixture = (name: string) => readWav(new Uint8Array(readFileSync(`${here}fixtures/${name}.wav`)));
 
-/** PCM16 at `rate`: a 220 Hz tone for speech, zeros for silence. */
 function pcm(parts: { tone?: number; silence?: number }[], rate: number): Uint8Array {
 	const samples = parts.flatMap((p) => Array.from({ length: Math.round((((p.tone ?? p.silence) as number) * rate) / 1000) }, (_, i) => (p.tone ? Math.round(8000 * Math.sin((2 * Math.PI * 220 * i) / rate)) : 0)));
 	return new Uint8Array(new Int16Array(samples).buffer);
 }
 
-/** Audio as a person would describe it: stretches of sound and silence, in milliseconds. */
 function layout(audio: Uint8Array, rate: number): string {
 	const s = new Int16Array(audio.buffer, audio.byteOffset, audio.byteLength >> 1);
-	const win = Math.round(rate / 100); // 10 ms
+	const win = Math.round(rate / 100);
 	const out: string[] = [];
 	let kind = "";
 	let ms = 0;
@@ -84,7 +76,7 @@ async function speaker(input: string, name: string): Promise<string> {
 		},
 	};
 	const provider = c.phrases ? withPhrases(plain, c.phrases) : plain;
-	if (c.phrases) await new Promise((resolve) => setTimeout(resolve, 20)); // let the phrases render
+	if (c.phrases) await new Promise((resolve) => setTimeout(resolve, 20));
 	const sent: Uint8Array[] = [];
 	const sp = new Speaker(provider, { gapMs: c.gapMs, pronunciations: parsePronunciations(c.pronunciations ?? ""), onAudio: (a) => void sent.push(a) });
 	for (const s of c.say) {
@@ -129,7 +121,7 @@ async function providers(input: string, name: string): Promise<string> {
 
 async function loop(input: string, name: string): Promise<string> {
 	const c = JSON.parse(input);
-	let clock = 0; // milliseconds of microphone audio fed so far: the loop's only clock
+	let clock = 0;
 	const heard = [...(c.heard as string[])];
 	const stt: SttProvider = { name: "fake", transcribe: async () => heard.shift() ?? "" };
 	const tts: TtsProvider = {

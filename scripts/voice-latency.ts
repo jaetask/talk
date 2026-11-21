@@ -1,10 +1,3 @@
-// Measure a Talk's voice loop from outside, the same way for Python Talk (3910) and the new Talk (3911): play a
-// recorded utterance into the hands-free websocket in real time and time what comes back.
-//
-//   bun next/scripts/voice-latency.ts ws://127.0.0.1:3911/ws [runs] [--barge] [--config '{"harness":"talk"}']
-//
-// last word to first audio: from the last loud sample of the utterance being sent to the first audio frame back.
-// barge-in reaction: while the reply plays, from the first loud sample of "stop" being sent to the `barge` message.
 import { readFileSync } from "node:fs";
 import { firstLoudSample, lastLoudSample, readWav } from "../packages/pi-voice/src/index.ts";
 
@@ -15,9 +8,8 @@ const extra = process.argv.includes("--config") ? JSON.parse(process.argv[proces
 const fixtures = new URL("../packages/pi-voice/test/fixtures/", import.meta.url).pathname;
 const wav = (name: string) => readWav(new Uint8Array(readFileSync(`${fixtures}${name}.wav`))).pcm;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const CHUNK = 1024; // 512 samples: 32 ms of 16 kHz PCM16
+const CHUNK = 1024;
 
-/** Send audio at the speed it would be spoken; returns when the sample at `mark` went out. */
 async function play(ws: WebSocket, pcm: Uint8Array, mark: number): Promise<number> {
 	const start = performance.now();
 	let markedAt = 0;
@@ -55,7 +47,7 @@ async function once(): Promise<{ firstAudio?: number; bargeMs?: number; heard: s
 	while (!firstAudioAt && performance.now() < until) await sleep(5);
 	const out: { firstAudio?: number; bargeMs?: number; heard: string; reply: string } = { firstAudio: firstAudioAt ? firstAudioAt - lastWordAt : undefined, heard, reply };
 	if (barge && firstAudioAt) {
-		await sleep(700); // let the reply get going
+		await sleep(700);
 		const stop = wav("stop");
 		const stopAt = await play(ws, stop, firstLoudSample(stop));
 		const wait = performance.now() + 5000;

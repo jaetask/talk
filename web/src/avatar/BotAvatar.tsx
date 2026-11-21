@@ -7,16 +7,13 @@ export function shapeDef(shape: AvatarShape | string): ShapeDef {
   return SHAPES[shape as AvatarShape] ?? SHAPES.blob;
 }
 
-/** Shapes offered in the Create New Bot picker, in the design's order (rows of 5/5/3). */
 export const PICKER_SHAPES: AvatarShape[] = ['blob', 'cloud', 'square', 'sparkle', 'clover', 'heart', 'flower', 'teardrop', 'tablet', 'wedge', 'house', 'star', 'hex'];
 
 interface Props {
   shape: AvatarShape | string;
   color: AvatarColor | string;
-  /** Slot size in px. The drawing overflows the slot by the design's 1.533x ratio. */
   size: number;
   star?: boolean;
-  /** Selected-shape ring (white gap + gray outline following the silhouette). */
   ring?: boolean;
   className?: string;
   title?: string;
@@ -29,7 +26,6 @@ export function BotAvatar({ shape, color, size, star, ring, className, title }: 
   const draw = size * OVERDRAW;
   const off = (draw - size) / 2;
   const fill = palette(color).fill;
-  // Stroke widths in viewBox units: viewBox width maps to `draw` px.
   const vbw = Number(def.viewBox.split(/\s+/)[2]);
   const px = vbw / draw;
   return (

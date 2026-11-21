@@ -1,5 +1,3 @@
-// The web, as an extension: search (Talk's own SearXNG, so only the query leaves the Mac), reading one page, and
-// research, which hands a topic to a subagent that searches and reads, then checks what it wrote against the pages.
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { defineExtension, defineTool, section, type Extension } from "@earendil-works/pi-durable";
@@ -21,7 +19,6 @@ const RESEARCHER =
 
 const text = (t: string) => [{ type: "text" as const, text: t }];
 
-/** A Dojo case's canned result for a web tool, so a case doesn't depend on the live web. */
 async function canned(api: { snapshot: (...a: any[]) => Promise<any>; conversationId: unknown }, context: unknown, name: string): Promise<string | undefined> {
 	const chat = ((await api.snapshot(TalkChat, api.conversationId, context)) as ChatState | undefined) ?? initialChat();
 	if (!chat.fixtures) return undefined;
@@ -29,7 +26,6 @@ async function canned(api: { snapshot: (...a: any[]) => Promise<any>; conversati
 	return chat.fixturesOnly ? JSON.stringify({ error: "Nothing found for that lookup." }) : undefined;
 }
 
-/** The two tools a researcher needs, alone, so a research subagent has nothing else to reach for. */
 function webTools(opts: WebExtensionOptions) {
 	return [
 		defineTool({
@@ -65,7 +61,6 @@ export function researcherExtension(opts: WebExtensionOptions): Extension {
 	return defineExtension({ name: "talk-researcher", tools: webTools(opts), sections: [section("researcher", () => RESEARCHER, { tag: false })] });
 }
 
-/** The pages a research subagent read, in the order it read them, from its transcript. */
 export function sourcesRead(entries: readonly { kind: string; model?: readonly any[] }[]): Source[] {
 	const sources: Source[] = [];
 	for (const entry of entries) {
@@ -75,7 +70,6 @@ export function sourcesRead(entries: readonly { kind: string; model?: readonly a
 			const page = JSON.parse((m.content as { text?: string }[]).map((c) => c.text ?? "").join(""));
 			if (page.url && !sources.some((s) => s.url === page.url)) sources.push({ url: page.url, title: page.title ?? "", text: String(page.text ?? "") });
 		} catch {
-			// not a page
 		}
 	}
 	return sources;

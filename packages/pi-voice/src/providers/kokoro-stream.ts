@@ -1,6 +1,3 @@
-// Kokoro over a speech server's streaming websocket (VoiceStudio's /ws/tts): one connection for a whole reply, a
-// JSON request per sentence, PCM chunks back as they are rendered. It reaches first audio sooner than a request
-// per sentence, which is what a spoken reply is judged on.
 
 import type { SpeakOptions, TtsProvider } from "../tts.ts";
 
@@ -49,7 +46,6 @@ export function kokoroStream(options: KokoroStreamOptions = {}): TtsProvider {
 			};
 			const closed = () => push(new Error("kokoro: the speech server closed the connection"));
 			ws.addEventListener("close", closed);
-			// Stopping mid-sentence: the server has no cancel message, so the connection is dropped and reopened next time.
 			const abort = () => {
 				ws.close();
 				push(null);

@@ -17,7 +17,6 @@ type Item =
 const DIVIDER_GAP = 60 * 60 * 1000;
 const GROUP_GAP = 5 * 60 * 1000;
 
-/** Turns rows into render items: date dividers, grouped bubbles, collapsed tool-call steps, cards, events. */
 function buildItems(rows: Row[]): Item[] {
   const items: Item[] = [];
   let prevTs = 0;
@@ -64,7 +63,7 @@ const Bubble = memo(function Bubble({ row, side, pos }: { row: Row; side: 'left'
           <div className="bubble__cites">
             {b.citations.slice(0, 6).map((c, i) => {
               let host = c.url;
-              try { host = new URL(c.url).hostname.replace(/^www\./, ''); } catch { /* keep */ }
+              try { host = new URL(c.url).hostname.replace(/^www\./, ''); } catch {  }
               return <a key={i} className="cite-chip" href={c.url} target="_blank" rel="noreferrer noopener" title={c.title ?? c.url}>{host}</a>;
             })}
           </div>
@@ -137,12 +136,10 @@ export function Transcript({ bot, rows, live, loaded }: Props) {
   const streamingNow = last?.body.type === 'message' && last.body.role === 'assistant' && !!last.body.streaming;
   const showActivity = (running && !streamingNow) || waiting;
 
-  // Keep pinned to the bottom while new content arrives, unless the user scrolled up.
   useLayoutEffect(() => {
     const el = scrollRef.current;
     if (el && stick.current) el.scrollTop = el.scrollHeight;
   });
-  // Jump to bottom when switching bots.
   useLayoutEffect(() => {
     stick.current = true;
     const el = scrollRef.current;

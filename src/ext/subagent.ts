@@ -1,5 +1,3 @@
-// A child conversation owned by a tool call: Pi Durable's subagent pattern. Aborting the call aborts the child, the
-// parent is busy until the child is done, and a rerun after a crash finds the same child and the same submission.
 import type { Context } from "@earendil-works/chord/context";
 import { AssistantEntry, configure, type AgentChange, type ConversationId, type EntryRecord, type ToolExecutionApi } from "@earendil-works/pi-durable";
 import { initialChat, TalkChat, type ChatState } from "../chat.ts";
@@ -9,7 +7,6 @@ export type ChildResult = {
 	status: "done" | "unanswered";
 	reason?: string;
 	text: string;
-	/** Everything the child committed, oldest first: what it called and what came back. */
 	entries: EntryRecord[];
 };
 
