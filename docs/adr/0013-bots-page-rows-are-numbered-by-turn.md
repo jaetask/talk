@@ -17,8 +17,8 @@ In `src/bots.ts`:
 
 On the page:
 
-- Rows fetched are merged with anything that streamed in during the fetch (`web/src/store.ts`).
-- There is one EventSource for the whole app. It retries on its own, but a server restart can leave it closed, so the page also reconnects with backoff and resyncs on reconnect (`web/src/lib/events.ts`).
+- Rows fetched are merged with anything that streamed in during the fetch (`page/store.ts`).
+- There is one EventSource for the whole app. It retries on its own, but a server restart can leave it closed, so the page also reconnects with backoff and resyncs on reconnect (`page/lib/events.ts`).
 
 ## Consequences
 

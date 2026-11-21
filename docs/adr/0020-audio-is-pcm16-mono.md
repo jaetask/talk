@@ -6,7 +6,7 @@ Microphone audio, speech recognition, voice providers and the browser all need t
 
 ## Decision
 
-`packages/pi-voice/src/audio.ts` uses 16-bit little-endian mono PCM throughout. The microphone sends 16 kHz. Audio to the speaker is at the provider's own rate, 24 kHz for Kokoro. The page's call code sends the microphone as 16 kHz PCM16 and plays the reply as 24 kHz PCM16 (`web/src/voice/call.ts`). A provider's chunk may end in the middle of a sample, so the speaker carries the odd byte over to the next chunk (`packages/pi-voice/src/tts.ts`).
+`packages/pi-voice/src/audio.ts` uses 16-bit little-endian mono PCM throughout. The microphone sends 16 kHz. Audio to the speaker is at the provider's own rate, 24 kHz for Kokoro. The page's call code sends the microphone as 16 kHz PCM16 and plays the reply as 24 kHz PCM16 (`page/voice/call.ts`). A provider's chunk may end in the middle of a sample, so the speaker carries the odd byte over to the next chunk (`packages/pi-voice/src/tts.ts`).
 
 ## Consequences
 
