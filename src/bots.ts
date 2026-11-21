@@ -52,6 +52,11 @@ function voices(): { id: string; name: string }[] {
 	}
 	return VOICES.map(([id, name]) => ({ id, name }));
 }
+const PAINT: Record<string, string> = {
+	black: "#6E6E6E", white: "#959595", brown: "#A06B39", red: "#FB2B3E", orange: "#FD690F", yellow: "#F59312", green: "#14C16F", cyan: "#13B7A2",
+	blue: "#1E86FC", violet: "#8F59F9", magenta: "#F93498", gray: "#959595",
+};
+const paint = (color: string): string => PAINT[color] ?? "#959595";
 const SPEEDS = [0.8, 0.9, 0.94, 1, 1.1, 1.2, 1.3];
 
 const BLOCK = 1000;
@@ -517,6 +522,13 @@ export function createBots(o: BotsOptions) {
 					return json({ name, case: draft.case, saved: `expect/cases/${name}.json`, next: "Run the Dojo with --update, read the new expect file, then commit." });
 				}
 				break;
+			}
+			case "timeline": {
+				const all = await extras();
+				const looks = Object.fromEntries(Object.entries(await chats.looks()).map(([aid, look]) => [aid, { ...look, color: all[aid] ? paint(all[aid].color) : look.color }]));
+				const timeline = await chats.timeline(x.sid);
+				if (!timeline) return json({ session: { id: x.sid, agent_id: id, agent_name: agent.name, agent_color: paint(x.color) }, agents: looks, turns: [] });
+				return json({ ...timeline, session: { ...timeline.session, agent_color: paint(x.color) }, agents: looks });
 			}
 			case "trajectory": {
 				const got = await chats.turns(x.sid);
