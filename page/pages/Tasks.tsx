@@ -1,4 +1,11 @@
-import { ListCard, ListRow, PageBody, StatusDot } from "@jaetask/toolkit/suite";
+import {
+  EmptyLine,
+  ListCard,
+  ListRow,
+  PageControls,
+  StatusDot,
+  WorkPage,
+} from "@jaetask/toolkit/suite";
 import { ToggleGroup, ToggleGroupItem } from "@jaetask/toolkit/ui/toggle-group";
 import { useEffect, useMemo, useState } from "react";
 import { BotAvatarFor } from "../avatar/BotAvatar";
@@ -93,10 +100,11 @@ export function TasksPage() {
     [tasks, filter],
   );
   return (
-    <PageBody
+    <WorkPage
       title="Tasks"
-      line="What each bot is working on, and what waits for your yes."
-      action={
+      help="What each bot is working on, and every change waiting for your yes."
+    >
+      <PageControls>
         <ToggleGroup
           type="single"
           variant="outline"
@@ -109,15 +117,14 @@ export function TasksPage() {
           <ToggleGroupItem value="done">Done</ToggleGroupItem>
           <ToggleGroupItem value="all">All</ToggleGroupItem>
         </ToggleGroup>
-      }
-    >
+      </PageControls>
       {tasks === null ? (
-        <p className="quiet">Loading…</p>
+        <EmptyLine>Loading…</EmptyLine>
       ) : shown.length === 0 ? (
-        <p className="quiet">
+        <EmptyLine>
           {filter === "done" ? "Nothing finished yet." : "Nothing in progress."} A bot's long job,
           or a change waiting for your yes, shows here.
-        </p>
+        </EmptyLine>
       ) : (
         <ListCard as="ul">
           {shown.map((t) => (
@@ -125,6 +132,6 @@ export function TasksPage() {
           ))}
         </ListCard>
       )}
-    </PageBody>
+    </WorkPage>
   );
 }

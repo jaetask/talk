@@ -1,29 +1,19 @@
-import { AppShell, type GroupItem } from "@jaetask/toolkit/suite";
-import {
-  IconChecklist,
-  IconHistory,
-  IconLayoutSidebarRight,
-  IconMessage,
-  IconMessagePlus,
-  IconPlus,
-  IconSettings,
-  IconTimeline,
-} from "@tabler/icons-react";
+import { AppShell, EmptyLine, type GroupItem, WorkPage } from "@jaetask/toolkit/suite";
+import { IconArrowLeft, IconChecklist, IconPlus } from "@tabler/icons-react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { BotAvatarFor } from "./avatar/BotAvatar";
+import { BotHeader } from "./chat/BotHeader";
 import { ChatPage } from "./chat/ChatPage";
-import { IconButton } from "./icons";
-import { api } from "./lib/api";
 import { startEvents } from "./lib/events";
 import { HistoryDialog } from "./modals/History";
 import { SearchDialog } from "./modals/Search";
-import { BotEditPage, BotPage } from "./pages/BotSettings";
-import { NewBotPage } from "./pages/NewBot";
-import { SettingsEditPage, SettingsPage } from "./pages/Settings";
+import { BotPage } from "./pages/BotSettings";
+import { NewBotDialog } from "./pages/NewBot";
+import { SETTINGS, SettingsPage } from "./pages/Settings";
 import { TasksPage, useTasks } from "./pages/Tasks";
 import { botPath, go, parse, type Route, usePath } from "./router";
 import { displayName, primaryBot, useBot, useStore } from "./store";
+import type { Bot } from "./types";
 import { Trajectory } from "./trajectory/Trajectory";
 
 const COLLAPSED = "tk-sidebar-collapsed";
@@ -49,44 +39,25 @@ function routeBot(route: Route): string | null {
   return "botId" in route ? route.botId : null;
 }
 
-function BotTools({ botId, page }: { botId: string; page: "chat" | "trajectory" }) {
-  const detailsOpen = useStore((s) => s.detailsOpen);
-  const setDetailsOpen = useStore((s) => s.setDetailsOpen);
-  const setModal = useStore((s) => s.setModal);
+function BotFrame({
+  bot,
+  page,
+  children,
+}: {
+  bot: Bot;
+  page: "chat" | "trajectory";
+  children: ReactNode;
+}) {
   return (
-    <>
-      <IconButton label="Chat" pressed={page === "chat"} onClick={() => go(botPath(botId))}>
-        <IconMessage size={18} />
-      </IconButton>
-      <IconButton
-        label="Trajectory"
-        pressed={page === "trajectory"}
-        onClick={() => go(`${botPath(botId)}/trajectory`)}
-      >
-        <IconTimeline size={18} />
-      </IconButton>
-      <IconButton label="Earlier conversations" onClick={() => setModal("history")}>
-        <IconHistory size={18} />
-      </IconButton>
-      <IconButton
-        label="New conversation"
-        onClick={() => api.fresh(botId).catch((e) => toast.error((e as Error).message))}
-      >
-        <IconMessagePlus size={18} />
-      </IconButton>
-      <IconButton label="Bot settings" onClick={() => go(`${botPath(botId)}/settings`)}>
-        <IconSettings size={18} />
-      </IconButton>
-      {page === "chat" && (
-        <IconButton
-          label={detailsOpen ? "Hide details" : "Show details"}
-          pressed={detailsOpen}
-          onClick={() => setDetailsOpen(!detailsOpen)}
-        >
-          <IconLayoutSidebarRight size={18} />
-        </IconButton>
-      )}
-    </>
+    <WorkPage
+      wide
+      title={displayName(bot)}
+      icon={<BotAvatarFor bot={bot} size={22} star={bot.isPrimary} />}
+      help={bot.description || undefined}
+      action={<BotHeader bot={bot} page={page} />}
+    >
+      {children}
+    </WorkPage>
   );
 }
 
@@ -174,51 +145,72 @@ export function App() {
     };
   });
 
-  let title: ReactNode = null;
   let body: ReactNode = null;
-  let aside: ReactNode = null;
+  const last = useLastBot(route, bots);
   switch (route.page) {
     case "chat":
-      title = bot ? displayName(bot) : null;
-      body = bot ? <ChatPage bot={bot} /> : null;
-      aside = bot ? <BotTools botId={bot.id} page="chat" /> : null;
+      body = bot ? (
+        <BotFrame bot={bot} page="chat">
+          <ChatPage bot={bot} />
+        </BotFrame>
+      ) : null;
       break;
     case "trajectory":
-      title = bot ? `${displayName(bot)} · Trajectory` : null;
-      body = bot ? <Trajectory bot={bot} /> : null;
-      aside = bot ? <BotTools botId={bot.id} page="trajectory" /> : null;
+      body = bot ? (
+        <BotFrame bot={bot} page="trajectory">
+          <Trajectory bot={bot} />
+        </BotFrame>
+      ) : null;
       break;
     case "bot":
-      title = bot ? displayName(bot) : null;
       body = bot ? <BotPage bot={bot} /> : null;
       break;
-    case "bot-edit":
-      title = bot ? displayName(bot) : null;
-      body = bot ? <BotEditPage bot={bot} section={route.section} /> : null;
-      break;
     case "new-bot":
-      title = "New bot";
-      body = <NewBotPage />;
+      body = last ? (
+        <BotFrame bot={last} page="chat">
+          <ChatPage bot={last} />
+        </BotFrame>
+      ) : null;
       break;
     case "tasks":
-      title = "Tasks";
       body = <TasksPage />;
       break;
     case "settings":
-      title = "Settings";
-      body = <SettingsPage />;
-      break;
-    case "settings-edit":
-      title = "Settings";
-      body = <SettingsEditPage section={route.section} />;
+      body = <SettingsPage section={route.section} />;
       break;
   }
-  if (botId && botsLoaded && !bot) body = <p className="quiet">No such bot.</p>;
+  if (botId && botsLoaded && !bot) body = <EmptyLine>No such bot.</EmptyLine>;
 
-  return (
-    <div className={route.page === "chat" || route.page === "trajectory" ? "talk is-full" : "talk"}>
+  if (route.page === "settings")
+    return (
       <AppShell
         app={{ name: "Talk", href: "/" }}
+        bar={false}
+        nav={[
+          { href: "/", label: "Back to Talk", icon: <IconArrowLeft size={16} aria-hidden /> },
+          ...SETTINGS.map(([id, label, icon]) => ({
+            href: `/settings/${id}`,
+            label,
+            icon,
+            current: route.section === id,
+          })),
+        ]}
+      >
+        {body}
+      </AppShell>
+    );
+
+  return (
+    <div
+      className={
+        route.page === "chat" || route.page === "trajectory" || route.page === "new-bot"
+          ? "talk is-full"
+          : "talk"
+      }
+    >
+      <AppShell
+        app={{ name: "Talk", href: "/" }}
+        bar={false}
         nav={[
           {
             href: "/tasks",
@@ -243,17 +235,25 @@ export function App() {
             current: route.page === "new-bot",
           },
         ]}
-        settingsHref="/settings"
+        settingsHref="/settings/general"
         onSearch={() => setModal("search")}
-        title={title}
-        topAside={aside}
         collapsed={collapsed}
         onCollapsedChange={setCollapsed}
       >
         {body}
       </AppShell>
+      <NewBotDialog open={route.page === "new-bot"} />
       <SearchDialog open={modal === "search"} onClose={() => setModal(null)} />
       {bot && <HistoryDialog bot={bot} open={modal === "history"} onClose={() => setModal(null)} />}
     </div>
   );
+}
+
+function useLastBot(route: Route, bots: Bot[]): Bot | null {
+  const [lastId, setLastId] = useState<string | null>(null);
+  const id = "botId" in route ? route.botId : null;
+  useEffect(() => {
+    if (id) setLastId(id);
+  }, [id]);
+  return bots.find((b) => b.id === lastId) ?? primaryBot(bots) ?? null;
 }

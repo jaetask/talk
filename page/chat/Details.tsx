@@ -1,7 +1,13 @@
-import { EditLink, ListCard, ListRow, PageLink } from "@jaetask/toolkit/suite";
+import { IconAction, ListCard, ListRow, PageLink } from "@jaetask/toolkit/suite";
 import { Button } from "@jaetask/toolkit/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@jaetask/toolkit/ui/tabs";
-import { IconPhoneOff, IconPlayerPlay, IconWaveSine, IconX } from "@tabler/icons-react";
+import {
+  IconPhoneOff,
+  IconPlayerPlay,
+  IconSettings,
+  IconWaveSine,
+  IconX,
+} from "@tabler/icons-react";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { BotAvatarFor } from "../avatar/BotAvatar";
@@ -172,7 +178,13 @@ export function DetailsPanel({ bot }: { bot: Bot }) {
           </Section>
           <Section
             title="Voice chat"
-            action={<EditLink to={`${botPath(bot.id)}/settings/voice`} label="Edit voice" />}
+            action={
+              <IconAction
+                label="Change the voice"
+                icon={<IconSettings />}
+                href={`${botPath(bot.id)}/settings`}
+              />
+            }
           >
             <Voice bot={bot} />
           </Section>

@@ -1,26 +1,46 @@
-import {
-  EditFrame,
-  EditLink,
-  Facts,
-  ListCard,
-  ListRow,
-  PageBody,
-  Panel,
-  Row,
-  useBackTo,
-} from "@jaetask/toolkit/suite";
+import { EmptyLine, ListCard, PageSection, WorkPage } from "@jaetask/toolkit/suite";
 import { ToggleGroup, ToggleGroupItem } from "@jaetask/toolkit/ui/toggle-group";
-import { useEffect, useState } from "react";
+import { IconApps, IconPalette } from "@tabler/icons-react";
+import { type ReactNode, useEffect, useState } from "react";
 import { api } from "../lib/api";
-import { go } from "../router";
 import { useStore } from "../store";
 import { saveTheme, type Theme, useTheme } from "../theme";
 import type { Toolkit } from "../types";
 
+export const SETTINGS: [string, string, ReactNode][] = [
+  ["general", "General", <IconPalette key="general" size={16} aria-hidden />],
+  ["apps", "Apps", <IconApps key="apps" size={16} aria-hidden />],
+];
+
 const THEMES: Record<Theme, string> = { system: "System", light: "Light", dark: "Dark" };
 
-export function SettingsPage() {
+function General() {
   const theme = useTheme();
+  return (
+    <WorkPage title="General" help="How Talk looks in this browser.">
+      <PageSection title="Theme">
+        <div className="setting-line">
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            size="sm"
+            value={theme}
+            onValueChange={(v) => v && saveTheme(v as Theme)}
+            aria-label="Theme"
+          >
+            {(Object.keys(THEMES) as Theme[]).map((t) => (
+              <ToggleGroupItem key={t} value={t}>
+                {THEMES[t]}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+      </PageSection>
+    </WorkPage>
+  );
+}
+
+function Apps() {
   const version = useStore((s) => s.connectionsVersion);
   const [apps, setApps] = useState<Toolkit[] | null>(null);
   // biome-ignore lint/correctness/useExhaustiveDependencies: a connections event bumps the version
@@ -31,78 +51,34 @@ export function SettingsPage() {
       .catch(() => setApps([]));
   }, [version]);
   return (
-    <PageBody title="Settings" line="How Talk looks, and the apps its bots can use.">
-      <Panel
-        id="theme"
-        title="Theme"
-        line="System follows your device's light or dark setting."
-        action={<EditLink to="/settings/theme" />}
-      >
-        <Facts items={[{ label: "Theme", value: THEMES[theme] }]} />
-      </Panel>
-      <Panel
-        id="apps"
-        title="Apps"
-        line="Each app is an MCP server listed in apps.json. Bots ask before anything that deletes, archives or sends."
-      >
+    <WorkPage
+      title="Apps"
+      help="Each app is an MCP server listed in the apps file. Bots ask before anything that deletes, archives, sends or pays."
+    >
+      <PageSection title="Apps" count={apps?.length}>
         {apps === null ? (
-          <p className="quiet">Checking…</p>
+          <EmptyLine>Checking…</EmptyLine>
         ) : apps.length === 0 ? (
-          <p className="quiet">No apps. Add them to apps.json and restart Talk.</p>
+          <EmptyLine>No apps. Add them to the apps file and restart Talk.</EmptyLine>
         ) : (
-          <ListCard as="ul">
+          <ListCard>
             {apps.map((a) => (
-              <ListRow
-                key={a.slug}
-                aside={<span className="quiet">{a.connected ? "Online" : "Offline"}</span>}
-              >
+              <li key={a.slug} className="tk-list-row">
                 <span className="task-text">
                   <span className="task-title">{a.name}</span>
                   {a.description && <span className="task-note">{a.description}</span>}
                 </span>
-              </ListRow>
+                <span className="quiet">{a.connected ? "Online" : "Offline"}</span>
+              </li>
             ))}
           </ListCard>
         )}
-      </Panel>
-    </PageBody>
+      </PageSection>
+    </WorkPage>
   );
 }
 
-function ThemeEdit() {
-  const backTo = useBackTo("/settings");
-  const [theme, setTheme] = useState(useTheme());
-  return (
-    <EditFrame
-      title="Theme"
-      line="Light, dark, or the same as your device."
-      backTo={backTo}
-      onSave={() => {
-        saveTheme(theme);
-        go(backTo);
-      }}
-    >
-      <Row title="Theme" line="System follows your device.">
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          size="sm"
-          value={theme}
-          onValueChange={(v) => v && setTheme(v as Theme)}
-          aria-label="Theme"
-        >
-          {(Object.keys(THEMES) as Theme[]).map((t) => (
-            <ToggleGroupItem key={t} value={t}>
-              {THEMES[t]}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </Row>
-    </EditFrame>
-  );
-}
-
-export function SettingsEditPage({ section }: { section: string }) {
-  if (section === "theme") return <ThemeEdit />;
-  return <p className="quiet">No such settings page.</p>;
+export function SettingsPage({ section }: { section: string }) {
+  if (section === "apps") return <Apps />;
+  return <General />;
 }

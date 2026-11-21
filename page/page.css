@@ -31,7 +31,45 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  padding-bottom: 0;
+}
+.talk.is-full .tk-work {
+  flex: 1;
+  min-height: 0;
+  gap: 12px;
+}
+.setting-row {
+  min-height: 52px;
+}
+.setting-label {
+  flex: none;
+  width: 120px;
+  color: var(--tk-muted);
+  font-size: 13px;
+}
+.setting-value {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.setting-text {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.setting-select {
+  width: 220px;
+}
+.setting-line {
+  padding: 4px 0;
+}
+.look-button {
+  width: 32px;
+  height: 32px;
   padding: 0;
+  border-radius: 999px;
 }
 
 .bot-avatar {
@@ -746,7 +784,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  padding: 8px 24px;
+  padding: 0 0 12px;
   border-bottom: 1px solid var(--tk-line);
 }
 .tj-search {
@@ -759,7 +797,7 @@ body {
 }
 .tj-strip {
   display: flex;
-  padding: 6px 24px 10px 0;
+  padding: 6px 12px 10px 0;
 }
 .tj-lanes {
   flex: none;
@@ -882,7 +920,7 @@ body {
   gap: 12px;
   width: 100%;
   height: auto;
-  padding: 8px 24px 8px 0;
+  padding: 8px 12px 8px 0;
   border-bottom: 1px solid var(--tk-line);
   border-radius: 0;
   font-size: 14px;
@@ -963,4 +1001,8 @@ body {
   .chat-page.has-details .details {
     display: none;
   }
+}
+.look-button .bot-avatar svg {
+  width: 33px;
+  height: 33px;
 }
