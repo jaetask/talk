@@ -1,4 +1,9 @@
-{ "about": "Test mode: a change is accepted and logged, and nothing reaches the app.",
-  "script": [{ "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "Done" } }, "I've added the comment."],
+{
+  "about": "Test mode: a change is accepted and logged, and nothing reaches the app.",
+  "script": [
+    { "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "Done" } },
+    "I've added the comment."
+  ],
   "turns": [{ "say": "Comment done on TLK-1", "config": { "writes": true, "pretend": true } }],
-  "pretendLog": "chat" }
+  "pretendLog": "chat"
+}

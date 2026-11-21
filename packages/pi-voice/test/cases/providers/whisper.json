@@ -1,1 +1,6 @@
-{ "about": "Speech to text: a WAV of the utterance to OpenAI's transcription endpoint, primed with likely words.", "provider": "whisper", "options": {}, "transcribe": { "prompt": "Jae is talking to Cooper. Tasks, Marketing, Money." } }
+{
+  "about": "Speech to text: a WAV of the utterance to OpenAI's transcription endpoint, primed with likely words.",
+  "provider": "whisper",
+  "options": {},
+  "transcribe": { "prompt": "Jae is talking to Cooper. Tasks, Marketing, Money." }
+}

@@ -1,1 +1,10 @@
-{ "stream": ["There are two", " tickets. One is", " in review", ". It costs 3.", "5 dollars.", " Anything else"] }
+{
+  "stream": [
+    "There are two",
+    " tickets. One is",
+    " in review",
+    ". It costs 3.",
+    "5 dollars.",
+    " Anything else"
+  ]
+}

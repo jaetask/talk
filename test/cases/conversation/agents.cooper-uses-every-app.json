@@ -1,3 +1,16 @@
-{ "about": "Cooper may use every connected app.", "apps": ["money"],
-  "script": [{ "calls": [{ "call": "tasks__board-read", "args": {} }, { "call": "money__list-items", "args": {} }] }, "Two tickets and two bills."],
-  "turns": [{ "say": "What's on the board, and what bills do we have?", "config": { "agent": "cooper" } }] }
+{
+  "about": "Cooper may use every connected app.",
+  "apps": ["money"],
+  "script": [
+    {
+      "calls": [
+        { "call": "tasks__board-read", "args": {} },
+        { "call": "money__list-items", "args": {} }
+      ]
+    },
+    "Two tickets and two bills."
+  ],
+  "turns": [
+    { "say": "What's on the board, and what bills do we have?", "config": { "agent": "cooper" } }
+  ]
+}

@@ -1,1 +1,6 @@
-{ "system": "You are Cooper.", "messages": [{ "role": "user", "content": "Hello", "timestamp": 0 }], "status": 500, "chunks": [{ "error": "model not found" }] }
+{
+  "system": "You are Cooper.",
+  "messages": [{ "role": "user", "content": "Hello", "timestamp": 0 }],
+  "status": 500,
+  "chunks": [{ "error": "model not found" }]
+}

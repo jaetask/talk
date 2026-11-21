@@ -1,3 +1,5 @@
-{ "about": "Ordinary conversation is answered directly.",
+{
+  "about": "Ordinary conversation is answered directly.",
   "script": ["Morning, Jae."],
-  "turns": [{ "say": "Morning Cooper" }] }
+  "turns": [{ "say": "Morning Cooper" }]
+}

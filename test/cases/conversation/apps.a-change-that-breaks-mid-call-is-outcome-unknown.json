@@ -1,3 +1,8 @@
-{ "about": "A change that breaks mid-call (the app falls over) is never reported as done, and never sent twice: the model is told the outcome is unknown.",
-  "script": [{ "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "BREAK" } }, "I couldn't confirm the comment was added."],
-  "turns": [{ "say": "Comment on TLK-1", "config": { "writes": true } }] }
+{
+  "about": "A change that breaks mid-call (the app falls over) is never reported as done, and never sent twice: the model is told the outcome is unknown.",
+  "script": [
+    { "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "BREAK" } },
+    "I couldn't confirm the comment was added."
+  ],
+  "turns": [{ "say": "Comment on TLK-1", "config": { "writes": true } }]
+}

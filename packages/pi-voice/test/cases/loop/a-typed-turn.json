@@ -1,1 +1,6 @@
-{ "about": "A typed message takes the same path without speech recognition.", "heard": [], "replies": [["Morning, Jae."]], "steps": [{ "type": "Morning Cooper" }] }
+{
+  "about": "A typed message takes the same path without speech recognition.",
+  "heard": [],
+  "replies": [["Morning, Jae."]],
+  "steps": [{ "type": "Morning Cooper" }]
+}

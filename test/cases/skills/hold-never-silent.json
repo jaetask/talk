@@ -1,1 +1,4 @@
-{ "limit": 300, "hold": [{ "text": "The board has two tickets." }, { "tool": true }, { "end": true }] }
+{
+  "limit": 300,
+  "hold": [{ "text": "The board has two tickets." }, { "tool": true }, { "end": true }]
+}

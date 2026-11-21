@@ -1,115 +1,111 @@
 {
- "system": "You are Cooper.",
- "hidden": [
-  "tasks__ticket-archive",
-  "tasks__ticket-step-add",
-  "money__delete-item"
- ],
- "tools": [
-  {
-   "name": "tasks__ticket-read",
-   "description": "tasks__ticket-read",
-   "parameters": {
-    "type": "object",
-    "properties": {}
-   }
-  },
-  {
-   "name": "tasks__ticket-archive",
-   "description": "tasks__ticket-archive",
-   "parameters": {
-    "type": "object",
-    "properties": {}
-   }
-  },
-  {
-   "name": "tasks__ticket-step-add",
-   "description": "tasks__ticket-step-add",
-   "parameters": {
-    "type": "object",
-    "properties": {}
-   }
-  },
-  {
-   "name": "money__delete-item",
-   "description": "money__delete-item",
-   "parameters": {
-    "type": "object",
-    "properties": {}
-   }
-  },
-  {
-   "name": "tool_search",
-   "description": "tool_search",
-   "parameters": {
-    "type": "object",
-    "properties": {}
-   }
-  }
- ],
- "messages": [
-  {
-   "role": "user",
-   "content": "Archive TLK-2 and add a step",
-   "timestamp": 0
-  },
-  {
-   "role": "assistant",
-   "content": [
+  "system": "You are Cooper.",
+  "hidden": ["tasks__ticket-archive", "tasks__ticket-step-add", "money__delete-item"],
+  "tools": [
     {
-     "type": "toolCall",
-     "id": "c1",
-     "name": "tool_search",
-     "arguments": {
-      "query": "archive"
-     }
-    }
-   ],
-   "api": "x",
-   "provider": "x",
-   "model": "x",
-   "usage": {
-    "input": 0,
-    "output": 0,
-    "cacheRead": 0,
-    "cacheWrite": 0,
-    "totalTokens": 0,
-    "cost": {
-     "input": 0,
-     "output": 0,
-     "cacheRead": 0,
-     "cacheWrite": 0,
-     "total": 0
-    }
-   },
-   "stopReason": "toolUse",
-   "timestamp": 0
-  },
-  {
-   "role": "toolResult",
-   "toolCallId": "c1",
-   "toolName": "tool_search",
-   "content": [
+      "name": "tasks__ticket-read",
+      "description": "tasks__ticket-read",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
     {
-     "type": "text",
-     "text": "{\"found\":[{\"name\":\"tasks__ticket-archive\",\"description\":\"Archive a ticket\"}]}"
+      "name": "tasks__ticket-archive",
+      "description": "tasks__ticket-archive",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "tasks__ticket-step-add",
+      "description": "tasks__ticket-step-add",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "money__delete-item",
+      "description": "money__delete-item",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "tool_search",
+      "description": "tool_search",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
     }
-   ],
-   "isError": false,
-   "timestamp": 0
-  }
- ],
- "chunks": [
-  {
-   "message": {
-    "content": "Okay."
-   }
-  },
-  {
-   "done": true,
-   "done_reason": "stop",
-   "prompt_eval_count": 50,
-   "eval_count": 2
-  }
- ]
+  ],
+  "messages": [
+    {
+      "role": "user",
+      "content": "Archive TLK-2 and add a step",
+      "timestamp": 0
+    },
+    {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "toolCall",
+          "id": "c1",
+          "name": "tool_search",
+          "arguments": {
+            "query": "archive"
+          }
+        }
+      ],
+      "api": "x",
+      "provider": "x",
+      "model": "x",
+      "usage": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 0,
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "total": 0
+        }
+      },
+      "stopReason": "toolUse",
+      "timestamp": 0
+    },
+    {
+      "role": "toolResult",
+      "toolCallId": "c1",
+      "toolName": "tool_search",
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"found\":[{\"name\":\"tasks__ticket-archive\",\"description\":\"Archive a ticket\"}]}"
+        }
+      ],
+      "isError": false,
+      "timestamp": 0
+    }
+  ],
+  "chunks": [
+    {
+      "message": {
+        "content": "Okay."
+      }
+    },
+    {
+      "done": true,
+      "done_reason": "stop",
+      "prompt_eval_count": 50,
+      "eval_count": 2
+    }
+  ]
 }

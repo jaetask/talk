@@ -1,2 +1,4 @@
-{ "pronunciations": "# written=spoken\nTLK=T L K\nMCP=M C P\nJae=Jay",
-  "text": "Jae, TLK-480 is **done**. The MCP server has id 3f2a9c1e-8b7d-4c6a-9e5f-1a2b3c4d5e6f and two tickets:\n- Fix the reader\n- Tidy the sidebar\nIs that all? It costs 3.5 dollars." }
+{
+  "pronunciations": "# written=spoken\nTLK=T L K\nMCP=M C P\nJae=Jay",
+  "text": "Jae, TLK-480 is **done**. The MCP server has id 3f2a9c1e-8b7d-4c6a-9e5f-1a2b3c4d5e6f and two tickets:\n- Fix the reader\n- Tidy the sidebar\nIs that all? It costs 3.5 dollars."
+}

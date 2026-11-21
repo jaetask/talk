@@ -1,1 +1,20 @@
-[{"name":"ticket-read","annotations":{"readOnlyHint":true}},{"name":"ticket-status-change"},{"name":"ticket-comment-add"},{"name":"ticket-comment-delete"},{"name":"ticket-archive"},{"name":"ticket-backlog-send"},{"name":"ticket-tag-remove"},{"name":"feature-archive"},{"name":"project-rename"},{"name":"delete-item"},{"name":"mark-paid"},{"name":"add-item"},{"name":"set-balance"},{"name":"record-publication"},{"name":"start-pipeline-run"},{"name":"save-credential"},{"name":"get-overview","annotations":{"readOnlyHint":true}},{"name":"wipe","annotations":{"destructiveHint":true}}]
+[
+  { "name": "ticket-read", "annotations": { "readOnlyHint": true } },
+  { "name": "ticket-status-change" },
+  { "name": "ticket-comment-add" },
+  { "name": "ticket-comment-delete" },
+  { "name": "ticket-archive" },
+  { "name": "ticket-backlog-send" },
+  { "name": "ticket-tag-remove" },
+  { "name": "feature-archive" },
+  { "name": "project-rename" },
+  { "name": "delete-item" },
+  { "name": "mark-paid" },
+  { "name": "add-item" },
+  { "name": "set-balance" },
+  { "name": "record-publication" },
+  { "name": "start-pipeline-run" },
+  { "name": "save-credential" },
+  { "name": "get-overview", "annotations": { "readOnlyHint": true } },
+  { "name": "wipe", "annotations": { "destructiveHint": true } }
+]

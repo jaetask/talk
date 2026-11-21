@@ -1,36 +1,36 @@
 {
- "about": "An edit outside the scratch copy is never automatic: Jae is asked, and anything but a yes is passed on as a no.",
- "agent": "outside",
- "script": [
-  {
-   "call": "start_coding_session",
-   "args": {
-    "task": "Fix the export button"
-   }
-  },
-  "Claude Code couldn't make the edit."
- ],
- "steps": [
-  {
-   "say": "Get Claude Code to fix the export button"
-  },
-  {
-   "say": "yes"
-  },
-  {
-   "wait": "asked"
-  },
-  {
-   "say": "no"
-  },
-  {
-   "wait": "asked"
-  },
-  {
-   "say": "no"
-  },
-  {
-   "wait": "answered"
-  }
- ]
+  "about": "An edit outside the scratch copy is never automatic: Jae is asked, and anything but a yes is passed on as a no.",
+  "agent": "outside",
+  "script": [
+    {
+      "call": "start_coding_session",
+      "args": {
+        "task": "Fix the export button"
+      }
+    },
+    "Claude Code couldn't make the edit."
+  ],
+  "steps": [
+    {
+      "say": "Get Claude Code to fix the export button"
+    },
+    {
+      "say": "yes"
+    },
+    {
+      "wait": "asked"
+    },
+    {
+      "say": "no"
+    },
+    {
+      "wait": "asked"
+    },
+    {
+      "say": "no"
+    },
+    {
+      "wait": "answered"
+    }
+  ]
 }

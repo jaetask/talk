@@ -1,3 +1,5 @@
-{ "about": "A question that needs a lookup: the model calls the tool, then answers from the result.",
+{
+  "about": "A question that needs a lookup: the model calls the tool, then answers from the result.",
   "script": [{ "call": "tasks__ticket-read", "args": { "id": "TLK-1" } }, "It's being worked on."],
-  "turns": [{ "say": "What's the status of TLK-1?" }] }
+  "turns": [{ "say": "What's the status of TLK-1?" }]
+}

@@ -1,1 +1,7 @@
-{ "about": "A refusal from the service is an error that says who refused and why.", "provider": "xai", "options": { "apiKey": "xai-secret" }, "status": 401, "errorBody": "{\"error\":\"invalid api key\"}" }
+{
+  "about": "A refusal from the service is an error that says who refused and why.",
+  "provider": "xai",
+  "options": { "apiKey": "xai-secret" },
+  "status": 401,
+  "errorBody": "{\"error\":\"invalid api key\"}"
+}

@@ -1,28 +1,28 @@
 {
- "about": "A tool name spelled with underscores in place of hyphens is not a dead end: the error gives the exact name.",
- "script": [
-  {
-   "call": "tasks__ticket_step_add",
-   "args": {
-    "id": "TLK-1",
-    "title": "Test it"
-   }
-  },
-  {
-   "call": "tasks__ticket-step-add",
-   "args": {
-    "id": "TLK-1",
-    "title": "Test it"
-   }
-  },
-  "Added the step."
- ],
- "turns": [
-  {
-   "say": "Add a step to TLK-1: test it",
-   "config": {
-    "writes": true
-   }
-  }
- ]
+  "about": "A tool name spelled with underscores in place of hyphens is not a dead end: the error gives the exact name.",
+  "script": [
+    {
+      "call": "tasks__ticket_step_add",
+      "args": {
+        "id": "TLK-1",
+        "title": "Test it"
+      }
+    },
+    {
+      "call": "tasks__ticket-step-add",
+      "args": {
+        "id": "TLK-1",
+        "title": "Test it"
+      }
+    },
+    "Added the step."
+  ],
+  "turns": [
+    {
+      "say": "Add a step to TLK-1: test it",
+      "config": {
+        "writes": true
+      }
+    }
+  ]
 }

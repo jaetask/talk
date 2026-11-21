@@ -1,3 +1,8 @@
-{ "about": "Anything but a yes to the start question means no session is started.",
-  "script": [{ "call": "start_coding_session", "args": { "task": "Fix the export button" } }, "Okay, I won't start it."],
-  "steps": [{ "say": "Get Claude Code to fix the export button" }, { "say": "not now" }] }
+{
+  "about": "Anything but a yes to the start question means no session is started.",
+  "script": [
+    { "call": "start_coding_session", "args": { "task": "Fix the export button" } },
+    "Okay, I won't start it."
+  ],
+  "steps": [{ "say": "Get Claude Code to fix the export button" }, { "say": "not now" }]
+}

@@ -14,6 +14,6 @@ When SearXNG isn't running the model is told so, and told to say so.
 
 ```json
 {
-  "error": "web search isn't available (Error). Say web search isn't available right now."
+  "error": "web search isn't available (TypeError). Say web search isn't available right now."
 }
 ```

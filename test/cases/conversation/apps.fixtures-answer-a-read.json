@@ -1,3 +1,12 @@
-{ "about": "A Dojo case can give a read tool a canned result, so the case doesn't drift with live data.",
+{
+  "about": "A Dojo case can give a read tool a canned result, so the case doesn't drift with live data.",
   "script": [{ "call": "tasks__ticket-read", "args": { "id": "TLK-1" } }, "It's called Canned."],
-  "turns": [{ "say": "What is TLK-1?", "config": { "fixtures": { "tasks__ticket-read": { "ticket": { "id": "TLK-1", "title": "Canned" } } } } }] }
+  "turns": [
+    {
+      "say": "What is TLK-1?",
+      "config": {
+        "fixtures": { "tasks__ticket-read": { "ticket": { "id": "TLK-1", "title": "Canned" } } }
+      }
+    }
+  ]
+}

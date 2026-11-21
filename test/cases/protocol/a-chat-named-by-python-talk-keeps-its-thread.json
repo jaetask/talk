@@ -1,8 +1,15 @@
-{ "about": "Python Talk names the chat (sid). The same sid on a new connection is the same durable conversation, so a parked dangerous call can be answered from another connection or after a restart.",
-  "script": [{ "call": "tasks__board-read", "args": {} }, { "call": "tool_search", "args": { "query": "archive ticket" } }, { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } }, "Archived."],
+{
+  "about": "Python Talk names the chat (sid). The same sid on a new connection is the same durable conversation, so a parked dangerous call can be answered from another connection or after a restart.",
+  "script": [
+    { "call": "tasks__board-read", "args": {} },
+    { "call": "tool_search", "args": { "query": "archive ticket" } },
+    { "call": "tasks__ticket-archive", "args": { "id": "TLK-2" } },
+    "Archived."
+  ],
   "steps": [
     { "send": { "type": "config", "sid": "42", "agent": "cooper", "writes": true } },
     { "send": { "type": "text", "text": "Archive the sidebar ticket" }, "until": "done" },
     { "send": { "type": "config", "sid": "42", "agent": "cooper", "writes": true } },
     { "send": { "type": "text", "text": "yes" }, "until": "done" }
-  ] }
+  ]
+}

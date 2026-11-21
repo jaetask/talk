@@ -1,3 +1,6 @@
-{ "about": "One turn, hands free: the question is heard, the reply is spoken sentence by sentence as it is written, and the loop goes back to listening. Times are milliseconds of microphone audio.",
-  "heard": ["what's on the TAS board today"], "replies": [["Two tickets", ". One is in ", "review. ", "Anything else?"]],
-  "steps": [{ "fixture": "question" }, { "wait": true }, { "silenceMs": 3000 }] }
+{
+  "about": "One turn, hands free: the question is heard, the reply is spoken sentence by sentence as it is written, and the loop goes back to listening. Times are milliseconds of microphone audio.",
+  "heard": ["what's on the TAS board today"],
+  "replies": [["Two tickets", ". One is in ", "review. ", "Anything else?"]],
+  "steps": [{ "fixture": "question" }, { "wait": true }, { "silenceMs": 3000 }]
+}

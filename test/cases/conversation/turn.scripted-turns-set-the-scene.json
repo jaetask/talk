@@ -1,3 +1,12 @@
-{ "about": "Turns can be written into a chat as given, with no model call, so a test's context is the same on every run. The model then sees them as what was said before.",
+{
+  "about": "Turns can be written into a chat as given, with no model call, so a test's context is the same on every run. The model then sees them as what was said before.",
   "script": ["It was Fix the reader."],
-  "turns": [{ "scripted": [{ "say": "Which ticket is in progress?", "reply": "Fix the reader is in progress." }] }, { "say": "Which one was that again?", "show": ["context"] }] }
+  "turns": [
+    {
+      "scripted": [
+        { "say": "Which ticket is in progress?", "reply": "Fix the reader is in progress." }
+      ]
+    },
+    { "say": "Which one was that again?", "show": ["context"] }
+  ]
+}

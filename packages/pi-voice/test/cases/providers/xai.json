@@ -1,1 +1,6 @@
-{ "about": "xAI text to speech: POST /v1/tts with a Grok voice, PCM back.", "provider": "xai", "options": { "apiKey": "xai-secret", "voice": "ara" }, "speak": { "speed": 1.1 } }
+{
+  "about": "xAI text to speech: POST /v1/tts with a Grok voice, PCM back.",
+  "provider": "xai",
+  "options": { "apiKey": "xai-secret", "voice": "ara" },
+  "speak": { "speed": 1.1 }
+}

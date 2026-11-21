@@ -1,3 +1,21 @@
-{ "about": "Each agent's writes carry its own actor, and each agent has its own chat.",
-  "script": [{ "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "From Maddy" } }, "Done.", { "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "From Cooper" } }, "Done."],
-  "turns": [{ "sid": "maddy-chat", "say": "Comment on TLK-1", "config": { "agent": "maddy", "writes": true } }, { "sid": "cooper-chat", "say": "Comment on TLK-1", "config": { "agent": "cooper", "writes": true } }] }
+{
+  "about": "Each agent's writes carry its own actor, and each agent has its own chat.",
+  "script": [
+    { "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "From Maddy" } },
+    "Done.",
+    { "call": "tasks__ticket-comment-add", "args": { "id": "TLK-1", "body": "From Cooper" } },
+    "Done."
+  ],
+  "turns": [
+    {
+      "sid": "maddy-chat",
+      "say": "Comment on TLK-1",
+      "config": { "agent": "maddy", "writes": true }
+    },
+    {
+      "sid": "cooper-chat",
+      "say": "Comment on TLK-1",
+      "config": { "agent": "cooper", "writes": true }
+    }
+  ]
+}

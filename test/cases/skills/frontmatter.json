@@ -1,2 +1,9 @@
-{ "name": "tasks", "tools": [{ "name": "ticket-read", "kind": "read" }, { "name": "ticket-comment-add", "kind": "write" }, { "name": "ticket-archive", "kind": "danger" }],
-  "text": "---\nname: tasks\ndescription: Jae's tickets.\ntools: ticket-read, ticket-comment-add\ntopics:\n  step, checklist: ticket-step-add, ticket-step-check\n  archive: ticket-archive\n---\nRead a ticket with ticket-read before you talk about it.\n\n## Changing tickets\n- ticket-comment-add adds a comment.\n  Keep it short.\n- ticket-archive archives a ticket.\n\n## Finding tickets\n- ticket-read reads one; ticket-comment-add is for after.\n- Say the title, not the id." }
+{
+  "name": "tasks",
+  "tools": [
+    { "name": "ticket-read", "kind": "read" },
+    { "name": "ticket-comment-add", "kind": "write" },
+    { "name": "ticket-archive", "kind": "danger" }
+  ],
+  "text": "---\nname: tasks\ndescription: Jae's tickets.\ntools: ticket-read, ticket-comment-add\ntopics:\n  step, checklist: ticket-step-add, ticket-step-check\n  archive: ticket-archive\n---\nRead a ticket with ticket-read before you talk about it.\n\n## Changing tickets\n- ticket-comment-add adds a comment.\n  Keep it short.\n- ticket-archive archives a ticket.\n\n## Finding tickets\n- ticket-read reads one; ticket-comment-add is for after.\n- Say the title, not the id."
+}

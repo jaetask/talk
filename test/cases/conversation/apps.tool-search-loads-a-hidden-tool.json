@@ -1,3 +1,9 @@
-{ "about": "A tool the skill doesn't list is found with tool search, then called like any other.",
-  "script": [{ "call": "tool_search", "args": { "query": "checklist step" } }, { "call": "tasks__ticket-step-add", "args": { "id": "TLK-1", "title": "Test it" } }, "Added the step."],
-  "turns": [{ "say": "Add a step to TLK-1: test it", "config": { "writes": true } }] }
+{
+  "about": "A tool the skill doesn't list is found with tool search, then called like any other.",
+  "script": [
+    { "call": "tool_search", "args": { "query": "checklist step" } },
+    { "call": "tasks__ticket-step-add", "args": { "id": "TLK-1", "title": "Test it" } },
+    "Added the step."
+  ],
+  "turns": [{ "say": "Add a step to TLK-1: test it", "config": { "writes": true } }]
+}

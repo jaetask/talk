@@ -10,14 +10,14 @@ import { kokoro, VoiceLoop, whisper } from "pi-voice";
 import { durableBrain } from "pi-voice/durable";
 
 const loop = new VoiceLoop({
-  stt: whisper({ baseUrl: "http://127.0.0.1:3900" }),   // any OpenAI-compatible transcription server
-  tts: kokoro(),                                          // local and free; or xai(), elevenlabs()
+  stt: whisper({ baseUrl: "http://127.0.0.1:3900" }), // any OpenAI-compatible transcription server
+  tts: kokoro(), // local and free; or xai(), elevenlabs()
   brain: durableBrain(harness, await harness.root(context)),
-  onAudio: (pcm) => speaker.write(pcm),                   // PCM16 mono at tts.sampleRate
-  onEvent: (event) => console.log(event),                 // hearing, thinking, heard, sentence, barge, done
+  onAudio: (pcm) => speaker.write(pcm), // PCM16 mono at tts.sampleRate
+  onEvent: (event) => console.log(event), // hearing, thinking, heard, sentence, barge, done
 });
 
-microphone.on("data", (pcm) => loop.feed(pcm));           // PCM16 mono at 16 kHz, any chunk size
+microphone.on("data", (pcm) => loop.feed(pcm)); // PCM16 mono at 16 kHz, any chunk size
 ```
 
 ## What it does
@@ -30,13 +30,13 @@ microphone.on("data", (pcm) => loop.feed(pcm));           // PCM16 mono at 16 kH
 
 ## Voices
 
-| Provider | Call | Needs |
-|---|---|---|
-| Kokoro, local (default) | `kokoro()` | A speech server with OpenAI's `/v1/audio/speech` that can return PCM (Kokoro-FastAPI, VoiceStudio, LocalAI) |
-| Kokoro, streaming | `kokoroStream()` | A speech server with a `/ws/tts` websocket; reaches first audio sooner |
-| xAI (the Grok voices: eve, ara, rex, …) | `xai({ voice: "eve" })` | `XAI_API_KEY` |
-| ElevenLabs | `elevenlabs({ voice: "<voice id>" })` | `ELEVENLABS_API_KEY` |
-| Any OpenAI-compatible server | `openaiSpeech({ baseUrl, model, voice, apiKey })` | |
+| Provider                                | Call                                              | Needs                                                                                                       |
+| --------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Kokoro, local (default)                 | `kokoro()`                                        | A speech server with OpenAI's `/v1/audio/speech` that can return PCM (Kokoro-FastAPI, VoiceStudio, LocalAI) |
+| Kokoro, streaming                       | `kokoroStream()`                                  | A speech server with a `/ws/tts` websocket; reaches first audio sooner                                      |
+| xAI (the Grok voices: eve, ara, rex, …) | `xai({ voice: "eve" })`                           | `XAI_API_KEY`                                                                                               |
+| ElevenLabs                              | `elevenlabs({ voice: "<voice id>" })`             | `ELEVENLABS_API_KEY`                                                                                        |
+| Any OpenAI-compatible server            | `openaiSpeech({ baseUrl, model, voice, apiKey })` |                                                                                                             |
 
 A provider is one function: a sentence in, PCM16 mono chunks out. Writing another is about twenty lines (see `src/providers/`).
 
@@ -47,7 +47,7 @@ The detector takes any `Vad`: a function from a 32 ms frame to a speech probabil
 ## Tests
 
 ```
-bun test/run.ts
+npx tsx test/run.ts
 ```
 
 Expect tests with [`@jaetask/snap`](https://www.npmjs.com/package/@jaetask/snap) over recorded audio fixtures (`test/fixtures/*.wav`): each case is an input file with the approved output beside it. The paid providers have contract tests only: the request each one sends is checked against a stand-in server, and no key is needed.
