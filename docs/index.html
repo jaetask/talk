@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Talk · User guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a long guide. Sticky section rail on top, one column of prose,
+   interactive "bench" panels for the moving parts. */
+:root{
+  --bg:#f4f6f6; --panel:#ffffff; --sunk:#e9eeee; --ink:#13201f; --muted:#56676a; --line:#d3dcdc;
+  --pi:#0d7a6f; --pi-soft:#d6efeb; --an:#8a3f78; --an-soft:#f3e2ef;
+  --ok:#2f7d32; --ok-soft:#e1f1e1; --warn:#a86400; --warn-soft:#fbecd5; --bad:#b3261e; --bad-soft:#f9e0de;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+a{color:var(--pi)}
+code,.mono{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:var(--sunk);padding:.08em .35em;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.prose{max-width:68ch}
+h1,h2,h3{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(2rem,5vw,3.1rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:clamp(1.5rem,3vw,2rem);font-weight:700}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.stack{display:flex;flex-direction:column;gap:14px}
+section{padding-block:56px;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+
+/* nav */
+nav.rail{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--panel);border-bottom:1px solid var(--line)}
+nav.rail .wrap{display:flex;gap:4px;overflow-x:auto;padding-block:8px;scrollbar-width:thin}
+nav.rail a{flex:none;font-size:.86rem;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:6px;white-space:nowrap}
+nav.rail a:hover,nav.rail a:focus-visible{color:var(--ink);background:var(--sunk);outline:none}
+nav.rail a.on{color:var(--pi);background:var(--pi-soft)}
+
+/* hero */
+header.hero{padding-block:48px 40px}
+.hero .stack{gap:18px}
+.lede{font-size:1.15rem;color:var(--muted);max-width:62ch}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{font-family:var(--mono);font-size:.76rem;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--panel)}
+.tag.pi{border-color:var(--pi);color:var(--pi)}
+.tag.an{border-color:var(--an);color:var(--an)}
+.answer{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:8px}
+.answer > div{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.answer > div > b:first-child{display:block;font-family:var(--display);font-size:1.05rem;margin-bottom:4px}
+
+/* bench panels */
+.bench{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:22px}
+.bench-head{display:flex;flex-wrap:wrap;gap:10px;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.btn{font:inherit;font-size:.88rem;font-weight:500;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:6px 12px;border-radius:7px;cursor:pointer}
+.btn:hover{border-color:var(--pi)}
+.btn:focus-visible{outline:2px solid var(--pi);outline-offset:2px}
+.btn.primary{background:var(--pi);border-color:var(--pi);color:var(--panel)}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
+.btn[aria-pressed="true"]{background:var(--pi-soft);border-color:var(--pi);color:var(--pi)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* actor map */
+.layers{display:flex;flex-direction:column;gap:10px}
+.layer{display:grid;grid-template-columns:130px 1fr;gap:10px;align-items:start}
+.layer-name{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding-top:9px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.actor{font:inherit;font-size:.9rem;font-weight:500;background:var(--sunk);border:1px solid transparent;color:var(--ink);padding:7px 11px;border-radius:8px;cursor:pointer;text-align:left}
+.actor:hover{border-color:var(--pi)}
+.actor:focus-visible{outline:2px solid var(--pi);outline-offset:2px}
+.actor.on{background:var(--pi-soft);border-color:var(--pi);color:var(--pi)}
+.actor.rel{border-color:var(--pi);border-style:dashed}
+.detail{margin-top:16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;border-top:1px solid var(--line);padding-top:16px}
+.detail h3{margin-bottom:6px}
+.detail .rels{font-size:.88rem;color:var(--muted)}
+pre{margin:0;background:var(--sunk);border-radius:8px;padding:12px 14px;overflow-x:auto;font-family:var(--mono);font-size:.8rem;line-height:1.55;min-width:0}
+pre .c{color:var(--muted)}
+pre .k{color:var(--pi)}
+.caption{font-size:.82rem;color:var(--muted)}
+
+/* run stepper */
+.run-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:14px}
+.col{background:var(--sunk);border-radius:9px;padding:12px;min-width:0}
+.col h4{margin:0 0 8px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.entry,.task{font-family:var(--mono);font-size:.78rem;padding:6px 8px;border-radius:6px;background:var(--panel);border:1px solid var(--line);margin-bottom:6px;overflow-wrap:anywhere}
+.entry.new,.task.new{border-color:var(--pi);box-shadow:0 0 0 2px var(--pi-soft)}
+.task .st{float:right;font-size:.7rem;padding:0 6px;border-radius:999px;background:var(--sunk);color:var(--muted)}
+.task .st.running{background:var(--pi-soft);color:var(--pi)}
+.task .st.waiting{background:var(--warn-soft);color:var(--warn)}
+.task .st.done{background:var(--ok-soft);color:var(--ok)}
+.task.child{margin-left:16px}
+.stepinfo{margin-top:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+.box{border-radius:9px;padding:12px 14px;font-size:.92rem}
+.box.say{background:var(--pi-soft)}
+.box.crash{background:var(--bad-soft)}
+.box.crash b{color:var(--bad)}
+.box.say b{color:var(--pi)}
+.progress{display:flex;gap:4px}
+.progress span{width:22px;height:5px;border-radius:3px;background:var(--line)}
+.progress span.on{background:var(--pi)}
+.empty{font-size:.8rem;color:var(--muted);font-style:italic}
+
+/* tool lab */
+.lab{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:18px}
+.picker{display:flex;flex-direction:column;gap:8px}
+.picker .btn{text-align:left}
+.picker .btn small{display:block;color:var(--muted);font-size:.76rem;font-weight:400}
+.timeline{list-style:none;margin:0;padding:0;border-left:2px solid var(--line)}
+.timeline li{position:relative;padding:0 0 12px 16px}
+.timeline li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--panel);border:2px solid var(--pi)}
+.timeline li.bad::before{border-color:var(--bad);background:var(--bad-soft)}
+.timeline li.wait::before{border-color:var(--warn);background:var(--warn-soft)}
+.timeline li.ok::before{border-color:var(--ok);background:var(--ok-soft)}
+.timeline b{display:block;font-size:.92rem}
+.timeline span{font-size:.86rem;color:var(--muted)}
+.vs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;margin-top:6px}
+.vs > div{border-radius:9px;padding:12px 14px;min-width:0}
+.vs .pi-side{background:var(--pi-soft)}
+.vs .an-side{background:var(--an-soft)}
+.vs h4{margin:0 0 8px;font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.vs .pi-side h4{color:var(--pi)}
+.vs .an-side h4{color:var(--an)}
+.vs .an-side p{font-size:.9rem}
+
+/* cards */
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin-top:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.card h3{font-size:1.02rem}
+.card p{font-size:.92rem;color:var(--muted)}
+
+/* mapping table */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.filters input{font:inherit;font-size:.9rem;padding:6px 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);min-width:0;flex:1 1 200px}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:.88rem}
+th,td{text-align:left;vertical-align:top;padding:9px 12px;border-bottom:1px solid var(--line)}
+th{font-family:var(--mono);font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--sunk);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+td.an-col code{background:var(--an-soft)}
+td.pi-col code{background:var(--pi-soft)}
+.fit{display:inline-block;font-family:var(--mono);font-size:.72rem;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.fit.better{background:var(--ok-soft);color:var(--ok)}
+.fit.direct{background:var(--pi-soft);color:var(--pi)}
+.fit.adapter{background:var(--warn-soft);color:var(--warn)}
+.fit.gap{background:var(--bad-soft);color:var(--bad)}
+.tally{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 4px}
+.tally .fit{font-size:.8rem;padding:4px 10px}
+
+/* paths */
+.paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:20px}
+.path{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.path.rec{border-color:var(--pi);box-shadow:0 0 0 1px var(--pi)}
+.path .verdict{font-family:var(--mono);font-size:.74rem;text-transform:uppercase;letter-spacing:.06em}
+.path.rec .verdict{color:var(--pi)}
+.path ul{margin:0;padding-left:18px;font-size:.9rem;color:var(--muted)}
+.diagram{display:flex;flex-direction:column;gap:6px;font-family:var(--mono);font-size:.74rem}
+.diagram div{padding:6px 8px;border-radius:6px;text-align:center}
+.d-an{background:var(--an-soft);color:var(--an)}
+.d-pi{background:var(--pi-soft);color:var(--pi)}
+.d-x{background:var(--sunk);color:var(--muted)}
+.d-arrow{color:var(--muted);padding:0!important}
+
+/* verdict */
+.verdict-box{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--pi);border-radius:10px;padding:20px;margin-top:18px}
+.checklist{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:8px}
+.checklist label{display:flex;gap:10px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}
+.checklist input{margin-top:5px;accent-color:var(--pi)}
+.checklist b{display:block;font-size:.95rem}
+.checklist span{font-size:.86rem;color:var(--muted)}
+footer{padding-block:40px;color:var(--muted);font-size:.85rem;border-top:1px solid var(--line)}
+
+/* figures (inline SVG diagrams) */
+figure.fig{margin:22px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.fig-scroll{overflow-x:auto}
+figure.fig svg{display:block;width:100%;height:auto;color:var(--ink)}
+figure.fig figcaption{font-size:.86rem;color:var(--muted);margin-top:10px;max-width:80ch}
+.s-box{fill:var(--panel);stroke:var(--line);stroke-width:1.2}
+.s-sunk{fill:var(--sunk);stroke:var(--line);stroke-width:1}
+.s-pi{fill:var(--pi-soft);stroke:var(--pi);stroke-width:1.4}
+.s-an{fill:var(--an-soft);stroke:var(--an);stroke-width:1.4}
+.s-warn{fill:var(--warn-soft);stroke:var(--warn);stroke-width:1.4}
+.s-bad{fill:var(--bad-soft);stroke:var(--bad);stroke-width:1.4}
+.s-ok{fill:var(--ok-soft);stroke:var(--ok);stroke-width:1.4}
+.s-dash{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:5 4}
+.ln{stroke:currentColor;stroke-width:1.4;fill:none}
+.ln-pi{stroke:var(--pi);stroke-width:1.6;fill:none}
+.ln-an{stroke:var(--an);stroke-width:1.6;fill:none}
+.ln-bad{stroke:var(--bad);stroke-width:1.5;fill:none;stroke-dasharray:6 4}
+.ln-mut{stroke:var(--muted);stroke-width:1.2;fill:none}
+.t{font-family:var(--body);font-size:13px;fill:currentColor}
+.tb{font-family:var(--body);font-size:13px;font-weight:600;fill:currentColor}
+.th{font-family:var(--display);font-size:15px;font-weight:700;fill:currentColor}
+.ts{font-family:var(--body);font-size:11px;fill:var(--muted)}
+.tm{font-family:var(--mono);font-size:11.5px;fill:currentColor}
+.c-pi{fill:var(--pi)} .c-an{fill:var(--an)} .c-bad{fill:var(--bad)} .c-warn{fill:var(--warn)} .c-ok{fill:var(--ok)} .c-mut{fill:var(--muted)}
+.mk{fill:currentColor} .mk-pi{fill:var(--pi)} .mk-an{fill:var(--an)} .mk-bad{fill:var(--bad)} .mk-mut{fill:var(--muted)}
+.plugin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:18px}
+
+@media (max-width:820px){
+  .run-grid{grid-template-columns:minmax(0,1fr)}
+  .stepinfo,.detail,.vs,.lab{grid-template-columns:minmax(0,1fr)}
+  .layer{grid-template-columns:minmax(0,1fr)}
+  .layer-name{padding-top:0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .entry.new,.task.new{animation:pop .35s ease-out}
+  @keyframes pop{from{transform:translateY(-3px);opacity:.6}to{transform:none;opacity:1}}
+}
+</style>
+<style>
+/* glossary, details and rules */
+.gloss{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px;margin-top:14px}
+.term{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:12px 14px;min-width:0}
+.term b{font-family:var(--display);font-size:1rem}
+.term p{font-size:.88rem;color:var(--muted);margin-top:4px}
+.term .avoid{font-size:.78rem;font-style:italic;margin-top:6px}
+.term .ddd{font-family:var(--mono);font-size:.7rem;color:var(--an);float:right;margin-left:8px}
+details.prob{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:0;margin-top:10px}
+details.prob summary{cursor:pointer;padding:13px 16px;font-weight:600;display:flex;gap:10px;align-items:baseline;list-style:none}
+details.prob summary::-webkit-details-marker{display:none}
+details.prob summary::before{content:"+";font-family:var(--mono);color:var(--pi);width:1ch;flex:none}
+details.prob[open] summary::before{content:"–"}
+details.prob summary:focus-visible{outline:2px solid var(--pi);outline-offset:2px;border-radius:10px}
+details.prob .body{padding:0 16px 14px 36px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;font-size:.92rem}
+details.prob .body div b{display:block;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px}
+details.prob .attack b{color:var(--bad)} details.prob .answer2 b{color:var(--ok)}
+.node rect{fill:var(--panel);stroke:var(--line);stroke-width:1.3}
+.node.end rect{fill:var(--sunk)}
+.node.on rect{fill:var(--pi-soft);stroke:var(--pi);stroke-width:2.2}
+.node.on text{fill:var(--pi)}
+.simlog{font-family:var(--mono);font-size:.78rem;background:var(--sunk);border-radius:8px;padding:10px 12px;min-height:44px;overflow-wrap:anywhere}
+.phase{display:grid;grid-template-columns:54px minmax(0,1fr);gap:14px;padding:14px 0;border-top:1px solid var(--line)}
+.phase:first-child{border-top:0}
+.phase .n{font-family:var(--display);font-size:1.6rem;font-weight:700;color:var(--pi);line-height:1}
+.phase h3{margin-bottom:4px}
+.phase p{font-size:.92rem;color:var(--muted)}
+.phase .proof{font-size:.84rem;margin-top:6px;color:var(--ink)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:14px;margin-top:18px}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:18px}
+@media (max-width:820px){details.prob .body{grid-template-columns:minmax(0,1fr);padding-left:16px}}
+</style>
+<style>
+/* board, ticket and inbox panels */
+.fx{display:inline-block;font-family:var(--mono);font-size:.74rem;font-weight:500;padding:1px 8px;border-radius:999px}
+.fx.read{background:var(--ok-soft);color:var(--ok)} .fx.write{background:var(--pi-soft);color:var(--pi)} .fx.danger{background:var(--bad-soft);color:var(--bad)}
+.mock table{min-width:0} .card .fx{width:max-content;justify-self:start;align-self:start}
+.toggles{display:flex;flex-wrap:wrap;gap:8px}
+.kind{display:inline-block;font-family:var(--mono);font-size:.72rem;font-weight:500;padding:1px 8px;border-radius:999px;width:max-content}
+.kind.todo{background:var(--panel);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)} .kind.doing{background:var(--pi-soft);color:var(--pi)} .kind.waiting{background:var(--an-soft);color:var(--an)} .kind.done{background:var(--ok-soft);color:var(--ok)}
+.colrows{display:grid;gap:8px;margin:12px 0}
+.colrow{display:grid;grid-template-columns:minmax(0,1fr) 120px auto auto;gap:8px;align-items:center}
+.colrow input,.colrow select{font:inherit;font-size:.88rem;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);min-width:0}
+.miniboard{display:flex;gap:8px;overflow-x:auto;margin:14px 0;padding-bottom:4px}
+.mcol{flex:0 0 130px;min-height:110px;background:var(--sunk);border-radius:8px;padding:8px;display:flex;flex-direction:column;gap:6px;font-size:.84rem}
+.mticket{background:var(--panel);border:1px solid var(--pi);border-radius:6px;padding:6px 8px;font-size:.8rem;color:var(--ink)}
+.mticket.blocked{border-color:var(--bad)} .mticket small{display:block;color:var(--bad);font-size:.72rem}
+@media (max-width:560px){.colrow{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.tkwrap{display:grid;grid-template-columns:minmax(0,240px) minmax(0,1fr);gap:22px;align-items:start}
+.tcard{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(0,0,0,.05);font-size:.9rem;color:var(--ink)}
+.tcard:focus-visible{outline:2px solid var(--pi)}
+.tcard .lbls{gap:4px} .bar{width:36px;height:6px;border-radius:3px} .bar.pi{background:var(--pi)} .bar.an{background:var(--an)} .bar.bad{background:var(--bad)}
+.tmeta{display:flex;gap:10px;align-items:center;color:var(--muted);font-size:.8rem} .tmeta .av{margin-left:auto}
+.av{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;font-size:.74rem;font-weight:600;flex:none} .av.pi{background:var(--pi-soft);color:var(--pi)} .av.an{background:var(--an-soft);color:var(--an)}
+.tk{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.tktitle{font-size:1.25rem;margin:0} .tkdesc{margin:0;color:var(--ink)}
+.lbls{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.lbl{font-size:.76rem;font-weight:500;padding:2px 10px;border-radius:999px} .lbl.pi{background:var(--pi-soft);color:var(--pi)} .lbl.an{background:var(--an-soft);color:var(--an)} .lbl.bad{background:var(--bad-soft);color:var(--bad)}
+.lbls .btn{padding:2px 10px;font-size:.76rem}
+.thumbs{display:flex;gap:8px} .thumbs svg{width:120px;height:80px}
+.thread{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:12px}
+.cmt{display:flex;flex-direction:column;gap:4px} .cmt p{margin:0 0 0 32px;font-size:.92rem;color:var(--ink)}
+.cmt.reply{margin:8px 0 0 32px;padding-left:12px;border-left:2px solid var(--line)}
+.chead{display:flex;gap:8px;align-items:center;font-size:.88rem}
+.reacts{display:flex;flex-wrap:wrap;gap:6px;margin-left:32px}
+.react{font:inherit;font-size:.78rem;padding:1px 8px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--muted);cursor:pointer}
+.react.on{background:var(--pi-soft);border-color:var(--pi);color:var(--pi)} .react.add{border-style:dashed}
+.act{font-size:.8rem;color:var(--muted);font-family:var(--mono);padding-left:32px}
+.cform{display:flex;gap:8px} .cform input{flex:1;min-width:0;font:inherit;font-size:.9rem;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+@media (max-width:720px){.tkwrap{grid-template-columns:minmax(0,1fr)}}
+.itemcard{font-family:var(--mono);font-size:.8rem;background:var(--sunk);border-radius:8px;padding:10px 12px;overflow-wrap:anywhere;white-space:pre-wrap}
+</style>
+<style>
+/* Diagrams drawn with the visualize skill, in this guide's colours. */
+.v-bg{fill:var(--panel)}
+.v-n{fill:var(--panel);stroke:var(--ink)} .v-s{fill:var(--sunk);stroke:var(--line)}
+.v-f{fill:var(--pi-soft);stroke:var(--pi);stroke-width:1.2} .v-o{fill:var(--panel);stroke:var(--ink);stroke-dasharray:5 4}
+.v-t{fill:var(--ink);font-family:var(--body)} .v-m{fill:var(--muted);font-family:var(--body)} .v-a{fill:var(--pi);font-family:var(--body)}
+.v-e{stroke:var(--ink);stroke-width:1.2;fill:none} .v-ea{stroke:var(--pi);stroke-width:1.4;fill:none}
+.v-hm{fill:var(--ink)} .v-ham{fill:var(--pi)}
+img.shot{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px}
+</style>
+</head>
+<body>
+<nav class="rail" id="rail" aria-label="Sections">
+  <div class="wrap">
+    <a href="#goal">Talk</a><a href="#words">Words</a><a href="#basics">The basics</a><a href="#turn">A turn</a><a href="#gate">Your yes</a><a href="#ask">Bots ask bots</a><a href="#voice">Voice</a><a href="#trajectory">Trajectory</a><a href="#settings">Your bots</a><a href="#run">Running it</a><a href="#faq">Questions</a>
+  </div>
+</nav>
+
+<header class="hero" id="goal">
+  <div class="wrap stack">
+    <span class="eyebrow">User guide · Talk · built on pi and Pi Durable</span>
+    <h1>Talk to your bots, by voice or by typing</h1>
+    <p class="lede">Talk is where you talk to your bots. Each bot has a role, a voice and the apps it may use. Ask a question and it looks the answer up in your apps. Ask for a change and it makes it, and it asks you first before anything that deletes, archives, sends or pays.</p>
+    <div class="answer">
+      <div><b>Voice first</b>Start a voice call and talk. The bot answers one sentence at a time, and stops when you talk over it.</div>
+      <div><b>It asks before a change</b>Deleting, archiving, sending and paying wait for your yes. Anything but a yes stops it.</div>
+      <div><b>Nothing is lost</b>Every chat is saved as it happens. A long job, or a change waiting for your yes, carries on after a restart.</div>
+    </div>
+  </div>
+  <div class="wrap">
+    <figure class="fig"><div class="fig-scroll"><svg viewBox="0 0 940 124" width="100%" style="max-width:940px;height:auto" role="img" aria-label="You talk to a bot. It looks things up in your apps at once, and a change waits for your yes."><defs>
+<marker id="hero-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-hm"/></marker>
+<marker id="hero-ha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-ham"/></marker>
+</defs><rect class="v-bg" x="0" y="0" width="940" height="124"/><rect x="20" y="30" width="170" height="54" rx="6" class="v-s"/><text x="32" y="55" class="v-t" font-size="13" font-weight="700" text-anchor="start">You</text><text x="32" y="72" class="v-m" font-size="11" font-weight="400" text-anchor="start">type or talk</text><path d="M190,55 L246,55" class="v-e" marker-end="url(#hero-h)"/><rect x="250" y="30" width="190" height="54" rx="6" class="v-f"/><text x="262" y="55" class="v-a" font-size="13" font-weight="700" text-anchor="start">A bot</text><text x="262" y="72" class="v-m" font-size="11" font-weight="400" text-anchor="start">a role and a voice</text><path d="M440,55 L496,55" class="v-e" marker-end="url(#hero-h)"/><rect x="500" y="10" width="200" height="40" rx="6" class="v-n"/><text x="512" y="34" class="v-t" font-size="12" font-weight="700" text-anchor="start">Lookups and changes run</text><rect x="500" y="62" width="200" height="54" rx="6" class="v-n"/><text x="512" y="86" class="v-t" font-size="12" font-weight="700" text-anchor="start">Dangerous ones wait for</text><text x="512" y="104" class="v-t" font-size="12" font-weight="700" text-anchor="start">you</text><path d="M700,30 L756,30" class="v-e" marker-end="url(#hero-h)"/><path d="M700,82 L756,82" class="v-e" marker-end="url(#hero-h)"/><rect x="760" y="10" width="160" height="92" rx="6" class="v-s"/><text x="772" y="35" class="v-t" font-size="13" font-weight="700" text-anchor="start">Your apps</text><text x="772" y="52" class="v-m" font-size="11" font-weight="400" text-anchor="start">Tasks, Money, Tables</text><text x="772" y="69" class="v-m" font-size="11" font-weight="400" text-anchor="start">and more, over MCP</text></svg></div>
+      <figcaption>You talk to a bot. It reads your apps at once and makes ordinary changes, and a dangerous change waits for your yes. Your apps are other programs on your machine, such as Tasks or Money, reached over MCP.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<section id="words">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">1 · Words</span>
+      <h2>The words Talk uses</h2>
+      <p>Talk uses a handful of words with one meaning each. They appear on the page, in the bots' answers and in this guide.</p>
+    </div>
+    <div class="bench">
+      <div class="filters"><input id="glossSearch" type="search" placeholder="Filter the words, for example lookup or turn" aria-label="Filter the words"></div>
+      <div class="gloss" id="gloss"></div>
+    </div>
+  </div>
+</section>
+
+<section id="basics">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">2 · The basics</span>
+      <h2>Each bot has one chat on screen</h2>
+      <p>Your bots are in the sidebar. The <b>main bot</b> is first, with a star; the others follow, the most recent first. A dot means a bot is working, and a mark means it has something new or is waiting for you.</p>
+      <p>Pick a bot to open its <b>chat</b>. Your messages are in the bot's colour on the right; its answers are on the left. The <b>details</b> panel on the right shows the apps it can use, whether each is online, and its voice. The icons at the top switch between the chat and its Trajectory, open earlier conversations, start a new one, open the bot's settings, and hide the details.</p>
+    </div>
+    <figure class="fig"><img class="shot" src="img/chat.png" alt="Talk with Cooper open: the sidebar of bots, the chat with one lookup step and the answer, and the details panel with five apps online and the voice settings." loading="lazy">
+      <figcaption>Cooper answered a question about Tasks. "1 step" opens to show the lookup it made.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="turn">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">3 · A turn</span>
+      <h2>A turn is what you said and everything the bot did about it</h2>
+      <p>Each message you send starts a <b>turn</b>. While the bot works, a line under your message says what it is doing and for how long. You can press Stop at any time.</p>
+      <p>Each thing the bot does in an app is a <b>step</b>, shown above its answer. A step is a <b>lookup</b>, which only reads, or a <b>change</b>. When a step returns something worth showing, such as a list of tickets or what a change did, it is shown as a <b>card</b> in the chat.</p>
+    </div>
+    <div class="rules">
+      <div class="card"><span class="kind todo">lookup</span><h3>Reads, runs at once</h3><p>Find tickets, list accounts, read a page from the web.</p></div>
+      <div class="card"><span class="kind doing">change</span><h3>Writes, signed by the bot</h3><p>Add a comment, move a ticket. The app sees which bot made it.</p></div>
+      <div class="card"><span class="kind waiting">dangerous change</span><h3>Waits for your yes</h3><p>Delete, archive, send, pay. A card asks you first.</p></div>
+    </div>
+    <details class="prob"><summary>How Talk tells a lookup from a change</summary><div class="body" style="grid-template-columns:minmax(0,1fr)"><ol class="timeline" style="padding-left:0">
+      <li><b>From the app</b><span>Each app describes its tools over MCP. A tool marked as read-only is a lookup.</span></li>
+      <li class="wait"><b>From the name</b><span>A tool named for deleting, archiving, sending or paying is a dangerous change, whatever else it says.</span></li>
+      <li class="ok"><b>Changes are off until you turn them on</b><span>Talk makes real changes only when the switch file <code>data/writes.enabled</code> exists. Without it, a change is refused and the bot says so.</span></li>
+    </ol></div></details>
+  </div>
+</section>
+
+<section id="gate">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">4 · Your yes</span>
+      <h2>A dangerous change waits for your yes</h2>
+      <p>When a bot wants to delete, archive, send or pay, it stops and shows a card with what it is about to do. <b>Allow</b> runs it. <b>Don't allow</b>, or anything else you say, stops the run, and what you said becomes the next turn. The thing it changes must be one a lookup has just shown, so the bot cannot act on something it guessed.</p>
+    </div>
+    <figure class="fig"><div class="fig-scroll"><svg viewBox="0 0 920 260" width="100%" style="max-width:920px;height:auto" role="img" aria-label="A lookup runs at once. A dangerous change shows a card; only Allow runs it, and anything else stops the run."><defs>
+<marker id="gate-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-hm"/></marker>
+<marker id="gate-ha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-ham"/></marker>
+</defs><rect class="v-bg" x="0" y="0" width="920" height="260"/><rect x="20" y="20" width="220" height="53" rx="6" class="v-s"/><text x="32" y="44" class="v-t" font-size="12" font-weight="700" text-anchor="start">You ask for something</text><text x="32" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">delete ticket TLK-12</text><path d="M240,44 L286,44" class="v-e" marker-end="url(#gate-h)"/><rect x="290" y="20" width="220" height="53" rx="6" class="v-n"/><text x="302" y="44" class="v-t" font-size="12" font-weight="700" text-anchor="start">The bot looks it up</text><text x="302" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">a lookup runs at once</text><path d="M510,44 L556,44" class="v-e" marker-end="url(#gate-h)"/><rect x="560" y="20" width="220" height="53" rx="6" class="v-n"/><text x="572" y="44" class="v-t" font-size="12" font-weight="700" text-anchor="start">A dangerous change?</text><text x="572" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">delete, archive, send, pay</text><path d="M670,68 L670,110" class="v-e" marker-end="url(#gate-h)"/><text x="678" y="94" class="v-m" font-size="10" font-weight="700" text-anchor="start">yes</text><rect x="560" y="114" width="220" height="53" rx="6" class="v-n"/><text x="572" y="138" class="v-t" font-size="12" font-weight="700" text-anchor="start">A card asks you</text><text x="572" y="155" class="v-m" font-size="11" font-weight="400" text-anchor="start">Allow or Don&#x27;t allow</text><path d="M780,44 L840,44 L840,198" class="v-e" marker-end="url(#gate-h)"/><text x="848" y="120" class="v-m" font-size="10" font-weight="700" text-anchor="start">no</text><path d="M670,162 L670,194" class="v-e" marker-end="url(#gate-h)"/><text x="678" y="182" class="v-m" font-size="10" font-weight="700" text-anchor="start">yes</text><rect x="560" y="198" width="340" height="44" rx="6" class="v-f"/><text x="572" y="222" class="v-a" font-size="12" font-weight="700" text-anchor="start">It runs, signed with the bot&#x27;s name</text><path d="M560,138 L246,138" class="v-e" marker-end="url(#gate-h)"/><text x="400" y="130" class="v-m" font-size="10" font-weight="700" text-anchor="middle">anything else</text><rect x="20" y="114" width="222" height="53" rx="6" class="v-s"/><text x="32" y="138" class="v-t" font-size="12" font-weight="700" text-anchor="start">Nothing changes</text><text x="32" y="155" class="v-m" font-size="11" font-weight="400" text-anchor="start">what you said is the next turn</text></svg></div>
+      <figcaption>The card waits as long as you need, through a restart. You can also answer by voice: yes runs it.</figcaption>
+    </figure>
+    <div class="bench">
+      <div class="bench-head"><h3>Try it</h3><span class="caption">Pick what you ask for, then answer the card.</span></div>
+      <div class="row" id="askRow"></div>
+      <div class="box say" id="gateSay"></div>
+      <div class="row" id="answerRow"></div>
+      <div class="simlog" id="gateLog"></div>
+    </div>
+  </div>
+</section>
+
+<section id="ask">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">5 · Bots ask bots</span>
+      <h2>One bot can ask another</h2>
+      <p>A bot can hand part of a job to another bot. The other bot works in its own conversation, with only the apps it may use, and its answer comes back to the bot you asked. You can mention a bot by name, as in "ask Maddy", or let the bot decide.</p>
+    </div>
+    <figure class="fig"><div class="fig-scroll"><svg viewBox="0 0 800 196" width="100%" style="max-width:800px;height:auto" role="img" aria-label="One bot asks another. The other works in its own child conversation with its own apps, and the answer comes back."><defs>
+<marker id="delegate-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-hm"/></marker>
+<marker id="delegate-ha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-ham"/></marker>
+</defs><rect class="v-bg" x="0" y="0" width="800" height="196"/><rect x="20" y="20" width="200" height="53" rx="6" class="v-s"/><text x="32" y="44" class="v-t" font-size="12" font-weight="700" text-anchor="start">You ask Cooper</text><text x="32" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">ask Maddy if she is ok</text><path d="M220,46 L276,46" class="v-e" marker-end="url(#delegate-h)"/><rect x="280" y="20" width="220" height="53" rx="6" class="v-n"/><text x="292" y="44" class="v-t" font-size="12" font-weight="700" text-anchor="start">Cooper asks Maddy</text><text x="292" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">a child conversation</text><path d="M500,46 L556,46" class="v-e" marker-end="url(#delegate-h)"/><rect x="560" y="20" width="220" height="53" rx="6" class="v-n"/><text x="572" y="44" class="v-t" font-size="12" font-weight="700" text-anchor="start">Maddy works</text><text x="572" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">with her own apps only</text><path d="M670,72 L670,100 L390,100 L390,128" class="v-e" marker-end="url(#delegate-h)"/><rect x="280" y="132" width="220" height="53" rx="6" class="v-f"/><text x="292" y="156" class="v-a" font-size="12" font-weight="700" text-anchor="start">Cooper answers you</text><text x="292" y="173" class="v-m" font-size="11" font-weight="400" text-anchor="start">with what Maddy said</text></svg></div>
+      <figcaption>A bot that is asked for help cannot make a dangerous change, because there is nobody there to say yes. It reports back instead.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="voice">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">6 · Voice</span>
+      <h2>Talk to a bot on a voice call</h2>
+      <p>Press the wave button in the message box, or <b>Start voice chat</b> in the details, to start a <b>voice call</b>. A bar above the message box shows the call: who is speaking, how long it has run, and the last thing said. What you say on a call lands in the chat like a typed message.</p>
+      <p>To type with your voice instead, hold the microphone button and speak, or tap it to start and tap again to stop. This is <b>dictation</b>: the words go into the message box for you to send.</p>
+    </div>
+    <figure class="fig"><div class="fig-scroll"><svg viewBox="0 0 760 186" width="100%" style="max-width:760px;height:auto" role="img" aria-label="On a voice call you speak, pause, and hear the reply sentence by sentence. Talk over it and it stops to listen."><defs>
+<marker id="voice-h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-hm"/></marker>
+<marker id="voice-ha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="v-ham"/></marker>
+</defs><rect class="v-bg" x="0" y="0" width="760" height="186"/><rect x="20" y="20" width="190" height="53" rx="6" class="v-s"/><text x="32" y="44" class="v-t" font-size="12" font-weight="700" text-anchor="start">You speak</text><text x="32" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">the microphone is on</text><path d="M210,46 L256,46" class="v-e" marker-end="url(#voice-h)"/><rect x="260" y="20" width="200" height="53" rx="6" class="v-n"/><text x="272" y="44" class="v-t" font-size="12" font-weight="700" text-anchor="start">You pause</text><text x="272" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">the turn is heard</text><path d="M460,46 L506,46" class="v-e" marker-end="url(#voice-h)"/><rect x="510" y="20" width="230" height="53" rx="6" class="v-f"/><text x="522" y="44" class="v-a" font-size="12" font-weight="700" text-anchor="start">The reply is spoken</text><text x="522" y="61" class="v-m" font-size="11" font-weight="400" text-anchor="start">one sentence at a time</text><path d="M625,72 L625,110" class="v-e" marker-end="url(#voice-h)"/><rect x="510" y="114" width="230" height="53" rx="6" class="v-n"/><text x="522" y="138" class="v-t" font-size="12" font-weight="700" text-anchor="start">You talk over it</text><text x="522" y="155" class="v-m" font-size="11" font-weight="400" text-anchor="start">it stops and listens</text><path d="M510,140 L116,140 L116,76" class="v-e" marker-end="url(#voice-h)"/></svg></div>
+      <figcaption>While a lookup runs, the bot can say a short line so the call is not silent.</figcaption>
+    </figure>
+    <figure class="fig"><img class="shot" src="img/voice-edit.png" alt="The Voice edit page: voice, speed and language, with Back, Cancel and Save." loading="lazy">
+      <figcaption>Each bot has its own voice, speed and language. Change them from the details panel with Edit voice.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="trajectory">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">7 · Trajectory</span>
+      <h2>See every step a chat took, with timings</h2>
+      <p>The <b>Trajectory</b> shows a chat as a timeline and a list of steps: what you said, how the model was asked, each lookup and change, and each answer. The strip at the top has a lane each for hearing you, the model, the apps and the voice. Click a bar or a row to see it in full.</p>
+      <p>From a step you can <b>Make test</b>, which saves the turn as a test case, or <b>Clear</b> the turn, which hides it from the chat, exports and tests. The download button saves the whole chat as a log.</p>
+    </div>
+    <figure class="fig"><img class="shot" src="img/trajectory.png" alt="The Trajectory: Duration, Turns and Calls, the usage line, the timeline strip and the list of steps." loading="lazy">
+      <figcaption>Duration shows real time; Turns gives each turn the same width; Calls gives each step its own slot.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="settings">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">8 · Your bots</span>
+      <h2>Make a bot, then shape it</h2>
+      <p><b>New bot</b> at the bottom of the sidebar makes one: a name, a shape and a colour. A bot's settings page shows its look, what it is for, its instructions, its voice and the skills it reads. Each part has its own Edit, which opens a page with Back, Cancel and Save.</p>
+      <p><b>Tasks</b> in the sidebar lists what each bot is working on, and every change waiting for your yes.</p>
+    </div>
+    <figure class="fig"><img class="shot" src="img/bot-settings.png" alt="Cooper's settings page: Look, About and Instructions, each with an Edit button." loading="lazy">
+      <figcaption>Instructions apply from the bot's next turn.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="run">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">9 · Running it</span>
+      <h2>One program, one data folder</h2>
+      <p>Talk runs on your machine with a local model and local speech, so nothing leaves the machine unless you choose a hosted voice. It needs Node 22.19 or later, Ollama with the model, and for voice a speech server with Whisper and Kokoro.</p>
+    </div>
+    <div class="grid3" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))">
+      <pre>npm install
+npm run build:page
+npm start            <span class="c"># http://127.0.0.1:3930</span></pre>
+      <div class="tablewrap"><table style="min-width:0">
+        <thead><tr><th>Setting</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>TALK_PORT</code></td><td>The port, 3930 unless set</td></tr>
+          <tr><td><code>TALK_DATA</code></td><td>Where the chats are saved</td></tr>
+          <tr><td><code>TALK_APPS_FILE</code></td><td>The apps your bots may use</td></tr>
+          <tr><td><code>TALK_MODEL</code></td><td>The model on Ollama</td></tr>
+          <tr><td><code>TALK_TTS</code></td><td>The voice: Kokoro, xAI or ElevenLabs</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="stack prose">
+      <span class="eyebrow">10 · Questions</span>
+      <h2>Questions people ask</h2>
+      <p>The answers to what people ask most. Open any of them.</p>
+    </div>
+    <div id="faqs"></div>
+  </div>
+</section>
+
+<footer><div class="wrap">Talk is built on pi and Pi Durable, with a page made from @jaetask/toolkit.</div></footer>
+
+<script>
+(function () {
+"use strict";
+const $ = (s) => document.querySelector(s);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+
+const WORDS = [["Bot", "A role, a voice and the apps it may use. You talk to it in its chat. In the code a bot is an agent."], ["Main bot", "The bot shown first in the sidebar, with a star. It cannot be deleted while it is the main one."], ["Chat", "A bot's conversation on screen. Starting a new conversation keeps the old one under Earlier conversations."], ["Turn", "What you said, and everything the bot did about it until it answered."], ["Step", "One thing a bot did in an app during a turn: a lookup or a change."], ["Lookup", "A step that only reads. It runs at once."], ["Change", "A step that writes. The app records which bot made it."], ["Dangerous change", "A change that deletes, archives, sends or pays. It waits for your yes."], ["Card", "What a step showed in the chat: a list, a table, sources, what a change did, or a dangerous change waiting for your yes."], ["App", "A program your bots can use, reached over MCP and listed in the apps file."], ["Skill", "A how-to a bot reads when a job calls for it. One file per app in the skills folder."], ["Voice call", "Talking to a bot out loud. It answers one sentence at a time and stops when you talk over it."], ["Dictation", "Speaking into the message box. The words are typed for you to send."], ["Trajectory", "A chat as a timeline and a list of steps, with timings."], ["Task", "A long job a bot is doing, or a dangerous change waiting for your yes. All of them are listed under Tasks."], ["Test mode", "Changes are accepted and logged, never made."]];
+function renderWords(q) {
+  const host = $("#gloss"); host.replaceChildren();
+  WORDS.filter((w) => !q || w.join(" ").toLowerCase().includes(q)).forEach(([t, d]) => {
+    const c = el("div", "term"); c.append(el("b", "", t), el("p", "", d)); host.append(c);
+  });
+  if (!host.children.length) host.append(el("p", "empty", "No word matches. Clear the filter to see all of them."));
+}
+$("#glossSearch").addEventListener("input", (e) => renderWords(e.target.value.trim().toLowerCase())); renderWords("");
+
+const ASKS = {
+  lookup: { label: "Which tickets are open?", step: "Tasks · ticket-find", kind: "lookup" },
+  change: { label: "Comment on TLK-12", step: "Tasks · comment-add", kind: "change" },
+  danger: { label: "Delete TLK-12", step: "Tasks · ticket-delete", kind: "danger" },
+};
+let asked = null, log = [];
+function renderGate() {
+  const ar = $("#askRow"); ar.replaceChildren();
+  for (const [k, a] of Object.entries(ASKS)) { const b = el("button", "btn", a.label); b.type = "button"; b.setAttribute("aria-pressed", String(asked === k)); b.addEventListener("click", () => ask(k)); ar.append(b); }
+  const an = $("#answerRow"); an.replaceChildren();
+  if (asked === "danger" && !log.some((l) => l.done)) {
+    for (const [label, yes, cls] of [["Allow", true, "btn primary"], ["Don't allow", false, "btn"], ["Say: wait, which one?", false, "btn"]]) {
+      const b = el("button", cls, label); b.type = "button"; b.addEventListener("click", () => answer(yes, label)); an.append(b);
+    }
+  }
+  const lg = $("#gateLog"); lg.replaceChildren(); log.forEach((l) => lg.append(el("div", "", l.text)));
+}
+function ask(k) {
+  asked = k; log = [{ text: "You: " + ASKS[k].label }];
+  const a = ASKS[k];
+  if (a.kind === "lookup") { log.push({ text: "Step: " + a.step + " (lookup, ran at once)" }, { text: "Bot: three tickets are open.", done: true }); $("#gateSay").textContent = "A lookup only reads, so it runs at once."; }
+  else if (a.kind === "change") { log.push({ text: "Step: " + a.step + " (change, signed by the bot)" }, { text: "Bot: done, I added the comment.", done: true }); $("#gateSay").textContent = "An ordinary change runs, and the app records which bot made it."; }
+  else { log.push({ text: "Step: Tasks · ticket-read (lookup)" }, { text: "Card: Delete TLK-12 \"Voice notes\"? Allow / Don't allow" }); $("#gateSay").textContent = "A delete is a dangerous change. The bot looked the ticket up first, and now it waits for you."; }
+  renderGate();
+}
+function answer(yes, label) {
+  log.push({ text: "You: " + label });
+  if (yes) { log.push({ text: "Step: " + ASKS.danger.step + " (allowed by you, then run)" }, { text: "Bot: TLK-12 is deleted.", done: true }); $("#gateSay").textContent = "Only Allow, or a yes on a call, runs it."; }
+  else { log.push({ text: "Nothing was changed. What you said is the next turn.", done: true }); $("#gateSay").textContent = "Anything but a yes stops the run."; }
+  renderGate();
+}
+ask("danger");
+
+const FAQ = [
+  ["Can a bot delete something without asking?", "No. Deleting, archiving, sending and paying always wait for your yes, and the thing being changed must be one a lookup has just shown."],
+  ["I said no. Why did it not try again?", "Anything but a yes ends the run. What you said instead is treated as your next message, so you can say what you meant."],
+  ["What happens if Talk restarts in the middle of a turn?", "The chat carries on where it was. A change waiting for your yes is still waiting, and a long job is still running."],
+  ["A change broke halfway. Did it happen?", "Talk never sends a change twice. If the app stopped answering in the middle, the bot says the outcome is unknown, so you can check."],
+  ["Why are changes refused?", "Changes are off until the switch file data/writes.enabled exists. Lookups work without it."],
+  ["Which apps can a bot use?", "The apps listed in the apps file, each an MCP server. A bot's role says which of them it may use."],
+  ["Does anything leave my machine?", "Not with a local model and local speech. A hosted voice, such as xAI or ElevenLabs, sends the reply text to that service."],
+  ["How do I get my old conversations back?", "Use the history icon at the top of a chat. Starting a new conversation never deletes the old one."],
+];
+const host = $("#faqs");
+FAQ.forEach(([q, a], i) => { const d = el("details", "prob"); if (i === 0) d.open = true; const s = el("summary", "", q); const b = el("div", "body"); b.style.gridTemplateColumns = "minmax(0,1fr)"; b.append(el("div", "answer2", a)); d.append(s, b); host.append(d); });
+
+const links = [...document.querySelectorAll("#rail a")];
+const secs = links.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+function onScroll() { let c = secs[0]; const y = window.scrollY + 120; secs.forEach((s) => { if (s.offsetTop <= y) c = s; }); links.forEach((a) => a.classList.toggle("on", a.getAttribute("href") === "#" + c.id)); }
+window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+})();
+</script>
+</body>
+</html>

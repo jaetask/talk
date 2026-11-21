@@ -1,4 +1,4 @@
-# 9. Ollama is called through its own chat API, not the OpenAI-compatible route
+# 9. Ollama is called through its own chat API
 
 ## Context
 

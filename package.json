@@ -21,11 +21,12 @@
     "typecheck": "tsc --noEmit && tsc -p page --noEmit && node .agents/guardrails/check-comments.mjs",
     "test": "tsx test/run.ts && tsx packages/pi-voice/test/run.ts",
     "test:update": "tsx test/run.ts --update && tsx packages/pi-voice/test/run.ts --update",
-    "lint": "biome lint . && npm run check:toolkit",
+    "lint": "biome lint . && npm run check:docs && npm run check:toolkit",
     "check:toolkit": "toolkit-guard page",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "prepare": "git config core.hooksPath .agents/guardrails/hooks || true"
+    "prepare": "git config core.hooksPath .agents/guardrails/hooks || true",
+    "check:docs": "node scripts/check-docs.mjs"
   },
   "dependencies": {
     "@earendil-works/chord": "1.5.2",
