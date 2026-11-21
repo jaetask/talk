@@ -1,5 +1,3 @@
-// What every chat has, whatever its agent: who is speaking, which apps are connected, the rules every agent
-// inherits, reading a skill, and ending the voice call.
 import type { Context } from "@earendil-works/chord/context";
 import { defineExtension, defineTool, section, type Extension } from "@earendil-works/pi-durable";
 import { obj, str } from "@earendil-works/pi-schema";
@@ -13,7 +11,6 @@ export const READ_SKILL = "read_skill";
 export const STAY_QUIET = "talk__stay-quiet";
 export const TOOL_SEARCH = "tool_search";
 
-/** BM25-style ranking of hidden tools over their name, description, argument names and the skill's topic words. */
 export function searchTools<T extends { name: string; text: string }>(docs: T[], query: string, k = 5): T[] {
 	const toks = (t: string): string[] => t.toLowerCase().match(/[a-z0-9]+/g) ?? [];
 	const q = new Set(toks(query));

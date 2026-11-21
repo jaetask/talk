@@ -1,5 +1,3 @@
-// The dangerous-action gate: a delete, payment, archive or send must name one item a lookup actually returned.
-// Pure functions, ported from Python Talk's server/tools/gate.py.
 import { verbAndThing, type Json } from "./classify.ts";
 
 export type SeenItem = { app: string; id: string; name: string; record: Record<string, Json>; source: string };
@@ -7,7 +5,6 @@ export type SeenItem = { app: string; id: string; name: string; record: Record<s
 const NAME_KEYS = ["name", "title", "label", "summary", "project", "feature"];
 const IGNORED_ARGS = new Set(["by", "requestId", "expectedVersion", "note", "reason"]);
 
-/** The JSON value in a tool result, tolerating a note or text before it. */
 export function parseResult(result: unknown): Json | undefined {
 	if (typeof result !== "string") return result as Json;
 	for (let i = 0; i < result.length; i++) {
@@ -41,7 +38,6 @@ const nameOf = (r: Record<string, Json>): string | undefined => {
 	return undefined;
 };
 
-/** Every object in the result with an id and a human name: the things a dangerous call may target. */
 export function collectItems(app: string, result: unknown, source = ""): SeenItem[] {
 	const found: SeenItem[] = [];
 	const walk = (v: Json | undefined) => {
@@ -59,7 +55,6 @@ export function collectItems(app: string, result: unknown, source = ""): SeenIte
 const norm = (v: unknown): string => String(v).replace(/\s+/g, " ").trim().toLowerCase();
 const scalar = (v: unknown): v is string | number => typeof v === "string" || typeof v === "number";
 
-/** The one seen item the arguments point at, or why there isn't one. */
 export function resolve(app: string, args: Record<string, Json>, seen: SeenItem[], tool = ""): { item?: SeenItem; why?: string } {
 	const values = new Set(
 		Object.entries(args ?? {}).filter(([k, v]) => !IGNORED_ARGS.has(k) && scalar(v) && String(v).trim()).map(([, v]) => norm(v)),
@@ -86,7 +81,6 @@ export function resolve(app: string, args: Record<string, Json>, seen: SeenItem[
 	return { item };
 }
 
-/** What the model sees when a dangerous call can't be tied to one real item. */
 export function refusal(tool: string, why: string): string {
 	const hint = why.startsWith("mismatch")
 		? `${why.split(": ").slice(1).join(": ")}. Use the item's own values.`
@@ -103,7 +97,6 @@ export function refusal(tool: string, why: string): string {
 
 const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
 
-/** One short confirmation naming the item by its human name, written by the server and never by the model. */
 export function question(appLabel: string, tool: string, item: SeenItem): string {
 	const [verb, noun] = verbAndThing(tool);
 	if (tool === "mark-paid") return `Mark ${item.name} as paid in ${appLabel}?`;
@@ -113,5 +106,4 @@ export function question(appLabel: string, tool: string, item: SeenItem): string
 	return `${cap(tool.replace(/-/g, " "))}: ${item.name} in ${appLabel}?`;
 }
 
-/** An explicit yes to the one confirmation question. Agreeing in conversation is not approval. */
 export const YES = /^\W*(yes|yeah|yep|yup|sure|ok|okay|go ahead|do it|please do|confirm(ed)?|correct|that'?s right|absolutely|definitely)\b/i;

@@ -1,5 +1,3 @@
-// Short tool results for the model: Tasks results as compact lines with names instead of ids, other results trimmed,
-// long numbers masked. Ported from Python Talk's server/apps/compact.py.
 import type { Json, JsonObject } from "./classify.ts";
 
 const STATUS_WORDS: Record<string, string> = { todo: "To do", doing: "Doing", review: "Review", done: "Done", canceled: "Cancelled" };
@@ -10,7 +8,6 @@ const DROP_KEYS = new Set([
 
 type Entity = { id: string; kind?: string; name?: string; archived?: boolean; ticketPrefix?: string; projectId?: string; description?: string };
 
-/** id to name lookups from Tasks' catalog, so results say names instead of UUIDs. */
 export class Catalog {
 	readonly entities: Entity[];
 	private names = new Map<string, string>();
@@ -24,10 +21,6 @@ export class Catalog {
 	actors(): Entity[] {
 		return this.entities.filter((e) => e.kind === "actor" && !e.archived);
 	}
-	/**
-	 * What the prompt says about Tasks' names: how projects are written (so a misheard name can be put right) and who
-	 * owns tickets. The list is a spelling aid for tool arguments; what a project holds is always looked up.
-	 */
 	promptBlock(): string {
 		if (!this.entities.length) return "";
 		const projects = this.entities.filter((e) => e.kind === "project" && !e.archived).map((p) => `${p.name} (${p.ticketPrefix || "?"}-…)`);
@@ -66,7 +59,6 @@ function ticketLine(t: Record<string, any>, cat: Catalog): JsonObject {
 	});
 }
 
-/** Tickets as the chat's card shows them: every one of a list (up to 200), not the 40 the model gets. */
 export function displayTasks(s: Record<string, any> | undefined, cat: Catalog): JsonObject | undefined {
 	if (Array.isArray(s?.tickets)) return { total: s.total ?? s.tickets.length, tickets: s.tickets.slice(0, 200).map((t: any) => ticketLine(t, cat)) };
 	if (s?.ticket && typeof s.ticket === "object") return { ticket: ticketLine(s.ticket, cat) };
@@ -130,7 +122,6 @@ export function compactTasks(tool: string, s: Record<string, any> | undefined, t
 			return JSON.stringify(out);
 		}
 	} catch {
-		// fall through to the generic shape
 	}
 	return compactGeneric(Object.keys(s).length ? (s as Json) : maybeJson(text));
 }
@@ -156,6 +147,5 @@ function trim(o: Json, depth = 0): Json {
 export const compactGeneric = (o: Json): string => JSON.stringify(trim(o)).slice(0, 4000);
 export const displayGeneric = (o: Json): string => JSON.stringify(trim(o));
 
-/** Hide account or card-like numbers (8 or more digits, spaced or dashed too) except the last four digits. */
 export const maskNumbers = (text: string): string =>
 	text.replace(/(?<!\d)(?!\d{4}-\d\d-\d\d(?!\d))\d(?:[ -]?\d){7,}(?!\d)/g, (m) => `••••${m.replace(/\D/g, "").slice(-4)}`);

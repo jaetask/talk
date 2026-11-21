@@ -28,7 +28,6 @@ export function BotSettingsModal() {
   useEffect(() => { reload(); }, [reload, memVersion]);
   useEffect(() => { if (target) useStore.getState().loadRoutines(target.botId).catch(() => {}); }, [target?.botId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Bot deleted while open (or bad id): close.
   useEffect(() => { if (target && !bot && useStore.getState().bots.length) close(); }, [bot, target, close]);
   if (!target || !bot) return null;
 
@@ -65,7 +64,6 @@ export function BotSettingsModal() {
   );
 }
 
-// ---------------------------------------------------------------------------
 
 type Draft = Pick<Bot, 'name' | 'label' | 'description' | 'instructions' | 'avatarShape' | 'avatarColor' | 'effort' | 'mode'>;
 const draftOf = (b: Bot): Draft => ({ name: b.name, label: b.label, description: b.description, instructions: b.instructions, avatarShape: b.avatarShape, avatarColor: b.avatarColor, effort: b.effort, mode: b.mode });
@@ -225,7 +223,6 @@ function LookPicker({ shape, color, onShape, onColor }: { shape: AvatarShape; co
   );
 }
 
-// ---------------------------------------------------------------------------
 
 function SkillsTab({ bot, skills }: { bot: Bot; skills: Skill[] | undefined }) {
   const [open, setOpen] = useState<string | null>(null);

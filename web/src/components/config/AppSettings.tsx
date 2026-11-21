@@ -13,7 +13,6 @@ const SECTIONS: { id: AppSection; label: string }[] = [
   { id: 'apps', label: 'Apps' },
 ];
 
-/** Full-window settings page, opened from the account menu. */
 export function AppSettings() {
   const section = useConfigUI((s) => s.appSettings);
   const close = useConfigUI((s) => s.closeAppSettings);
@@ -56,7 +55,6 @@ function PageHead({ title, sub }: { title: string; sub?: string }) {
   );
 }
 
-// ---------------------------------------------------------------------------
 
 function ThemeTile({ value, label, current, onPick }: { value: Theme; label: string; current: Theme; onPick: (t: Theme) => void }) {
   return (
@@ -89,7 +87,6 @@ function GeneralSection() {
   );
 }
 
-// ---------------------------------------------------------------------------
 
 function AppsSection() {
   const version = useStore((s) => s.connectionsVersion);

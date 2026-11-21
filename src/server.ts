@@ -1,7 +1,3 @@
-// Talk on pi + Pi Durable, served on 127.0.0.1:3911 beside Python Talk on 3910: the page (the same ui/ build), its
-// HTTP API and the websocket. The websocket speaks Python Talk's own
-// protocol (config, text, microphone audio in; token, tool, state, audio, done out), so the same page, the same Dojo
-// cases and Python Talk's harness picker work against either Talk.
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import type { ServerWebSocket } from "bun";
@@ -23,19 +19,16 @@ import { ASR_VOCAB, DEFAULT_GAP_MS, DEFAULT_SPEED, FILLERS, fixHeard, pronunciat
 type Socket = {
 	cfg: Record<string, any>; sid: string; agent: string; busy: Promise<unknown>;
 	heard?: { sid: string; stop: () => void }; voice?: { key: string; loop: VoiceLoop }; mic?: Promise<unknown>;
-	/** When the audio already sent will have finished playing at the page's end (ms, performance.now). */
 	playUntil: number;
 	reader?: { stop: () => Promise<void> };
 };
 
 const BRAIN_ALIASES = new Set(["smart", "fast", "gemma", "default"]);
-const READ_AHEAD_MS = 1500; // how much audio the reader keeps queued at the page; the position follows what is heard
+const READ_AHEAD_MS = 1500;
 
 export type ServeOptions = {
 	filesDir?: string; uiDist?: string; casesDir?: string;
-	/** The speech services; tests give stand-ins. */
 	tts?: (provider: string) => TtsProvider; stt?: () => SttProvider;
-	/** The settings of a turn typed on the bots page (tests run them in test mode). */
 	botConfig?: (agent: string) => ChatConfig;
 };
 
@@ -57,7 +50,6 @@ export async function start(port = PORT) {
 	return { server, engine, registry };
 }
 
-/** The HTTP and websocket front of an engine. Tests serve a scripted engine on port 0. */
 export function serve(engine: Engine, port: number, options: ServeOptions = {}) {
 	const registry = engine.options.registry;
 	const chats = new Chats(engine);
@@ -70,9 +62,8 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		const model = typeof cfg.model === "string" && cfg.model ? cfg.model : typeof cfg.brain === "string" && !BRAIN_ALIASES.has(cfg.brain) && cfg.brain.includes(":") ? cfg.brain : undefined;
 		return {
 			agent: cfg.agent,
-			persona: cfg.personality ?? undefined, // a case may name a personality; with an agent, the agent's own role stands unless overridden
+			persona: cfg.personality ?? undefined,
 			voice: cfg.voice,
-			// Real changes need the switch file; test mode (pretend) only needs the case to ask for them.
 			writes: pretend ? Boolean(cfg.writes) : cfg.writes !== false && writesEnabled(),
 			pretend,
 			onCall: Boolean(cfg.duplex),
@@ -100,7 +91,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		type: "done", call_end: done?.endCall ?? false, timings: round({ ...(done?.timings ?? {}), ...voice }), model: done?.model ?? engine.options.model, harness: "pi-durable", stop: done?.stop ?? "answered", usage: done?.usage ?? { input: 0, output: 0, cost: 0 },
 	});
 
-	/** What a chat says unasked (a long job's question, or its report) goes to whoever has it open. */
 	function hear(ws: ServerWebSocket<Socket>, sid: string) {
 		const s = ws.data;
 		if (s.heard?.sid === sid) return;
@@ -118,9 +108,7 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		return { provider, voice: voiceFor(provider, s.cfg.voice ?? (await engine.agents.get(s.agent))?.voice) };
 	};
 
-	// ── the reader: a file read aloud beside the chat ──
 
-	/** Read the open file aloud from a section, one section after another, paced to what is being heard. */
 	async function startReading(ws: ServerWebSocket<Socket>, sid: string, index: number, sentence = 0): Promise<void> {
 		const s = ws.data;
 		await s.reader?.stop();
@@ -143,7 +131,7 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		const queued = () => s.playUntil - performance.now();
 		const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 		let at = { index, sentence };
-		let lastCue = 0; // when the last sentence's cue fires; a section or end shows after it
+		let lastCue = 0;
 		const afterCues = async () => {
 			while (performance.now() < lastCue + 1 && !stopped) await sleep(10);
 		};
@@ -152,7 +140,7 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 			s.playUntil = 0;
 			await chats.setReading(sid, { index, sentence, playing: true });
 			for (let i = Math.max(0, index); i < file.sections.length && !stopped; i++) {
-				while (queued() > 300 && !stopped) await sleep(50); // a new section shows once the last one has been heard
+				while (queued() > 300 && !stopped) await sleep(50);
 				await afterCues();
 				if (stopped) break;
 				at = { index: i, sentence: 0 };
@@ -173,7 +161,7 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 			while (queued() > 0 && !stopped) await sleep(50);
 			await afterCues();
 			if (!stopped) {
-				stopped = true; // read to the end: a later stop has nothing to do
+				stopped = true;
 				await chats.setReading(sid, { playing: false });
 				send(ws, { type: "article", slug: file.slug, index: at.index, playing: false, finished: true });
 				if (s.reader?.stop === stop) s.reader = undefined;
@@ -185,7 +173,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 				speaker.stop();
 				for (const c of cues) clearTimeout(c);
 				await done;
-				// Stopped mid-way: carry on later from the sentence that was being heard.
 				const now = heard.filter((h) => h.at <= performance.now()).at(-1) ?? heard[0];
 				if (now) at = { index: now.index, sentence: now.sentence };
 				s.playUntil = 0;
@@ -196,7 +183,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		s.reader = { stop };
 	}
 
-	/** After a turn: do what a reader tool asked for, now that the reply has been spoken. */
 	async function afterTurn(ws: ServerWebSocket<Socket>, sid: string): Promise<void> {
 		const action = await chats.takeReaderAction(sid);
 		if (!action) return;
@@ -208,10 +194,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		} else await startReading(ws, sid, action.index, action.sentence);
 	}
 
-	/**
-	 * The socket's voice loop: pi-voice in front of the engine. What is heard (or typed, when the page asks for a
-	 * spoken reply) goes to the chat's conversation; the reply comes back as tokens and as audio.
-	 */
 	async function voiceLoop(ws: ServerWebSocket<Socket>): Promise<VoiceLoop> {
 		const s = ws.data;
 		const { provider, voice } = await voiceOf(s);
@@ -225,11 +207,11 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 				const [sid, cfg] = [s.sid, chatConfig(s.cfg)];
 				spokenFor = sid;
 				hear(ws, sid);
-				await s.reader?.stop(); // a turn stops the reading; "carry on" picks it up where it was heard
+				await s.reader?.stop();
 				const queue: (string | { aside: string } | null)[] = [];
 				let wake: () => void = () => {};
 				const forward = relay(ws);
-				let said = false; // has anything been said yet this turn (a word of the answer, or the filler)?
+				let said = false;
 				const abort = () => void engine.abort(sid);
 				signal.addEventListener("abort", abort);
 				const turn = engine
@@ -239,8 +221,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 							queue.push(e.text);
 							wake();
 						} else {
-							// The first lookup of a spoken turn: fill the silence while it runs. The model has decided to look
-							// something up; nothing here guesses that from Jae's words.
 							if (e.type === "tool" && !said && registry.resolve(e.name).tool?.kind === "read") {
 								said = true;
 								queue.push({ aside: FILLERS[fillers++ % FILLERS.length] });
@@ -266,7 +246,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		};
 		const speed = Number(s.cfg.speed) || DEFAULT_SPEED;
 		const loop = new VoiceLoop({
-			// the fillers are the same words every time, so they are rendered once, ahead of the first lookup
 			stt: (options.stt ?? sttProvider)(), tts: withPhrases((options.tts ?? ttsProvider)(provider), FILLERS, { voice, speed, pronunciations: pronunciations() }), brain, voice,
 			speed, gapMs: s.cfg.gap_ms === undefined ? DEFAULT_GAP_MS : Number(s.cfg.gap_ms),
 			pronunciations: pronunciations(), vocabulary: ASR_VOCAB, fixHeard,
@@ -297,7 +276,7 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 		config: options.botConfig ?? ((agent) => chatConfig({ agent, ...(PRETEND_WRITES ? { writes: true } : {}) })),
 		tts: (provider) => (options.tts ?? ttsProvider)(provider ?? (process.env.TALK_NEXT_TTS === "kokoro" || !process.env.TALK_NEXT_TTS ? "kokoro-http" : process.env.TALK_NEXT_TTS)),
 		stt: options.stt ?? sttProvider,
-		...(options.tts ? { voices: () => [{ id: "af_heart", name: "Heart" }, { id: "bf_emma", name: "Emma" }] } : {}), // a test's stand-in speech has no voice files
+		...(options.tts ? { voices: () => [{ id: "af_heart", name: "Heart" }, { id: "bf_emma", name: "Emma" }] } : {}),
 	});
 
 	const server = Bun.serve<Socket>({
@@ -330,7 +309,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 			async message(ws, raw) {
 				const s = ws.data;
 				if (typeof raw !== "string") {
-					// Hands-free: a continuous 16 kHz PCM16 microphone stream; the voice loop decides the turns.
 					if (s.cfg.duplex) {
 						const pcm = new Uint8Array(raw as unknown as ArrayBuffer);
 						s.mic = (s.mic ?? Promise.resolve()).then(async () => (await voiceLoop(ws)).feed(pcm)).catch(() => {});
@@ -351,7 +329,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 					send(ws, { type: "stopped" });
 					return;
 				}
-				// Everything else is handled in the order it arrived: a config must be in place before the text after it.
 				const next = (work: () => Promise<void>) => {
 					s.busy = s.busy.then(work).catch((e) => send(ws, { type: "error", text: `Talk couldn't do that (${String((e as Error)?.message ?? e).slice(0, 200)})` }));
 				};
@@ -359,17 +336,15 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 					next(async () => {
 						const { type: _t, new_session, article, article_index, ...rest } = m;
 						const agent = rest.agent && (await engine.agents.get(rest.agent)) ? rest.agent : s.agent;
-						// Python Talk names the chat itself (sid); the page names it by its session id.
 						if (typeof rest.sid === "string" && rest.sid) s.sid = `talk-${rest.sid}`;
 						else if (typeof rest.session_id === "string" && rest.session_id) s.sid = rest.session_id;
 						else if (new_session || agent !== s.agent) s.sid = newSid(agent);
 						if (agent !== s.agent || rest.session_id) await s.reader?.stop();
 						s.agent = agent;
 						Object.assign(s.cfg, rest, { agent });
-						if (rest.agent && rest.personality === undefined) delete s.cfg.personality; // the agent's own role
+						if (rest.agent && rest.personality === undefined) delete s.cfg.personality;
 						if (rest.agent || rest.session_id) send(ws, { type: "agent", agent: await engine.agents.get(agent), session_id: s.sid });
 						if (article) {
-							// open a file at a section (the Dojo's cases use this)
 							await engine.chat(s.sid, chatConfig(s.cfg));
 							await chats.openArticle(s.sid, String(article), Number(article_index) || 0);
 						}
@@ -412,7 +387,6 @@ export function serve(engine: Engine, port: number, options: ServeOptions = {}) 
 				}
 				if (kind === "text" && typeof m.text === "string") {
 					if (s.cfg.speak === true || s.cfg.duplex) {
-						// Spoken: the same turn through the voice loop, so the reply is voiced sentence by sentence.
 						return next(async () => {
 							await (await voiceLoop(ws)).say(m.text);
 						});

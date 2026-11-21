@@ -27,7 +27,6 @@ const fmt = (ms: number) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 };
 
-/** In-call bar shown above the composer while a voice call is connecting, live, or just failed. */
 export function VoiceCallBar() {
   const v = useVoice();
   const bot = useStore((s) => s.bots.find((b) => b.id === v.botId));
@@ -43,7 +42,6 @@ export function VoiceCallBar() {
     return () => clearInterval(t);
   }, [v.status]);
 
-  // Drive the speaking animation from the output level without re-rendering React every frame.
   useEffect(() => {
     if (!active) return;
     let raf = 0;

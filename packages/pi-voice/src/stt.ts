@@ -1,10 +1,7 @@
-// Speech to text. The provider shipped here is any server with OpenAI's transcription endpoint
-// (POST /v1/audio/transcriptions): Whisper behind VoiceStudio, faster-whisper-server, LocalAI, OpenAI itself.
 
 import { wavBytes } from "./audio.ts";
 
 export type TranscribeOptions = {
-	/** Words likely in the clip (names, products). Whisper reads it as what was said just before. */
 	prompt?: string;
 	language?: string;
 	signal?: AbortSignal;
@@ -12,7 +9,6 @@ export type TranscribeOptions = {
 
 export interface SttProvider {
 	readonly name: string;
-	/** The words in a clip of PCM16 mono audio at `rate`. */
 	transcribe(pcm: Uint8Array, rate: number, options?: TranscribeOptions): Promise<string>;
 }
 

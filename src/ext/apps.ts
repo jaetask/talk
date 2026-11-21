@@ -1,6 +1,3 @@
-// One Pi Durable extension per app: the app's MCP tools under "<app>__<tool>" names, and a prompt section with the
-// app's skill and the names its tools take. Tools the skill lists are offered at once; the rest are deferred and
-// found with tool search. A feature only adds tools; nothing here removes another app's.
 import type { Context } from "@earendil-works/chord/context";
 import { defineExtension, defineTool, section, type Extension, type ToolRegistration } from "@earendil-works/pi-durable";
 import { buildCard, type Card } from "../apps/cards.ts";
@@ -18,14 +15,12 @@ export const OUTCOME_UNKNOWN = JSON.stringify({
 		"The change may or may not have happened (the app didn't confirm). Don't say it worked. Check with a read tool if you can, otherwise tell Jae it's unconfirmed.",
 });
 
-/** A test case's canned result for a read tool (keys like "money__list-items", or "tables__*" for a whole app). */
 export function fixtureResult(fixtures: { [k: string]: Json }, name: string, app: string): string {
 	const key = name in fixtures ? name : `${app}__*`;
 	if (key in fixtures) return typeof fixtures[key] === "string" ? (fixtures[key] as string) : JSON.stringify(fixtures[key]);
 	return JSON.stringify({ error: "Nothing found for that lookup." });
 }
 
-/** The app's own actor id for the speaking agent: Tasks gives actors generated ids, so match by name. */
 export function appActor(app: McpApp, chat: Pick<ChatState, "agent" | "agentName">): string {
 	const actors = app.catalog.actors();
 	const hit = actors.find((a) => a.id === chat.agent || (a.name ?? "").trim().toLowerCase() === chat.agentName.trim().toLowerCase());
@@ -39,12 +34,9 @@ export type ToolDetails = {
 	kind: string;
 	args: JsonObject;
 	outcome: "ok" | "error" | "pretend" | "unknown";
-	/** The whole result for the chat's card, when the model's copy was shortened. */
 	full?: string;
 	ms: number;
-	/** The card the chat draws for this call, built once here and stored, so it redraws unchanged. */
 	card?: Card;
-	/** When the call finished (ISO). */
 	at?: string;
 };
 
@@ -80,7 +72,6 @@ function appTool(registry: Registry, app: McpApp, tool: Tool): ToolRegistration 
 				return { output: text(res.text), isError: res.isError, details: details(res.isError ? "error" : "ok", input, res.full, res.text) as never };
 			}
 
-			// A change: signed with the speaking agent and a retry key that survives a replay of this call.
 			if ("by" in real) input.by = appActor(app, chat);
 			if ("requestId" in real) input.requestId = await api.memo("requestId", `${chat.agent}-${crypto.randomUUID()}`, context);
 			const shown = Object.fromEntries(Object.entries(input).filter(([k]) => k !== "requestId")) as JsonObject;
@@ -101,7 +92,6 @@ function appTool(registry: Registry, app: McpApp, tool: Tool): ToolRegistration 
 	}) as ToolRegistration;
 }
 
-/** The extension for one app as it is right now. Reinstall it when the app's tool list changes. */
 export function appExtension(registry: Registry, app: McpApp): Extension {
 	return defineExtension({
 		name: appExtensionName(app.name),
@@ -114,8 +104,6 @@ export function appExtension(registry: Registry, app: McpApp): Extension {
 					const chat = (await input.read.snapshot(TalkChat, input.conversationId, context)) ?? initialChat();
 					const body = app.skill?.body || app.about;
 					const skill = chat.writes ? body : readOnlySkill(body, app.tools);
-					// The tools behind tool search, by the words Jae uses for them, so the model knows they exist. Naming
-					// one loads it; nothing here calls anything.
 					const hidden = new Set(app.tools.filter((t) => !app.isCore(t) && (chat.writes || t.kind === "read")).map((t) => toolKey(t.name)));
 					const named = new Map(app.tools.map((t) => [toolKey(t.name), fullName(app.name, t.name)]));
 					const more = (app.skill?.topics ?? [])

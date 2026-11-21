@@ -6,7 +6,7 @@
     "start": "bun src/server.ts",
     "test": "bun test/run.ts",
     "test:update": "bun test/run.ts --update",
-    "check": "tsc --noEmit"
+    "check": "tsc --noEmit && bun .agents/guardrails/check-comments.mjs"
   },
   "dependencies": {
     "@earendil-works/chord": "1.5.2",

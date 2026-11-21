@@ -2,7 +2,6 @@ const sameDay = (a: Date, b: Date) => a.getFullYear() === b.getFullYear() && a.g
 
 export const clock = (ts: number) => new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-/** "Fri, Nov 6 3:56 PM" / "Yesterday 11:24 PM" / "Today 9:02 AM" dividers, like screen 01. */
 export function dividerLabel(ts: number, now = Date.now()): string {
   const d = new Date(ts);
   const today = new Date(now);
@@ -14,7 +13,6 @@ export function dividerLabel(ts: number, now = Date.now()): string {
   return `${d.toLocaleDateString('en-US', opts)} ${clock(ts)}`;
 }
 
-/** Compact elapsed: "12s", "3m", "1h 4m". */
 export function elapsed(ms: number): string {
   const s = Math.max(0, Math.floor(ms / 1000));
   if (s < 60) return `${s}s`;

@@ -1,6 +1,3 @@
-// A stand-in for a coding agent: speaks ACP v1 on stdin and stdout, plans, edits a file in its folder, asks before
-// running the tests, and reports. FAKE_ACP=outside makes it reach outside its folder; FAKE_ACP=force makes it try a
-// force push, which Talk must refuse without asking.
 const mode = process.env.FAKE_ACP ?? "";
 const send = (m: object) => process.stdout.write(`${JSON.stringify(m)}\n`);
 let cwd = process.cwd();

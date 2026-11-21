@@ -4,7 +4,6 @@ import {
   MessageCircle, Mic, Monitor, PanelLeft, Paperclip, Plus, RefreshCw, Save, Search, Share, Square, SquarePen, Star, X, type LucideIcon,
 } from 'lucide-react';
 
-/** The app's icon names, drawn with Lucide. */
 const ICONS = {
   apps: LayoutGrid, arrow_down: ArrowDown, chat_filled: MessageCircle, check: Check, chev_down: ChevronDown, chev_right: ChevronRight, clock: Clock,
   close: X, composer_plus: Plus, copy: Copy, edit: SquarePen, file: FileText, mic: Mic, paperclip: Paperclip, plus: Plus, record: Circle, save: Save,

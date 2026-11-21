@@ -8,7 +8,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`/api/v2/voice${path}`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   if (!res.ok) {
     let msg = res.statusText;
-    try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch { /* not json */ }
+    try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch {  }
     throw new Error(msg || `HTTP ${res.status}`);
   }
   return res.json() as Promise<T>;
@@ -28,12 +28,11 @@ export const voiceApi = {
     const buf = await res.arrayBuffer();
     return new Int16Array(buf, 0, buf.byteLength >> 1);
   },
-  /** Dictation: 16 kHz PCM16 straight from the microphone, transcribed by Talk's own speech-to-text. */
   async transcribe(pcm: Int16Array, rate: number): Promise<string> {
     const res = await fetch(`/api/v2/voice/stt?rate=${rate}`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/octet-stream' }, body: pcm.buffer.slice(pcm.byteOffset, pcm.byteOffset + pcm.byteLength) as ArrayBuffer });
     if (!res.ok) {
       let msg = 'Transcription failed';
-      try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch { /* not json */ }
+      try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch {  }
       throw new Error(msg);
     }
     return ((await res.json()) as { text: string }).text;

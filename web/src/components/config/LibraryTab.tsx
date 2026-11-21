@@ -10,7 +10,6 @@ import { sayOnCall } from '../../voice/call';
 import { Glyph } from './glyphs';
 import { formatBytes } from './ui';
 
-/** Talk's files (data/files): what research wrote and what can be read aloud. */
 export function LibraryTab({ bot }: { bot: Bot }) {
   const awake = useStore((s) => s.computer?.status === 'running');
   const [path, setPath] = useState('');
@@ -30,7 +29,6 @@ export function LibraryTab({ bot }: { bot: Bot }) {
   useEffect(() => { setPath(''); setList(null); }, [bot.id]);
   useEffect(() => { load(); }, [load, awake]);
 
-  /** Open a text file to read here; anything else is downloaded. */
   const view = async (f: LibraryFile) => {
     if (!/\.(md|txt|json|jsonl)$/i.test(f.name)) return download(f);
     const rel = path ? `${path}/${f.name}` : f.name;

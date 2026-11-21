@@ -1,5 +1,3 @@
-// Talk's own avatar shapes, drawn here from a few formulas (nothing is traced from anyone's artwork). Each shape is
-// a silhouette in a 48-unit box with two eyes cut out of the fill.
 import type { AvatarShape } from '@shared/types';
 
 export interface ShapeDef { viewBox: string; d: string; outline: string }
@@ -10,20 +8,17 @@ const TAU = Math.PI * 2;
 const f = (n: number) => (Math.round(n * 100) / 100).toString();
 const path = (pts: Pt[]) => `M${pts.map(([x, y]) => `${f(x)} ${f(y)}`).join('L')}Z`;
 
-/** A closed curve from a radius at each angle (0 = right, a quarter turn = down). */
 const polar = (r: (t: number) => number, sx = 1, sy = 1, n = 120): Pt[] =>
   Array.from({ length: n }, (_, i) => {
     const t = (i / n) * TAU;
     return [C + r(t) * Math.cos(t) * sx, C + r(t) * Math.sin(t) * sy] as Pt;
   });
-/** A rounded box: the higher the power, the squarer the corners. Below 1 it pinches into a four-point star. */
 const box = (a: number, b: number, power: number) =>
   polar((t) => (Math.abs(Math.cos(t) / a) ** power + Math.abs(Math.sin(t) / b) ** power) ** (-1 / power));
 const ngon = (sides: number, r: number, turn = -Math.PI / 2, dy = 0): Pt[] =>
   Array.from({ length: sides }, (_, i) => [C + r * Math.cos(turn + (i / sides) * TAU), C + dy + r * Math.sin(turn + (i / sides) * TAU)] as Pt);
 const curve = (xy: (t: number) => Pt, n = 120): Pt[] => Array.from({ length: n }, (_, i) => xy((i / n) * TAU));
 const turned = (pts: Pt[], by: number): Pt[] => pts.map(([x, y]) => [C + (x - C) * Math.cos(by) - (y - C) * Math.sin(by), C + (x - C) * Math.sin(by) + (y - C) * Math.cos(by)]);
-/** An arc over the top that drops straight to a flat base. */
 const domed = (r: number, cy: number, base: number): Pt[] => [
   ...Array.from({ length: 49 }, (_, i) => [C - r * Math.cos((i / 48) * Math.PI), cy - r * Math.sin((i / 48) * Math.PI)] as Pt),
   [C + r, base], [C - r, base],
@@ -57,7 +52,6 @@ const SILHOUETTES: Record<AvatarShape, Pt[]> = {
   star: Array.from({ length: 10 }, (_, i) => [C + (i % 2 ? 9.5 : 18) * Math.cos(-Math.PI / 2 + (i / 10) * TAU), 25 + (i % 2 ? 9.5 : 18) * Math.sin(-Math.PI / 2 + (i / 10) * TAU)] as Pt),
 };
 
-/** Where the eyes sit, for the shapes whose middle isn't the middle of the box. */
 const EYE_Y: Partial<Record<AvatarShape, number>> = { wedge: 29, house: 27, teardrop: 29, heart: 21, dome: 26, arch: 24, star: 25 };
 const eye = (x: number, y: number, w = 3, h = 6.4) =>
   `M${f(x - w / 2)} ${f(y - h / 2 + w / 2)}a${f(w / 2)} ${f(w / 2)} 0 0 1 ${f(w)} 0v${f(h - w)}a${f(w / 2)} ${f(w / 2)} 0 0 1 ${f(-w)} 0Z`;

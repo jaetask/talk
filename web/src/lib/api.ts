@@ -13,7 +13,7 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
   });
   if (!res.ok) {
     let msg = res.statusText;
-    try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch { /* not json */ }
+    try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch {  }
     throw new ApiError(res.status, msg);
   }
   if (res.status === 204) return undefined as T;
@@ -56,7 +56,6 @@ export const api = {
   createRoom: (name: string, botIds: string[]) => req<{ id: string }>('POST', '/rooms', { name, botIds }),
 };
 
-/** Open a link in a centered popup. */
 export function openPopup(url: string) {
   const w = 520, h = 680;
   const left = window.screenX + (window.outerWidth - w) / 2;

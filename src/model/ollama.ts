@@ -1,6 +1,3 @@
-// Ollama's own chat API (/api/chat) as a pi-ai API. The OpenAI-compatible route cannot carry num_ctx, so a request
-// through it makes Ollama reload the model with another context size, and Python Talk's next turn reloads it back.
-// This sends exactly what Python Talk sends: the same context size, sampling, keep-alive and thinking off.
 import { createProvider, type Model, type Provider } from "@earendil-works/pi-ai";
 import type {
 	AssistantMessage,
@@ -24,12 +21,7 @@ export type OllamaOptions = {
 	temperature: number;
 	keepAlive: string;
 	deterministic: boolean;
-	/**
-	 * Which of the conversation's tools the model is shown. The Harness offers every tool the chat may call; a
-	 * local model is shown the short list, and a tool it names or finds joins the list from then on.
-	 */
 	shown?: (tools: Tool[], messages: WireMessage[]) => Tool[];
-	/** Injected for tests. */
 	fetch?: typeof fetch;
 };
 
@@ -41,7 +33,6 @@ export type WireMessage =
 const textOf = (content: string | readonly { type: string; text?: string }[]): string =>
 	typeof content === "string" ? content : content.map((c) => (c.type === "text" ? (c.text ?? "") : "")).join("");
 
-/** pi-ai's transcript as Ollama's messages: one leading system message, then the turns in order. */
 export function toWire(context: TranscriptContext): WireMessage[] {
 	const flat = collapseSystemMessages(context);
 	const out: WireMessage[] = [];
@@ -53,7 +44,7 @@ export function toWire(context: TranscriptContext): WireMessage[] {
 		else if (m.role === "assistant") {
 			const calls = m.content.filter((c): c is ToolCall => c.type === "toolCall");
 			const text = m.content.filter((c): c is TextContent => c.type === "text").map((c) => c.text).join("");
-			if (!text && calls.length === 0) continue; // an aborted or empty attempt says nothing to the model
+			if (!text && calls.length === 0) continue;
 			out.push({
 				role: "assistant",
 				content: text,
@@ -206,7 +197,6 @@ export function ollamaModel(id: string, opts: OllamaOptions): Model<string> {
 	} as Model<string>;
 }
 
-/** The `ollama` provider for these model ids, all on one Ollama server. */
 export function ollamaProvider(ids: string[], opts: OllamaOptions): Provider {
 	const stream = ollamaStream(opts);
 	return createProvider({

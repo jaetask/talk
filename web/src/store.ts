@@ -17,7 +17,6 @@ interface State {
   transcripts: Record<string, Transcript>;
   routines: Record<string, Routine[]>;
   computer: ComputerState | null;
-  /** Bumped on every `connections` event so open views can refetch. */
   connectionsVersion: number;
   sseConnected: boolean;
 
@@ -42,7 +41,7 @@ const LS_SELECTED = 'talk.selectedBot';
 const LS_DETAILS = 'talk.detailsOpen';
 const LS_SIDEBAR = 'talk.sidebarCollapsed';
 const lsGet = (k: string) => { try { return localStorage.getItem(k); } catch { return null; } };
-const lsSet = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* ignore */ } };
+const lsSet = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch {  } };
 
 export const useStore = create<State>((set, get) => ({
   user: null,
@@ -96,7 +95,6 @@ export const useStore = create<State>((set, get) => ({
     const { generation, rows } = await api.rows(id);
     const bySeq: Record<number, Row> = {};
     for (const r of rows) bySeq[r.seq] = r;
-    // Merge with anything that streamed in while we were fetching.
     const prev = get().transcripts[id];
     if (prev && prev.generation === generation) {
       for (const r of Object.values(prev.bySeq)) if (!bySeq[r.seq] || bySeq[r.seq].updatedSeq < r.updatedSeq) bySeq[r.seq] = r;
@@ -120,7 +118,6 @@ export const useStore = create<State>((set, get) => ({
       if (prev && generation < prev.generation) return {};
       const base: Transcript = !prev || generation > prev.generation ? { generation, bySeq: {}, loaded: prev?.loaded ?? false } : prev;
       const bySeq = { ...base.bySeq };
-      // A finished turn replaces what was drawn while it ran.
       if (replace) for (const k of Object.keys(bySeq)) if (Number(k) >= replace[0] && Number(k) <= replace[1]) delete bySeq[Number(k)];
       for (const r of rows) {
         const cur = bySeq[r.seq];
@@ -150,7 +147,6 @@ export const useStore = create<State>((set, get) => ({
         return;
       case 'bot': {
         const exists = s.bots.some((b) => b.id === ev.bot.id);
-        // Opening a bot marks it read; keep the open bot at 0 unread.
         if (ev.bot.id === s.selectedBotId && ev.bot.unread > 0 && document.visibilityState === 'visible') api.markRead(ev.bot.id).catch(() => {});
         set((st) => ({ bots: exists ? st.bots.map((b) => (b.id === ev.bot.id ? ev.bot : b)) : [...st.bots, ev.bot] }));
         return;
@@ -163,7 +159,6 @@ export const useStore = create<State>((set, get) => ({
         return;
       case 'tasks':
       case 'memories':
-        // Picked up by configStore.ts (Tasks view, Library/Tasks tabs, bot settings).
         window.dispatchEvent(new CustomEvent('talk:event', { detail: ev }));
         return;
       case 'connections':
@@ -181,7 +176,6 @@ export const useStore = create<State>((set, get) => ({
   },
 }));
 
-/** Rows for a bot, ordered by seq. */
 export function sortedRows(t: Transcript | undefined): Row[] {
   if (!t) return [];
   return Object.values(t.bySeq).sort((a, b) => a.seq - b.seq);

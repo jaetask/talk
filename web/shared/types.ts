@@ -1,4 +1,3 @@
-// Shared API contract between server and web (web imports these as types only).
 
 export type AvatarShape =
   | 'blob' | 'pebble' | 'bean' | 'egg' | 'squircle' | 'tablet' | 'capsule' | 'cylinder' | 'hex'
@@ -20,11 +19,9 @@ export interface Bot {
   avatarColor: AvatarColor;
   mode: 'personal' | 'teammate';
   isPrimary: boolean;
-  /** 'room' = group chat (members answer instead of the bot itself). */
   kind?: 'agent' | 'room';
   pinned: boolean;
   effort: 'low' | 'medium' | 'high' | 'xhigh';
-  /** Voice chat settings: the voice's name at the speech provider, a speed multiplier, and a language. */
   voice: string;
   voiceSpeed: number;
   voiceLanguage: string;
@@ -35,7 +32,6 @@ export interface Bot {
   createdAt: number;
 }
 
-/** A transcript row. `seq` orders rows; `updatedSeq` is a per-bot revision counter (rows are rewritten while streaming). */
 export interface Row {
   botId: string;
   generation: number;
@@ -60,7 +56,6 @@ export interface MessageBody {
   role: 'user' | 'assistant';
   text: string;
   streaming?: boolean;
-  /** Set when a message came from another bot, a routine or a voice call rather than the user typing. */
   from?: { kind: 'bot' | 'routine' | 'voice'; id: string; name: string };
   citations?: { url: string; title?: string }[];
 }
@@ -69,12 +64,10 @@ export interface ToolCallBody {
   type: 'tool-call';
   callId: string;
   name: string;
-  /** Human phrase, e.g. "Clicking on screen". */
   label: string;
   status: 'running' | 'done' | 'error' | 'awaiting-approval' | 'denied';
   args?: unknown;
   summary?: string;
-  /** Data URL thumbnail for computer actions. */
   screenshot?: string;
 }
 
@@ -121,7 +114,6 @@ export type CardBody =
     }
   | { type: 'card'; card: 'tool'; data: ToolCard };
 
-/** What a tool call showed, as Talk stores it with the call (tickets, a change, sources, or a table). */
 export interface ToolCard {
   name: string; app: string; app_label: string; tool: string; kind: string; outcome: string; args: Record<string, unknown>; at: string;
   view: 'tickets' | 'change' | 'sources' | 'table';
@@ -133,7 +125,6 @@ export interface EventBody {
   event: 'routine-created' | 'routine-updated' | 'routine-run' | 'task-changed' | 'bot-message' | 'conversation-cleared' | 'computer' | 'voice-call';
   text: string;
   ref?: string;
-  /** voice-call only: the call record (set on the end-of-call row). */
   call?: VoiceCallRecord;
 }
 
@@ -188,7 +179,6 @@ export interface Toolkit {
   managedAuth: boolean; noAuth: boolean; connected: boolean;
 }
 
-/** Server-sent events on GET /api/events */
 export type ServerEvent =
   | { type: 'hello'; serverTime: number }
   | { type: 'rows'; botId: string; generation: number; rows: Row[]; replace?: [number, number] }

@@ -1,7 +1,3 @@
-// The file reader as an extension: Jae's Markdown files read aloud beside the chat. The model drives the reader with
-// tools (read a section, next, previous, pause, resume, open a file), so it never retells a section to "read" it, and
-// answers questions about the open file from the file's own text. A feature only adds: these tools and this context
-// sit beside the apps, the web and everything else.
 import { defineExtension, defineTool, section, type Extension } from "@earendil-works/pi-durable";
 import { readSkill } from "../apps/skills.ts";
 import { initialChat, TalkChat, type ChatState } from "../chat.ts";
@@ -15,7 +11,6 @@ const json = (o: object, isError = false) => ({ output: [{ type: "text" as const
 export function readerExtension(opts: ReaderOptions): Extension {
 	const files = () => loadArticles(opts.filesDir);
 	const open = (chat: ChatState): Article | undefined => (chat.article ? files().find((f) => f.slug === chat.article!.slug) : undefined);
-	/** A reader tool on the open file: `run` gets the article and the chat, and may leave an action for after the reply. */
 	const onFile = (name: string, description: string, parameters: object, run: (article: Article, chat: ChatState, args: any) => { result: object; action?: ChatState["readerAction"]; move?: { index: number; sentence: number } }) =>
 		defineTool({
 			name,

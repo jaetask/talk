@@ -1,5 +1,3 @@
-// Skills (.agents/skills/<name>/SKILL.md) and personalities (personalities/*.txt): plain text, read fresh at every
-// use, so an edit applies without a restart. The same files Python Talk reads.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PERSONAS_DIR, SKILLS_DIR } from "../config.ts";
@@ -9,9 +7,7 @@ export type Skill = {
 	name: string;
 	description: string;
 	body: string;
-	/** Tool names (tool_key form) the skill lists: the ones offered without a search. Undefined: not declared. */
 	tools?: string[];
-	/** Topic words and the extra tools they point at; these feed tool search, they never call anything. */
 	topics: { words: string[]; tools: string[] }[];
 	builders: boolean;
 };
@@ -53,15 +49,10 @@ export function skillNames(dir = SKILLS_DIR): string[] {
 	return readdirSync(dir).filter((d) => existsSync(join(dir, d, "SKILL.md"))).sort();
 }
 
-/** The skill list the model sees: one line each; builder skills are for coding agents, not for Cooper. */
 export function skillIndex(dir = SKILLS_DIR): string {
 	return skillNames(dir).map((n) => readSkill(n, dir)).filter((s): s is Skill => !!s && !s.builders).map((s) => `- ${s.name}: ${s.description}`).join("\n");
 }
 
-/**
- * The skill for read-only turns: don't describe tools the model doesn't have. A `##` section that names write tools
- * and no read tool is left out whole; elsewhere a line naming a write tool (and its indented continuation) is left out.
- */
 export function readOnlySkill(body: string, tools: (AppTool & { kind: Kind })[]): string {
 	const names = (ok: (k: Kind) => boolean) => tools.filter((t) => ok(t.kind)).flatMap((t) => [t.name, toolKey(t.name)]);
 	const writes = names((k) => k !== "read");
@@ -95,7 +86,6 @@ export function readOnlySkill(body: string, tools: (AppTool & { kind: Kind })[])
 	return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
-// ── personalities and the rules every agent inherits (Python Talk's server/engine/prompt.py) ──
 
 export function personalities(dir = PERSONAS_DIR): { id: string; label: string }[] {
 	if (!existsSync(dir)) return [];
@@ -115,7 +105,6 @@ export const USER_FACTS =
 	"(J-A-E), never Jay. When a transcript says Jay, he means his own name, so always write Jae: in replies, titles, " +
 	"tickets, comments and anything you save.";
 
-/** The chosen personality, read fresh; an unknown id falls back to the first one. */
 export function persona(id: string | undefined, dir = PERSONAS_DIR): string {
 	const ids = personalities(dir).map((p) => p.id);
 	const pid = id && ids.includes(id) ? id : ids[0];
@@ -124,7 +113,6 @@ export function persona(id: string | undefined, dir = PERSONAS_DIR): string {
 		try {
 			text = readFileSync(join(dir, `${pid}.txt`), "utf8").trim();
 		} catch {
-			// keep the fallback
 		}
 	}
 	return `${text}\n\n${USER_FACTS}`;

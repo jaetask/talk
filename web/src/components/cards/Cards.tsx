@@ -19,10 +19,8 @@ function useBusy() {
 
 const prettyTool = (s: string) => s.replace(/_/g, ' ').toLowerCase().replace(/^\w/, (c) => c.toUpperCase());
 const KNOWN: Record<string, string> = { github: 'GitHub', gitlab: 'GitLab', hubspot: 'HubSpot', linkedin: 'LinkedIn', youtube: 'YouTube', clickup: 'ClickUp', googledocs: 'Google Docs', googledrive: 'Google Drive', googlesheets: 'Google Sheets', googlecalendar: 'Google Calendar', googletasks: 'Google Tasks', googlemeet: 'Google Meet' };
-/** "googlecalendar" → "Google Calendar", "slack" → "Slack". */
 export const humanizeToolkit = (slug: string) => KNOWN[slug.toLowerCase()] ?? slug.replace(/^(google|microsoft)(?=\w)/i, '$1 ').replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-// ---------------- approval ----------------
 
 const APPROVAL_OUTCOME: Record<string, string> = { allowed: 'Allowed once', always: 'Always allowed', denied: 'Not allowed', expired: 'Expired' };
 
@@ -59,7 +57,6 @@ export function ApprovalCard({ body }: { body: Card<'approval'> }) {
   );
 }
 
-// ---------------- question ----------------
 
 export function QuestionCard({ row, body }: { row: Row; body: Card<'question'> }) {
   const { busy, error, run } = useBusy();
@@ -99,7 +96,6 @@ export function QuestionCard({ row, body }: { row: Row; body: Card<'question'> }
   );
 }
 
-// ---------------- connect ----------------
 
 export function ConnectCard({ row, body }: { row: Row; body: Card<'connect'> }) {
   const { busy, error, run } = useBusy();
@@ -107,7 +103,6 @@ export function ConnectCard({ row, body }: { row: Row; body: Card<'connect'> }) 
   const connectionsVersion = useStore((s) => s.connectionsVersion);
   const pending = body.status === 'pending';
 
-  // Leave the "waiting" state once the server reports a connection change or the card resolves.
   useEffect(() => { setWaiting(false); }, [connectionsVersion, body.status]);
 
   const connect = () => run('connect', async () => {
@@ -146,7 +141,6 @@ export function ConnectCard({ row, body }: { row: Row; body: Card<'connect'> }) 
   );
 }
 
-// ---------------- draft (screen 02) ----------------
 
 const CHANNEL_LABEL: Record<string, string> = { email: 'Email', slack: 'Slack', message: 'Chat' };
 
@@ -155,7 +149,7 @@ export function DraftCard({ body }: { body: Card<'draft'> }) {
   const user = useStore((s) => s.user);
   const pending = body.status === 'pending';
   const [copied, setCopied] = useState(false);
-  const copy = async () => { try { await navigator.clipboard.writeText(body.text); setCopied(true); setTimeout(() => setCopied(false), 1200); } catch { /* ignore */ } };
+  const copy = async () => { try { await navigator.clipboard.writeText(body.text); setCopied(true); setTimeout(() => setCopied(false), 1200); } catch {  } };
   const handle = user?.email ? `@${user.email.split('@')[0]}` : '';
   return (
     <div className={`card draft-card${pending ? '' : ' is-resolved'}`}>
@@ -194,13 +188,11 @@ export function DraftCard({ body }: { body: Card<'draft'> }) {
   );
 }
 
-// ---------------- what a tool call showed ----------------
 
 const cellText = (v: unknown): string => (v === null || v === undefined ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
 const TICKET_COLS = ['id', 'title', 'status', 'owner', 'priority', 'feature', 'due'];
 const ROWS_SHOWN = 8;
 
-/** A tool call's stored card: the tickets it listed, the change it made, the sources it quoted, or a plain table. */
 export function ToolResultCard({ card }: { card: ToolCard }) {
   const [all, setAll] = useState(false);
   const rows: Record<string, unknown>[] = Array.isArray(card.data.rows) ? card.data.rows : [];

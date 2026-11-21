@@ -33,7 +33,6 @@ function NativeSelect<T extends string | number>({ label, value, options, onChan
   );
 }
 
-/** "Voice chat" section of the details panel: voice, speed, language (saved per bot), preview, start a call. */
 export function VoiceSettings({ bot }: { bot: Bot }) {
   const [opts, setOpts] = useState<VoiceOptions>(FALLBACK);
   const [previewing, setPreviewing] = useState(false);
@@ -45,7 +44,6 @@ export function VoiceSettings({ bot }: { bot: Bot }) {
 
   const save = async (patch: Partial<Pick<Bot, 'voice' | 'voiceSpeed' | 'voiceLanguage'>>) => {
     const prev = useStore.getState().bots.find((b) => b.id === bot.id);
-    // Optimistic; the server's `bot` event confirms.
     useStore.setState((s) => ({ bots: s.bots.map((b) => (b.id === bot.id ? { ...b, ...patch } : b)) }));
     setError(null);
     try {

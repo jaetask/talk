@@ -1,5 +1,3 @@
-// How Talk sees an app tool: read, write or dangerous (from its annotations and the verb in its name), the name the
-// model calls it by, and the view of its schema the model gets. Ported from Python Talk's server/apps/classify.py.
 export type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 export type JsonObject = { [key: string]: Json };
 export type Kind = "read" | "write" | "danger";
@@ -10,7 +8,6 @@ export type AppTool = {
 	annotations?: { readOnlyHint?: boolean; destructiveHint?: boolean };
 };
 
-/** Framework helpers, and image or export tools that make no sense in a spoken answer. */
 export const DENY = new Set([
 	"ask_app", "ask_app_status", "list_apps", "open_app", "create_embed_session", "tool-search", "navigate",
 	"view-screen", "get-protocol", "read-task-image", "list-task-images", "get-work-media", "get-export", "get-work-export",
@@ -38,7 +35,6 @@ const SAFE_NAMES = new Set([
 	"ticket-blocked-by-ticket-remove", "ticket-backlog-send",
 ]);
 
-/** (verb, thing) of a tool name in either order: "delete-item" and "ticket-comment-delete" both give delete. */
 export function verbAndThing(tool: string): [string, string] {
 	const parts = toolKey(tool).split("_");
 	if (parts.length === 1) return [parts[0], "item"];
@@ -50,7 +46,6 @@ export function verbAndThing(tool: string): [string, string] {
 	return [parts[0], parts[parts.length - 1]];
 }
 
-/** read, write (runs directly) or danger (waits for Jae's yes). */
 export function classifyTool(tool: AppTool): Kind {
 	const ann = tool.annotations ?? {};
 	if (ann.readOnlyHint === true) return "read";
@@ -65,18 +60,12 @@ export function classifyTool(tool: AppTool): Kind {
 	return "write";
 }
 
-/** Arguments Talk fills in itself; the model never sees or sets them. */
 export const MODEL_HIDDEN_ARGS = ["by", "requestId"];
 const MODEL_DROPPED_KEYS = new Set([
 	"pattern", "format", "minLength", "maxLength", "minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum",
 	"minItems", "maxItems", "additionalProperties", "$schema", "examples",
 ]);
 
-/**
- * What the model is shown of a tool's input schema: no regex patterns, formats, length or range limits (they cost
- * tokens and only matter to the app, which still validates the real schema), no union roots, and none of the
- * arguments Talk fills in itself.
- */
 export function modelView(schema: JsonObject | undefined): JsonObject {
 	const clean = (o: Json, names = false): Json => {
 		if (Array.isArray(o)) return o.map((v) => clean(v));

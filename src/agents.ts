@@ -1,23 +1,14 @@
-// The agents Jae talks to. Each is a set of choices a chat starts with: a role (a personality file, or its own
-// instructions), a voice, the apps it may use and, optionally, its own brain. They live in the store, so Settings can
-// change one without a restart; a new store is seeded with the same two Python Talk has.
 import { BACKGROUND_CONTEXT as ctx } from "@earendil-works/chord/context";
 import { defineDoc, type Harness } from "@earendil-works/pi-durable";
 
 export type Agent = {
 	id: string;
 	name: string;
-	/** One line on what the agent is for: shown in the sidebar, and to other agents that may hand it work. */
 	about: string;
-	/** A personality file's id (personalities/<id>.txt). */
 	persona: string;
-	/** Extra instructions of its own, after the role. */
 	instructions: string;
-	/** The voice it speaks with (a voice name of the chat's voice provider). */
 	voice: string;
-	/** App names it may use; empty means every app. */
 	apps: string[];
-	/** Its own model id; empty means Talk's default brain. */
 	model: string;
 };
 
@@ -26,7 +17,6 @@ export const SEED: Agent[] = [
 	{ id: "maddy", name: "Maddy", about: "the marketer: plans, drafts and replies in Marketing, and the tickets behind them", persona: "4-maddy", instructions: "", voice: "af_bella", apps: ["marketing", "tasks"], model: "" },
 ];
 
-/** A chat with no agent chosen: Talk's first voice, every app, whatever personality the chat asks for. */
 export const HEART: Agent = { id: "heart", name: "Heart", about: "Talk's own voice", persona: "", instructions: "", voice: "af_heart", apps: [], model: "" };
 
 type AgentsState = { seeded: boolean; agents: { [id: string]: Agent } };
@@ -65,7 +55,6 @@ export class Agents {
 		return (await this.harness().snapshot(TalkAgents, ctx))?.agents[id];
 	}
 
-	/** Create or change an agent. Unknown fields are ignored; a new agent needs a name. */
 	async save(id: string, change: Partial<Agent>): Promise<Agent> {
 		if (!ID.test(id) || id === HEART.id) throw new Error("An agent's id is lowercase letters, digits and hyphens, starting with a letter.");
 		return this.harness().commit(async (tx) => {

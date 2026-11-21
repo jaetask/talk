@@ -1,10 +1,6 @@
 import type { ServerEvent } from '@shared/types';
 import { useStore } from '../store';
 
-/**
- * One EventSource for the whole app. EventSource retries on its own, but a server restart
- * can leave it CLOSED, so we also reconnect manually with backoff and resync on reconnect.
- */
 export function startEvents(): () => void {
   let es: EventSource | null = null;
   let stopped = false;

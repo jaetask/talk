@@ -1,5 +1,3 @@
-// A chat's history and housekeeping, over the engine: listing chats, reading one back as the screens draw it,
-// naming and pinning, redaction and Clear chat, export, and Make test.
 import { BACKGROUND_CONTEXT as ctx } from "@earendil-works/chord/context";
 import type { EntryRecord } from "@earendil-works/pi-durable";
 import { persona } from "./apps/skills.ts";
@@ -51,7 +49,6 @@ export class Chats {
 		return timeline ? exportLines(timeline) : undefined;
 	}
 
-	/** The chat a turn belongs to, and the draft case for it. Turn ids are unique across the store. */
 	async draftCase(turnId: number, kind: "golden" | "regression", note = "") {
 		for (const sid of Object.keys((await this.index()).chats)) {
 			const got = await this.entries(sid);
@@ -62,23 +59,19 @@ export class Chats {
 		return undefined;
 	}
 
-	/** A chat's turns as the screens draw them, with the chat's own state. */
 	async turns(sid: string) {
 		const got = await this.entries(sid);
 		return got ? { turns: turnsOf(got.entries, got.redactions), chat: got.chat } : undefined;
 	}
-	/** A chat's line in the index: when it was last active and what was last said. */
 	async row(sid: string): Promise<ChatRow | undefined> {
 		return (await this.index()).chats[sid];
 	}
 
 	private async index() {
-		// A store made by an earlier build may lack the newer parts of the index: read it as if they were empty.
 		const index = (await this.engine.harness.snapshot(TalkIndex, ctx)) as Partial<IndexState> | undefined;
 		return { chats: index?.chats ?? {}, viewed: index?.viewed ?? {}, settings: index?.settings ?? {} };
 	}
 
-	/** Chats, newest first. Test runs are left out unless asked for (a pinned one always shows). `q` keeps the chats holding every word. */
 	async list(options: { agent?: string; tests?: boolean; q?: string; limit?: number } = {}) {
 		const words = (options.q ?? "").toLowerCase().split(/\s+/).filter(Boolean);
 		const rows = Object.entries((await this.index()).chats)
@@ -110,7 +103,6 @@ export class Chats {
 		return this.change(sid, (r) => { r.title = title.trim().slice(0, 120); });
 	}
 
-	/** Each agent's latest reply, and whether it came since the agent was last opened. */
 	async last(agent: string) {
 		const index = await this.index();
 		const newest = Object.entries(index.chats).filter(([, c]) => c.agent === agent && c.last && !c.test).sort(([, a], [, b]) => (b.lastAt ?? 0) - (a.lastAt ?? 0))[0];
@@ -129,14 +121,12 @@ export class Chats {
 		await this.engine.harness.commit(async (tx) => { const doc = await tx.doc(TalkIndex); doc.settings ??= {}; doc.settings[key] = value as never; }, ctx);
 	}
 
-	// ── the file open beside a chat ──
 
 	private async chatDoc<T>(sid: string, change: (doc: ChatState) => T): Promise<T | undefined> {
 		const conv = await this.engine.conversationOf(sid);
 		if (!conv) return undefined;
 		return this.engine.harness.commit(async (tx) => change((await tx.doc(TalkChat, conv.id)) as ChatState), ctx);
 	}
-	/** Open a file beside the chat, at a section (by default where the reading was last left). */
 	async openArticle(sid: string, slug: string, index?: number): Promise<number> {
 		const at = index ?? (await this.setting<Record<string, number>>("articles", {}))[slug] ?? 0;
 		await this.chatDoc(sid, (doc) => { doc.article = { slug, index: at, sentence: 0, playing: false }; });
@@ -145,7 +135,6 @@ export class Chats {
 	closeArticle(sid: string) {
 		return this.chatDoc(sid, (doc) => { doc.article = null; doc.readerAction = null; });
 	}
-	/** Where the reading is now. The position is also kept per file, so reopening it carries on from there. */
 	async setReading(sid: string, at: { index?: number; sentence?: number; playing?: boolean }): Promise<void> {
 		const slug = await this.chatDoc(sid, (doc) => {
 			if (!doc.article) return undefined;
@@ -154,7 +143,6 @@ export class Chats {
 		});
 		if (slug && at.index !== undefined) await this.saveSetting("articles", { ...(await this.setting<Record<string, number>>("articles", {})), [slug]: at.index });
 	}
-	/** What a reader tool asked for during the turn, to be done now that the reply has been spoken. */
 	takeReaderAction(sid: string) {
 		return this.chatDoc(sid, (doc) => {
 			const action = doc.readerAction;
@@ -163,10 +151,6 @@ export class Chats {
 		});
 	}
 
-	/**
-	 * Clear one turn from view. The transcript is immutable, so the words stay in the store's file; they are no longer
-	 * shown, exported or made into tests.
-	 */
 	async redactTurn(turnId: number): Promise<boolean> {
 		for (const sid of Object.keys((await this.index()).chats)) {
 			const got = await this.entries(sid);
@@ -178,10 +162,6 @@ export class Chats {
 		return false;
 	}
 
-	/**
-	 * Clear chat: every message so far is hidden (the rows stay as placeholders, so the conversation keeps its shape)
-	 * and the model starts from nothing: it no longer sees any of it.
-	 */
 	async clear(sid: string): Promise<boolean> {
 		const conv = await this.engine.conversationOf(sid);
 		if (!conv) return false;

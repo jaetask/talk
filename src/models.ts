@@ -1,5 +1,3 @@
-// The brains: one Ollama server, the models Talk is asked for. A model id nobody has asked for yet is added on first
-// use, so the picker and the Dojo's model sweep need no list kept here.
 import { createModels, type Models } from "@earendil-works/pi-ai";
 import { DETERMINISTIC, MAX_REPLY_TOKENS, MODEL, NUM_CTX, OLLAMA } from "./config.ts";
 import type { Tool } from "@earendil-works/pi-ai";
@@ -9,10 +7,6 @@ const ids = new Set<string>([MODEL]);
 const models = createModels();
 let hidden: (name: string) => boolean = () => false;
 
-/**
- * The tools a local model is shown: the short list, plus any hidden tool the conversation has already named (in a
- * call, or in a tool search result). The list only grows within a chat, so the prompt's start stays cached.
- */
 export function shownTools(tools: Tool[], messages: WireMessage[], isHidden: (name: string) => boolean): Tool[] {
 	const named = new Set<string>();
 	for (const m of messages) {
@@ -31,13 +25,11 @@ const install = () =>
 	);
 install();
 
-/** The models, showing a local model only the tools `isHidden` doesn't hold back. */
 export function ollamaModels(isHidden?: (name: string) => boolean): Models {
 	if (isHidden) hidden = isHidden;
 	return models;
 }
 
-/** Make sure `id` can be asked for; returns it. */
 export function useModel(id: string): string {
 	if (!ids.has(id)) {
 		ids.add(id);

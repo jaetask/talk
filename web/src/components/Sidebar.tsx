@@ -44,12 +44,11 @@ export function Sidebar() {
   const live = useStore((s) => s.live);
   const storeSelectedBotId = useStore((s) => s.selectedBotId);
   const inTasks = useConfigUI((s) => s.view === 'tasks');
-  const selectedBotId = inTasks ? null : storeSelectedBotId; // nothing highlighted while the Tasks view is open
+  const selectedBotId = inTasks ? null : storeSelectedBotId;
   const user = useStore((s) => s.user);
   const collapsed = useStore((s) => s.sidebarCollapsed);
   const set = useStore((s) => s.set);
   const storeSelectBot = useStore((s) => s.selectBot);
-  // Picking a bot (even the one already selected) leaves the Tasks view.
   const selectBot = useCallback((id: string) => { useConfigUI.getState().setView('chat'); storeSelectBot(id); }, [storeSelectBot]);
   const setModal = useStore((s) => s.setModal);
   const [accountMenu, setAccountMenu] = useState(false);

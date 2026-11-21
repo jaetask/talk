@@ -1,6 +1,5 @@
 import type { ActivityKind, LiveState, Row } from '@shared/types';
 
-/** textKind → phrase table from docs/research/03-ui-design.md §2.4. Arrays rotate. */
 const PHRASES: Record<string, string[]> = {
   thinking: ['Thinking it through', 'Mulling it over', 'Putting it together'],
   working: ['Getting it done', 'Making progress', 'Working on it', 'Handling it', 'Chipping away'],
@@ -27,7 +26,6 @@ const PHRASES: Record<string, string[]> = {
 
 const nice = (s?: string) => !!s && !/[_]/.test(s) && !/^[a-z0-9-]+$/.test(s);
 
-/** Phrase for the activity line. `tick` rotates multi-phrase kinds. */
 export function activityPhrase(live: LiveState, rows: Row[], tick: number): string {
   const a = live.activity;
   if (!a) return live.awaiting ? 'Needs your input' : 'Working on it';

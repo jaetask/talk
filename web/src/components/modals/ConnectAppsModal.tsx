@@ -6,7 +6,6 @@ import { Icon } from '../Icon';
 import { ToolkitLogo } from '../ToolkitLogo';
 import { Modal } from './Modal';
 
-/** The apps Talk's agents can use: each is an app on this machine, reached over its own MCP server. */
 export function ConnectAppsModal() {
   const setModal = useStore((s) => s.setModal);
   const version = useStore((s) => s.connectionsVersion);

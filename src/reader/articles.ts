@@ -1,17 +1,13 @@
-// Files read aloud: Markdown files split into sections by heading, what is said for each section (prose without
-// markdown, a table row as one sentence), and finding a section or a file from the words the model passes.
-// Pure functions. Ported from Python Talk's server/reader/articles.py; matching is used by the reader's tools only.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
 export type Section = { title: string; level: number; text: string; order: number; id: string; parent: string | null };
 export type Article = { slug: string; title: string; sections: Section[] };
 
-const HEADING = /^(#{1,4})\s+(.+?)\s*#*\s*$/; // H1 to H4 start sections; deeper headings stay in the text
+const HEADING = /^(#{1,4})\s+(.+?)\s*#*\s*$/;
 const STOP_WORDS = new Set("the a an of and to on in it is what that this section part bit about for from with one please".split(" "));
 const slug = (text: string): string => text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || "article";
 
-/** Sections in reading order: each heading starts one; text before the first heading is an introduction. */
 export function splitSections(markdown: string): Section[] {
 	const raw: { title: string | null; level: number; text: string }[] = [];
 	let title: string | null = null;
@@ -55,9 +51,9 @@ const BYLINE = /^\s*[A-Z][a-z]{2,8}\.? \d{1,2}, \d{4}\s*·\s*@\w+\s*$/gm;
 function cleanProse(body: string): string {
 	return body
 		.replace(BYLINE, "")
-		.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, " ") // code blocks aren't read aloud
+		.replace(/```[\s\S]*?```|~~~[\s\S]*?~~~/g, " ")
 		.replace(/`([^`]*)`/g, "$1")
-		.replace(/!?\[([^\]]+)\]\((?:[^()\s]|\([^()\s]*\))*\)/g, "$1") // links: keep the words
+		.replace(/!?\[([^\]]+)\]\((?:[^()\s]|\([^()\s]*\))*\)/g, "$1")
 		.replace(/(\*\*|__|\*|_|~~)(.+?)\1/g, "$2")
 		.replace(/^\s*([-*+•]|\d+[.)])\s+/gm, "")
 		.replace(/^\s*(#{1,6}|>)\s*/gm, "")
@@ -69,7 +65,6 @@ function cleanProse(body: string): string {
 const TABLE_DELIM = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
 const FENCE = /^\s{0,3}(```|~~~)/;
 
-/** A table row's cells; a pipe inside `code` or written as \| stays in its cell. */
 export function tableCells(line: string): string[] {
 	let s = line.trim();
 	if (s.startsWith("|")) s = s.slice(1);
@@ -96,7 +91,6 @@ export function tableCells(line: string): string[] {
 const plainInline = (text: string): string =>
 	text.replace(/!?\[([^\]]*)\]\((?:[^()\s]|\([^()\s]*\))+\)/g, "$1").replace(/`+([^`]*?)`+/g, "$1").replace(/(\*\*|__|~~)(.+?)\1/g, "$2").replace(/\\([\\`*_{}[\]()#+\-.!|~>])/g, "$1").trim();
 
-/** (what is said, the row's words on screen) for one table row: the first cell names the row, the rest are read with their column. */
 function rowSentence(header: string[], row: string[]): { say: string; shown: string } {
 	const head = header.map((h) => plainInline(h).replace(/[?:]+$/, "").trim());
 	const cells = head.map((_, i) => plainInline(row[i] ?? ""));
@@ -105,7 +99,6 @@ function rowSentence(header: string[], row: string[]): { say: string; shown: str
 	return { say: parts.length ? `${parts.join(". ")}.` : "", shown: cells.filter(Boolean).join(" ") };
 }
 
-/** A section's body in reading order: cleaned prose, and one entry per table row (with the row's words as shown). */
 export function spokenParts(body: string): { text: string; shown?: string }[] {
 	const lines = body.split("\n");
 	const out: { text: string; shown?: string }[] = [];
@@ -135,18 +128,15 @@ export function spokenParts(body: string): { text: string; shown?: string }[] {
 	return out;
 }
 
-/** What is read for a section: the heading briefly, then its sentences, each with what the page highlights. */
 export function spokenSentences(section: Section, split: (text: string) => string[]): { say: string; shown?: string }[] {
-	// The heading is one sentence, however it is punctuated ("2. Tools" is not "two" and then "tools").
 	const out: { say: string; shown?: string }[] = [{ say: `${section.title.replace(/[.:]+$/, "")}.` }];
 	for (const part of spokenParts(section.text)) out.push(...(part.shown === undefined ? split(part.text).map((say) => ({ say })) : [{ say: part.text, shown: part.shown }]));
 	return out;
 }
 
-// ── finding a section or a file by what was asked for ──
 
 const norm = (text: string, keepAll = false): string[] => text.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter((w) => w && (keepAll || !STOP_WORDS.has(w)));
-const stem = (word: string): string => word.slice(0, 5); // crude but deterministic: "sandboxing" and "sandbox" meet
+const stem = (word: string): string => word.slice(0, 5);
 const NUMBER_WORDS = "zero one two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty".split(" ");
 const ORDINALS = "first second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth nineteenth twentieth".split(" ");
 const NUMBERED = /^\s*(\d+)[.)]\s/;
@@ -166,7 +156,6 @@ function numberIn(query: string): number | undefined {
 	return o ? ORDINALS.indexOf(o[1].toLowerCase()) + 1 : undefined;
 }
 
-/** Section n: the heading numbered n when headings are numbered, else the nth top-level part (the title is never counted). */
 export function sectionByNumber(article: Article, n: number): number | undefined {
 	const numbered = article.sections.filter((s) => NUMBERED.test(s.title));
 	if (numbered.length) {
@@ -186,7 +175,6 @@ const score = (q: Set<string>, t: Set<string>): number => {
 	return overlap / q.size + (0.5 * overlap) / t.size + (q.size === t.size && overlap === q.size ? 1 : 0);
 };
 
-/** The section a number ("6", "six", "sixth", "section 6") or a title points at; two when two titles fit about equally. */
 export function findSection(want: string, article: Article): Found {
 	const n = want.trim().split(/\s+/).length === 1 ? asNumber(want) : numberIn(want);
 	if (n !== undefined) {
@@ -220,7 +208,6 @@ export function findSection(want: string, article: Article): Found {
 const FILE_GENERIC = new Set("deep dive lessons lesson for talk agent file files doc docs document documents the a an of on about notes research".split(" "));
 const fileWords = (text: string): string[] => text.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(Boolean);
 
-/** The file a name points at, by its distinctive words ("orca", "openbot"); two when two fit equally. */
 export function matchFile(query: string, files: Article[]): { slug?: string; ambiguous?: string[] } {
 	const q = new Set(fileWords(query));
 	const scored = files
@@ -237,10 +224,8 @@ export function matchFile(query: string, files: Article[]): { slug?: string; amb
 	return { slug: scored[0][1] };
 }
 
-/** The section titles, indented by level. */
 export const outline = (article: Article): string => article.sections.map((s) => `${"  ".repeat(s.level - 1)}${s.title}`).join("\n");
 
-/** The sections whose text shares the most word stems with a question, for answering it from the file. */
 export function relevantSections(question: string, article: Article, k = 2): number[] {
 	const qs = new Set(norm(question).map(stem));
 	if (!qs.size) return [];
@@ -252,9 +237,8 @@ export function relevantSections(question: string, article: Article, k = 2): num
 		.map(([, order]) => order);
 }
 
-const FILE_IN_FULL = 40_000; // characters: a smaller file goes to the model whole
+const FILE_IN_FULL = 40_000;
 
-/** What the model is told about the open file: where the reading is, the outline, and the text to answer from. */
 export function articleContext(article: Article, index: number): string {
 	const secs = article.sections;
 	const total = secs.reduce((n, s) => n + s.text.length, 0);

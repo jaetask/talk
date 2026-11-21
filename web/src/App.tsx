@@ -24,7 +24,6 @@ function Shell() {
     const st = useStore.getState();
     st.loadBots().catch(console.error);
     const stop = startEvents();
-    // OAuth popups post back here; refresh connection-dependent views and the open transcript.
     const onMsg = (e: MessageEvent) => {
       if ((e.data as { type?: string })?.type !== 'talk-connected') return;
       const s = useStore.getState();
@@ -35,7 +34,6 @@ function Shell() {
     return () => { stop(); window.removeEventListener('message', onMsg); };
   }, []);
 
-  // Global shortcuts: ⌘K search, ⌘B sidebar, ⇧⌘, details, ⌘N new bot.
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;

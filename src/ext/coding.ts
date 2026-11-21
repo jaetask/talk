@@ -1,7 +1,3 @@
-// Claude Code as tools: handing a coding task to a separate coding agent over ACP. Starting one asks Jae first (the
-// server's own question), then the tool call parks until the session finishes: it runs in a scratch worktree on a
-// scratch branch, its risky steps come back as questions for Jae, and its result returns to the model as the tool's
-// result. The chat's turn ends as soon as the session has started; the session reports when it is done.
 import { join } from "node:path";
 import { defineExtension, defineTool, section, type Extension } from "@earendil-works/pi-durable";
 import type { JsonObject } from "../apps/classify.ts";
@@ -16,12 +12,9 @@ export type CodingOptions = {
 	registry: Registry;
 	parked: Parked;
 	appsRoot: string;
-	/** The repo a task with no project works in. */
 	defaultRepo: string;
 	worktrees: string;
-	/** The agent's command (ACP on stdin and stdout). */
 	command?: string[];
-	/** Makes the scratch copy; tests give a plain folder. */
 	makeWorktree?: (repo: string) => string;
 	budget?: Budget;
 };
@@ -29,7 +22,7 @@ export type CodingOptions = {
 type Running = { session?: AcpSession; task: string; status: string; conversation: unknown };
 
 export function codingExtension(opts: CodingOptions): Extension {
-	let running: Running | undefined; // one coding session at a time
+	let running: Running | undefined;
 	let last: { task: string; final: string; stop: string } | undefined;
 	const text = (t: string) => [{ type: "text" as const, text: t }];
 	const json = (o: object, isError = false) => ({ output: text(JSON.stringify(o)), isError });

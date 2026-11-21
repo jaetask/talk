@@ -10,7 +10,7 @@ async function req<T>(method: string, path: string, body?: unknown): Promise<T> 
   });
   if (!res.ok) {
     let msg = res.statusText;
-    try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch { /* not json */ }
+    try { msg = ((await res.json()) as { error?: string }).error ?? msg; } catch {  }
     throw new ApiError(res.status, msg);
   }
   return res.json() as Promise<T>;

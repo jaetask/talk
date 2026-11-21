@@ -12,12 +12,10 @@ interface TurnTrace {
 const secs = (n: number) => (n >= 10 ? `${n.toFixed(0)}s` : `${n.toFixed(n < 1 ? 2 : 1)}s`);
 const STOP: Record<string, string> = { asked: 'waiting on you', working: 'handed to a long job', failed: 'failed', aborted: 'interrupted' };
 
-/** The Trajectory: each turn as the stages the engine went through, with how long each took. Drawn from the durable transcript. */
 export function TrajectoryTab({ bot }: { bot: Bot }) {
   const [turns, setTurns] = useState<TurnTrace[] | null>(null);
   const [confirming, setConfirming] = useState<number | null>(null);
   const [note, setNote] = useState<{ id: number; text: string } | null>(null);
-  // Refetch when the bot's conversation moves on (a turn ends, or a new conversation starts).
   const stamp = useStore((s) => { const b = s.bots.find((x) => x.id === bot.id); return `${b?.generation}:${b?.lastActivityAt}`; });
   useEffect(() => {
     let alive = true;

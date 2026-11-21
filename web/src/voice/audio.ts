@@ -1,9 +1,6 @@
-// Browser audio for voice calls: mic capture → PCM16 @ 24 kHz (AudioWorklet), and a gapless PCM16 player.
 
 export const RATE = 24000;
 
-// The worklet runs at the context's native rate (usually 48 kHz). It box-filters down to 24 kHz,
-// converts to Int16 and posts 40 ms frames plus a level for the UI.
 const WORKLET = `
 class Pcm16Capture extends AudioWorkletProcessor {
   constructor(options) {
@@ -48,7 +45,6 @@ async function ensureWorklet(ctx: AudioContext) {
   loadedContexts.add(ctx);
 }
 
-/** Create (and resume) an AudioContext. Call this synchronously inside a click handler so autoplay rules allow it. */
 export function createAudioContext(): AudioContext {
   const Ctx: typeof AudioContext = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
   const ctx = new Ctx({ latencyHint: 'interactive' });
@@ -88,7 +84,6 @@ export class MicCapture {
       this.level = this.level * 0.6 + e.data.level * 0.4;
       this.onFrame(new Int16Array(e.data.pcm));
     };
-    // A worklet only runs while connected to the destination; route it through a muted gain.
     this.sink = this.ctx.createGain();
     this.sink.gain.value = 0;
     this.source.connect(this.node).connect(this.sink).connect(this.ctx.destination);
@@ -100,14 +95,13 @@ export class MicCapture {
   }
 
   stop() {
-    try { this.source?.disconnect(); this.node?.disconnect(); this.sink?.disconnect(); } catch { /* already gone */ }
+    try { this.source?.disconnect(); this.node?.disconnect(); this.sink?.disconnect(); } catch {  }
     if (this.node) this.node.port.onmessage = null;
     for (const t of this.stream.getTracks()) t.stop();
     this.source = this.node = this.sink = null;
   }
 }
 
-/** Gapless queue of PCM16 chunks (e.g. realtime `response.output_audio.delta`). */
 export class PcmPlayer {
   private out: GainNode;
   private analyser: AnalyserNode;
@@ -139,7 +133,6 @@ export class PcmPlayer {
     src.connect(this.out);
     const now = this.ctx.currentTime;
     const wasIdle = !this.sources.size;
-    // Small lead-in when starting fresh absorbs network jitter.
     const at = this.nextTime > now ? this.nextTime : now + 0.06;
     src.start(at);
     this.nextTime = at + buf.duration;
@@ -151,10 +144,9 @@ export class PcmPlayer {
     if (wasIdle) this.onStart?.();
   }
 
-  /** Drop everything queued (barge-in). */
   clear() {
     const had = this.sources.size > 0;
-    for (const s of this.sources) { s.onended = null; try { s.stop(); } catch { /* not started */ } }
+    for (const s of this.sources) { s.onended = null; try { s.stop(); } catch {  } }
     this.sources.clear();
     this.nextTime = 0;
     if (had) this.settle();
@@ -168,7 +160,6 @@ export class PcmPlayer {
     });
   }
 
-  /** RMS output level 0..1 for the speaking animation. */
   level(): number {
     if (!this.sources.size) return 0;
     this.analyser.getFloatTimeDomainData(this.levelBuf);
@@ -185,7 +176,7 @@ export class PcmPlayer {
 
   dispose() {
     this.clear();
-    try { this.out.disconnect(); this.analyser.disconnect(); } catch { /* ignore */ }
+    try { this.out.disconnect(); this.analyser.disconnect(); } catch {  }
   }
 }
 

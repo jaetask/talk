@@ -1,6 +1,3 @@
-// A voice call with a bot. The call is Talk's own hands-free websocket (/ws): the microphone goes up as 16 kHz
-// PCM16, the engine's voice loop (pi-voice) hears the turns, and the reply comes back as words and 24 kHz PCM16.
-// The call talks to the same chat the page shows, so what was said lands in the transcript like a typed turn.
 import { create } from 'zustand';
 import { useStore } from '../store';
 import { voiceApi } from './api';
@@ -15,13 +12,9 @@ interface VoiceState {
   botId: string | null;
   callId: string | null;
   muted: boolean;
-  /** Bot audio is playing. */
   speaking: boolean;
-  /** The voice loop hears Jae. */
   listening: boolean;
-  /** A reply is being worked out but no audio yet. */
   thinking: boolean;
-  /** Lookups and changes the bot is making right now. */
   working: { seq: number; request: string }[];
   captions: Caption[];
   error: string | null;
@@ -39,7 +32,6 @@ const OUT_RATE = 24000;
 
 let current: VoiceCall | null = null;
 
-/** Start a call with a bot. Must be called from a user gesture (click) so audio can start. */
 export function startCall(botId: string) {
   if (current && !current.ended) {
     if (current.botId === botId) return;
@@ -50,7 +42,6 @@ export function startCall(botId: string) {
 }
 
 export function endCall() { current?.end(); }
-/** Say something to a bot on a call as if it had been spoken (starting the call if there isn't one): the reply is voiced. */
 export function sayOnCall(botId: string, text: string) {
   startCall(botId);
   current?.say(text);
@@ -73,7 +64,6 @@ class VoiceCall {
   private connectTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(readonly botId: string) {
-    // Created synchronously inside the click so autoplay policy lets it run.
     this.ctx = createAudioContext();
     this.player = new PcmPlayer(this.ctx);
     this.player.onStart = () => setV({ speaking: true, thinking: false });
@@ -185,18 +175,16 @@ class VoiceCall {
     if (this.ended) return;
     this.ended = true;
     if (this.connectTimer) clearTimeout(this.connectTimer);
-    try { this.ws?.close(); } catch { /* already closed */ }
+    try { this.ws?.close(); } catch {  }
     this.mic?.stop();
     this.player.dispose();
     void this.ctx.close().catch(() => {});
     if (current === this) current = null;
     setV(error ? { status: 'error', error, speaking: false, listening: false, thinking: false, working: [] } : { status: 'idle', botId: null, callId: null, speaking: false, listening: false, thinking: false, working: [], captions: [] });
-    // The chat on screen has the call's turns; make sure it is current.
     useStore.getState().loadRows(this.botId).catch(() => {});
   }
 }
 
-/** Play a short sample of a voice (the details panel's Preview). */
 export async function previewVoice(p: { botId: string; voice?: string; speed?: number; language?: string }) {
   const pcm = await voiceApi.preview(p);
   const ctx = createAudioContext();

@@ -1,6 +1,3 @@
-// The engine: Pi Durable under Talk. Every chat is a durable conversation; every mode shares this one path. A turn
-// submits what Jae said and follows the run through the conversation's watch, so a screen, a voice loop or a test
-// sees the same events.
 import { BACKGROUND_CONTEXT as ctx } from "@earendil-works/chord/context";
 import type { Models } from "@earendil-works/pi-ai";
 import {
@@ -31,7 +28,6 @@ export type ChatConfig = {
 	fixtures?: { [tool: string]: Json } | null;
 	fixturesOnly?: boolean;
 	model?: string;
-	/** typed or voice: how what was said arrived. */
 	source?: string;
 };
 
@@ -42,12 +38,10 @@ export type TurnEvent =
 	| { type: "ask"; question: string }
 	| { type: "status"; text: string };
 
-/** What an observer of all chats is told: a turn starting, its events, and its end. */
 export type TurnNotice = TurnEvent | { type: "start"; said: string; source: string } | { type: "done"; done: TurnDone } | { type: "failed"; error: string };
 
 export type TurnDone = {
 	reply: string;
-	/** answered; asked: something needs Jae's yes; working: a long job has the run and will report when it ends. */
 	stop: "answered" | "asked" | "working" | "failed" | "aborted";
 	error?: string;
 	model: string;
@@ -58,37 +52,26 @@ export type TurnDone = {
 };
 
 export type EngineOptions = {
-	/** A SQLite file, or "memory". */
 	storage: string;
 	models: Models;
 	provider: string;
 	model: string;
 	registry: Registry;
-	/** More extensions: features that add tools or context to every chat (the web, the reader, agents). */
 	extra?: Extension[];
-	/** Extensions installed for subagents only; an ordinary chat never selects them. */
 	childOnly?: Extension[];
 	maxTurns?: number;
-	/**
-	 * How much of a model step's text is held back before it is spoken, in case the step turns out to be narration on
-	 * the way to a tool call (default 300). 0 streams it as it comes, for a model that never narrates.
-	 */
 	holdChars?: number;
-	/** The calls waiting on Jae; shared with features that ask him things of their own (a coding session's steps). */
 	parked?: Parked;
-	/** How long a delegate may take before the agent that asked is told it ran out of time. */
 	delegateSeconds?: number;
 };
 
 export const TURN_KIND = "talk.turn";
-/** One turn as the person saw it: what was said, what was answered, how it ended and what it used. */
 export type TurnRecord = {
 	v: 1; at: string; startedMs: number; said: string; source: string; reply: string; stop: TurnDone["stop"]; error: string | null;
 	model: string; agent: string; timings: { [k: string]: number }; usage: { input: number; output: number; cost: number };
 };
 const round = (n: number): number => Math.round(n * 1000) / 1000;
 
-/** The part of a chat's state that comes from its agent. */
 export const chatOfAgent = (a: Agent) => ({ agent: a.id, agentName: a.name, persona: a.persona, instructions: a.instructions, voice: a.voice, apps: [...a.apps] });
 
 const textOf = (content: readonly { type: string; text?: string }[] | undefined): string =>
@@ -124,8 +107,6 @@ export class Engine {
 				settings: {
 					toolExecution: "sequential",
 					retry: { maxRetries: 1 },
-					// A 24k local context: keep the newest exchanges word for word, fold older ones into a summary only
-					// when the window is nearly full, and never summarize in the background (one model, one GPU).
 					compaction: { reserveTokens: 4096, keepRecentTokens: 8000, backgroundTokens: 0 },
 				},
 				onReport: (report: { kind: string; error?: unknown }) => console.error(`pi-durable report: ${report.kind}`, String((report.error as Error)?.message ?? report.error ?? "").slice(0, 300)),
@@ -142,11 +123,6 @@ export class Engine {
 		await this.harness.close(ctx);
 	}
 
-	/**
-	 * Connect (or reconnect) the apps and install what they offer now, then carry on with whatever the last process
-	 * left unfinished. Work is resumed only here, once the apps' tools exist: a call parked before a restart would
-	 * otherwise wake to find its tool missing.
-	 */
 	async syncApps(): Promise<void> {
 		await this.options.registry.connectAll();
 		for (const app of this.options.registry.apps.values()) this.lastRetry.set(app.name, Date.now());
@@ -155,7 +131,6 @@ export class Engine {
 	}
 
 	private lastRetry = new Map<string, number>();
-	/** Fresh names for the prompt, and another try at an app that was offline (it may have been restarted). */
 	private async refreshApps(): Promise<void> {
 		for (const app of this.options.registry.apps.values()) {
 			if (app.online) await app.refreshContext();
@@ -165,13 +140,11 @@ export class Engine {
 					await app.connect();
 					this.extensions.install(appExtension(this.options.registry, app));
 				} catch {
-					// still offline
 				}
 			}
 		}
 	}
 
-	// ── chats ──
 
 	async conversationOf(sid: string): Promise<Conversation | undefined> {
 		const index = await this.harness.snapshot(TalkIndex, ctx);
@@ -184,7 +157,6 @@ export class Engine {
 		return conv ? ((await this.harness.snapshot(TalkChat, conv.id, ctx)) as ChatState | undefined) : undefined;
 	}
 
-	/** The chat for `sid`, created on first use, with `config` applied to it. */
 	async chat(sid: string, config: ChatConfig = {}): Promise<Conversation> {
 		let conv = await this.conversationOf(sid);
 		const agent: Agent = (await this.agents.get(config.agent)) ?? HEART;
@@ -200,7 +172,6 @@ export class Engine {
 		const id = conv.id;
 		await this.harness.commit(async (tx) => {
 			const doc = await tx.doc(TalkChat, id);
-			// The agent's settings as they are now, so a change in Settings applies from the next turn.
 			if (config.agent ? agent.id === config.agent : doc.agent === agent.id) Object.assign(doc, chatOfAgent(agent));
 			else if (!config.agent) {
 				const own = await this.agents.get(doc.agent);
@@ -221,11 +192,6 @@ export class Engine {
 		return conv;
 	}
 
-	/**
-	 * What a conversation runs with, from its chat state: the extensions of the apps its agent may use, no write tools
-	 * while writes are off, and its model. A delegate's child conversation is configured the same way, so an agent is
-	 * the same agent whether Jae talks to it or another agent hands it work.
-	 */
 	agentChange(chat: Pick<ChatState, "apps" | "writes">, model?: string, without: string[] = []): AgentChange {
 		const mine = (name: string) => chat.apps.length === 0 || chat.apps.includes(name);
 		const skip = new Set([...(this.options.childOnly ?? []).map((e) => e.name), ...without]);
@@ -246,10 +212,6 @@ export class Engine {
 		} as AgentChange;
 	}
 
-	/**
-	 * Write turns into a chat as given, with no model call: what was said and what was answered. Tests use it to set up
-	 * what came before the sentence under test, so the context is the same on every run.
-	 */
 	async scripted(sid: string, turns: { say: string; reply: string }[], config: ChatConfig = {}): Promise<number> {
 		const conv = await this.chat(sid, config);
 		const model = config.model ?? this.options.model;
@@ -282,7 +244,6 @@ export class Engine {
 		return ((await this.chatState(sid))?.pretendLog ?? []) as PretendWrite[];
 	}
 
-	/** Stop the answer that is being given. What was said so far stays. */
 	async abort(sid: string): Promise<void> {
 		this.running.get(sid)?.abort();
 		const conv = await this.conversationOf(sid);
@@ -291,9 +252,7 @@ export class Engine {
 		await conv?.abort(ctx);
 	}
 
-	// ── a turn ──
 
-	/** How a call is shown in the chat: the app, the tool, and its arguments with names in place of ids. */
 	describe(name: string, args: JsonObject): string {
 		if (name === CALL_END) return "Talk · end the call";
 		if (name === STAY_QUIET) return "Talk · stay quiet";
@@ -302,7 +261,6 @@ export class Engine {
 		const { app, tool } = this.options.registry.resolve(name);
 		const tasks = this.options.registry.apps.get("tasks");
 		const plain = Object.entries(args ?? {}).map(([k, v]) => `${k}=${v && typeof v === "object" ? JSON.stringify(v).slice(0, 40) : v}`).join(" ");
-		// Talk's own features read like an app: "Reader · goto", "Web · search", "Claude Code · start coding session".
 		if (name.startsWith("reader_")) return `🔧 Reader · ${name.slice(7)} ${plain}`.trimEnd();
 		if (name.startsWith("web_")) return `🔧 Web · ${name.slice(4)} ${plain}`.trimEnd();
 		if (["start_coding_session", "coding_status", "stop_coding_session"].includes(name)) return `🔧 Claude Code · ${name.replace(/_/g, " ")}`;
@@ -317,10 +275,6 @@ export class Engine {
 		return `🔧 ${app.label} · ${tool?.name ?? toolOf(name)} ${bits.join(" ")}`.trimEnd();
 	}
 
-	/**
-	 * Watchers of every chat's turns, however they were started (the page, a voice call, a test): what was said, each
-	 * event, and how the turn ended. A screen that shows chats it didn't start (the bots page) draws from these.
-	 */
 	private observers = new Set<(sid: string, event: TurnNotice) => void | Promise<void>>();
 	observe(observer: (sid: string, event: TurnNotice) => void | Promise<void>): () => void {
 		this.observers.add(observer);
@@ -365,9 +319,8 @@ export class Engine {
 		const model = config.model ?? this.options.model;
 		const quick = (reply: string, stop: TurnDone["stop"]): TurnDone => ({ reply, stop, model, endCall: false, timings: { first_token: (performance.now() - t0) / 1000, total: (performance.now() - t0) / 1000 }, usage: { input: 0, output: 0, cost: 0 }, tools: [] });
 
-		let fresh = false; // does this turn start a run of its own (rather than carry on the one that was waiting)?
+		let fresh = false;
 		if (chat.pending) {
-			// Something is waiting on Jae (a dangerous call, or a step of a long job): what he says now is his answer.
 			const pending = chat.pending;
 			const yes = YES.test(said);
 			await this.harness.commit(async (tx) => {
@@ -376,8 +329,6 @@ export class Engine {
 				doc.pending = null;
 			}, ctx);
 			if (!yes && !chat.working && this.options.registry.resolve(pending.name).tool?.kind === "danger") {
-				// Not a yes: the waiting call ends its run there, without the model, and what Jae said is an ordinary turn
-				// after it. The model then reads "asked, not done" followed by his own words, as a person would.
 				await conv.abort(ctx);
 				this.parked.settle(`${conv.id}:${pending.callId}`, { yes, said });
 				cursor = await newest();
@@ -389,13 +340,11 @@ export class Engine {
 				if (!this.parked.settle(`${conv.id}:${pending.callId}`, { yes, said })) this.harness.resume();
 			}
 			if (chat.working) {
-				// The job carries on in the background and reports when it is done; this turn only took the answer.
 				const reply = yes ? "Okay." : "Okay, I've told it no.";
 				await onEvent({ type: "token", text: reply });
 				return quick(reply, "answered");
 			}
 		} else if (chat.working) {
-			// A long job is running on this chat and holds its run. Say where it has got to; it reports when it ends.
 			const reply = chat.working.status;
 			await onEvent({ type: "token", text: reply });
 			return quick(reply, "working");
@@ -417,7 +366,6 @@ export class Engine {
 		return done;
 	}
 
-	/** Listeners for what a chat says when nobody asked: a long job finishing, or its question for Jae. */
 	private listeners = new Map<string, Set<(event: TurnEvent | { type: "done"; done: TurnDone }) => void>>();
 	listen(sid: string, listener: (event: TurnEvent | { type: "done"; done: TurnDone }) => void): () => void {
 		const set = this.listeners.get(sid) ?? new Set();
@@ -426,7 +374,6 @@ export class Engine {
 		return () => set.delete(listener);
 	}
 
-	/** A long job holds the run after its turn ended. Keep following it, and tell whoever is listening what happens. */
 	private async background(sid: string, conv: Conversation, cursor: number, model: string): Promise<void> {
 		const emit = (event: TurnEvent | { type: "done"; done: TurnDone }) => {
 			for (const l of this.listeners.get(sid) ?? []) l(event);
@@ -438,7 +385,6 @@ export class Engine {
 				cursor = done.cursor;
 				emit({ type: "done", done });
 				if (done.stop !== "asked") return;
-				// Wait for Jae's answer (a turn records it), then carry on following.
 				const watch = (await this.harness.watchDoc(TalkChat, conv.id, ctx))!;
 				await new Promise<void>((resolve) => {
 					if (!(watch.value as ChatState | undefined)?.pending) resolve();
@@ -453,11 +399,6 @@ export class Engine {
 		}
 	}
 
-	/**
-	 * Follow a chat's run from `cursor`: entries as they are committed and the answer as it streams, until the run
-	 * answers or fails, something needs Jae (asked), or a long job takes the run over (working; a background follow
-	 * ignores that, since it is why it is following).
-	 */
 	private async follow(sid: string, conv: Conversation, cursor: number, onEvent: (event: TurnEvent) => void | Promise<void>, model: string, t0: number, background: boolean, turn: { said: string; source: string } = { said: "", source: "unasked" }): Promise<TurnDone & { cursor: number }> {
 		const startedMs = Date.now();
 		const chat = ((await this.harness.snapshot(TalkChat, conv.id, ctx)) as ChatState | undefined) ?? initialChat();
@@ -468,7 +409,7 @@ export class Engine {
 		const changes = new Map<string, { name: string; args: JsonObject }>();
 		let reply = "";
 		let firstToken: number | undefined;
-		let streamed = ""; // the current model step's text, as far as it has been taken
+		let streamed = "";
 		let aborted = false;
 		const say = async (piece: string) => {
 			if (!piece) return;
@@ -494,22 +435,19 @@ export class Engine {
 				else if (calls.every((c) => c.name === STAY_QUIET)) hold.silence();
 				else hold.tool();
 				for (const c of calls) {
-					if (c.name === STAY_QUIET) continue; // not a lookup: nothing to show
+					if (c.name === STAY_QUIET) continue;
 					tools.push({ name: c.name, args: c.arguments ?? {}, outcome: "called" });
-					// A change is shown once its outcome is known: a held or refused call must not read as one that ran.
 					const kind = this.options.registry.resolve(c.name).tool?.kind;
 					if (kind === "write" || kind === "danger") changes.set(c.id, { name: c.name, args: c.arguments ?? {} });
 					else await onEvent({ type: "tool", text: this.describe(c.name, c.arguments ?? {}), name: c.name, args: c.arguments ?? {}, callId: c.id });
 				}
 			} else if (entry.kind === "pi.user" && typeof message?.content === "string" && message.content.startsWith(NOTE)) {
-				hold.tool(); // Talk sent the model back to work: what it had said so far was not the answer
+				hold.tool();
 			} else if (entry.kind === "pi.tool-result" && message?.role === "toolResult") {
 				const row = [...tools].reverse().find((t) => t.name === message.toolName && t.outcome === "called");
 				const details = message.details as ToolDetails | undefined;
 				if (row) row.outcome = message.isError ? "error" : (details?.outcome ?? "ok");
 				const change = changes.get(message.toolCallId);
-				// After a refused change the model sometimes answers as if it were done; from here on its words are held
-				// until the step ends, so Talk's note can send it back to the tool before anything is spoken.
 				if (change && message.isError) hold.limit = Math.max(hold.limit, HOLD_CHARS);
 				if (change) {
 					changes.delete(message.toolCallId);
@@ -576,7 +514,7 @@ export class Engine {
 			if (first === "woken" && (aborted || woke === "aborted")) stop = "aborted";
 			else if (first === "woken" && woke === "asked" && now.pending) {
 				stop = "asked";
-				hold.tool(); // whatever the model said on the way to the call is not the question
+				hold.tool();
 				const pending = now.pending;
 				changes.delete(pending.callId);
 				await onEvent({ type: "tool", text: `${this.describe(pending.name, pending.args)}  (waiting for your yes)`, name: pending.name, args: pending.args, callId: pending.callId });
@@ -617,8 +555,6 @@ export class Engine {
 			usage: { input: a.input - b.input, output: a.output - b.output, cost: a.cost - b.cost },
 			tools,
 		};
-		// The turn as the person saw it, kept in the transcript: screens (the chat, the Trajectory, an export) are drawn
-		// from these records and the entries between them, so a chat reopened later shows exactly what happened.
 		const record: TurnRecord = {
 			v: 1, at: new Date(startedMs).toISOString(), startedMs, said: turn.said, source: turn.source, reply: done.reply, stop, error: error ?? null,
 			model, agent: after.agent, timings: { ...(firstToken === undefined ? {} : { first_token: round(firstToken) }), total: round(done.timings.total) },
