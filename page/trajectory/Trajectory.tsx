@@ -144,7 +144,7 @@ export function Trajectory({ bot }: { bot: Bot }) {
   };
 
   if (data === undefined) return <p className="quiet">Loading…</p>;
-  if (!data || !data.turns.length) return <p className="quiet">No turns yet.</p>;
+  if (!data?.turns.length) return <p className="quiet">No turns yet.</p>;
   const usage = usageLine(data.session.usage);
   return (
     <section
