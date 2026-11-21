@@ -1,6 +1,6 @@
-import { ColourSwatches, EditFrame, Row, useBackTo } from "@jaetask/toolkit/suite";
+import { ColourSwatches, Field, FormDialog } from "@jaetask/toolkit/suite";
 import { Input } from "@jaetask/toolkit/ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { BotAvatar } from "../avatar/BotAvatar";
 import { api } from "../lib/api";
@@ -10,15 +10,16 @@ import { useStore } from "../store";
 import type { AvatarColor, AvatarShape } from "../types";
 import { ShapePicker } from "./BotSettings";
 
-export function NewBotPage() {
-  const backTo = useBackTo("/");
+export function NewBotDialog({ open }: { open: boolean }) {
   const [name, setName] = useState("");
   const [shape, setShape] = useState<AvatarShape>("heart");
   const [color, setColor] = useState<AvatarColor>("orange");
-  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (open) setName("");
+  }, [open]);
+  const close = () => window.history.back();
   const create = async () => {
-    if (!name.trim()) return;
-    setBusy(true);
+    if (!name.trim()) return false;
     try {
       const { bot } = await api.createBot({
         name: name.trim(),
@@ -31,24 +32,24 @@ export function NewBotPage() {
         bots: st.bots.some((b) => b.id === bot.id) ? st.bots : [...st.bots, bot],
       });
       go(botPath(bot.id));
+      return true;
     } catch (e) {
       toast.error((e as Error).message);
-      setBusy(false);
+      return false;
     }
   };
   return (
-    <EditFrame
+    <FormDialog
+      open={open}
+      onOpenChange={(o) => !o && close()}
       title="New bot"
-      line="A bot is a role, a voice and the apps it may use."
-      backTo={backTo}
-      busy={busy || !name.trim()}
       saveLabel="Create"
       onSave={create}
     >
       <div className="look-preview">
-        <BotAvatar shape={shape} color={color} size={96} />
+        <BotAvatar shape={shape} color={color} size={72} />
       </div>
-      <Row title="Name" line="What you call it." htmlFor="new-bot-name">
+      <Field label="Name" htmlFor="new-bot-name">
         <Input
           id="new-bot-name"
           value={name}
@@ -57,11 +58,11 @@ export function NewBotPage() {
           placeholder="Give your bot a name"
           onChange={(e) => setName(e.target.value)}
         />
-      </Row>
-      <Row title="Shape" line="Its outline.">
+      </Field>
+      <Field label="Shape">
         <ShapePicker shape={shape} color={color} onShape={setShape} />
-      </Row>
-      <Row title="Colour" line="Its fill, and the colour of your messages to it.">
+      </Field>
+      <Field label="Colour">
         <ColourSwatches
           label="Colour"
           colours={SWATCHES}
@@ -69,7 +70,7 @@ export function NewBotPage() {
           value={palette(color).fill}
           onChange={(v) => setColor(colorOfFill(v))}
         />
-      </Row>
-    </EditFrame>
+      </Field>
+    </FormDialog>
   );
 }
