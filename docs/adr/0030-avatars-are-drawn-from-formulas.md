@@ -1,4 +1,4 @@
-# 30. Avatar shapes are drawn from formulas, not traced from artwork
+# 30. Avatar shapes are drawn from formulas
 
 ## Context
 

@@ -1,4 +1,4 @@
-# 23. The Speaker sets the pauses between sentences, not the voice provider
+# 23. The Speaker sets the pauses between sentences
 
 ## Context
 
