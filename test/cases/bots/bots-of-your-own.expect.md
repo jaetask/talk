@@ -105,6 +105,37 @@ The stream:
 
 - bot: scout, last "Hello! What shall we do?", unread 0, conversation 1
 
+## GET /bots/scout/timeline (session.agent_color)
+
+200
+
+```json
+"#1E86FC"
+```
+
+## PATCH /bots/scout {"avatarColor":"violet"} (bot.avatarColor)
+
+200
+
+```json
+"violet"
+```
+
+The stream:
+
+- bot: scout, last "Hello! What shall we do?", unread 0, conversation 1
+
+## GET /bots/scout/timeline (agents.scout)
+
+200
+
+```json
+{
+  "name": "Scout",
+  "color": "#8F59F9"
+}
+```
+
 ## scout is told on its call's socket: What day is it?
 
 The stream:
